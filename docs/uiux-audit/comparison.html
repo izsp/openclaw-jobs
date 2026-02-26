@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>UI/UX Audit — Before vs After</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background:#111; color:#eee; padding:2rem; }
+  h1 { font-size:2rem; margin-bottom:.5rem; }
+  .subtitle { color:#888; margin-bottom:2rem; }
+  .section { margin-bottom:3rem; }
+  .section h2 { font-size:1.2rem; color:#f97316; margin-bottom:1rem; border-bottom:1px solid #333; padding-bottom:.5rem; }
+  .compare { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .compare .card { background:#1a1a1a; border:1px solid #333; border-radius:12px; overflow:hidden; }
+  .compare .card img { width:100%; display:block; cursor:pointer; }
+  .compare .card .label { padding:.5rem 1rem; font-size:.8rem; text-align:center; }
+  .label.before { color:#ef4444; background:#1c1c1c; }
+  .label.after { color:#22c55e; background:#1c1c1c; }
+  .changes { background:#1a1a1a; border:1px solid #333; border-radius:12px; padding:1.5rem; margin-top:1rem; }
+  .changes li { margin-bottom:.4rem; font-size:.85rem; color:#ccc; }
+  .changes li::marker { color:#22c55e; }
+  .tag { display:inline-block; font-size:.7rem; padding:2px 8px; border-radius:4px; }
+  .tag.fixed { background:#14532d; color:#86efac; }
+  .tag.new { background:#1e3a5f; color:#93c5fd; }
+</style>
+</head>
+<body>
+
+<h1>Before vs After — UI/UX Improvements</h1>
+<p class="subtitle">2026-02-27 | Round 1-3 changes</p>
+
+<div class="section">
+  <h2>1. Landing Page</h2>
+  <div class="compare">
+    <div class="card">
+      <img src="screenshots/01-landing-unauth.png" onclick="window.open(this.src)">
+      <div class="label before">BEFORE</div>
+    </div>
+    <div class="card">
+      <img src="screenshots-after/01-landing-unauth.png" onclick="window.open(this.src)">
+      <div class="label after">AFTER</div>
+    </div>
+  </div>
+  <div class="changes">
+    <ul>
+      <li><span class="tag new">NEW</span> "For Workers" link in header nav</li>
+      <li><span class="tag fixed">FIXED</span> Chat panel now flex-grows (not fixed 480px)</li>
+      <li><span class="tag fixed">FIXED</span> Pricing cards show "from X🦐" (not misleading fixed prices)</li>
+      <li><span class="tag new">NEW</span> "Start Earning" CTA button in Lobster section</li>
+      <li><span class="tag new">NEW</span> Footer with links: For Workers, Dashboard, Sign in</li>
+      <li><span class="tag fixed">FIXED</span> Tighter hero (removed lobster emoji, shorter subtitle)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section">
+  <h2>2. 404 Page</h2>
+  <div class="compare">
+    <div class="card">
+      <img src="screenshots/09-404.png" onclick="window.open(this.src)">
+      <div class="label before">BEFORE — White, no branding</div>
+    </div>
+    <div class="card">
+      <img src="screenshots-after/03-404.png" onclick="window.open(this.src)">
+      <div class="label after">AFTER — Dark themed, branded</div>
+    </div>
+  </div>
+  <div class="changes">
+    <ul>
+      <li><span class="tag fixed">FIXED</span> Dark background matching site theme</li>
+      <li><span class="tag new">NEW</span> Lobster emoji + fun "wandered off into the deep sea" copy</li>
+      <li><span class="tag new">NEW</span> "Back to Home" + "Worker Dashboard" navigation buttons</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section">
+  <h2>3. Worker Register</h2>
+  <div class="compare">
+    <div class="card">
+      <img src="screenshots/07-worker-register-tab.png" onclick="window.open(this.src)">
+      <div class="label before">BEFORE — Bare dropdown</div>
+    </div>
+    <div class="card">
+      <img src="screenshots-after/05-worker-register.png" onclick="window.open(this.src)">
+      <div class="label after">AFTER — Radio cards + explanation</div>
+    </div>
+  </div>
+  <div class="changes">
+    <ul>
+      <li><span class="tag fixed">FIXED</span> Native &lt;select&gt; replaced with styled radio cards</li>
+      <li><span class="tag new">NEW</span> Explanation text about Worker ID + Bearer token</li>
+      <li><span class="tag new">NEW</span> "For Buyers" cross-navigation link in nav</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section">
+  <h2>4. Code-level Improvements (not visible in screenshots)</h2>
+  <div class="changes">
+    <ul>
+      <li><span class="tag fixed">FIXED</span> Chat input: single-line &lt;input&gt; → auto-growing &lt;textarea&gt; with Shift+Enter</li>
+      <li><span class="tag new">NEW</span> Markdown rendering in chat messages (code blocks, lists, tables, bold, links)</li>
+      <li><span class="tag new">NEW</span> Task example templates in empty chat state (Deep Research, Code Review, etc.)</li>
+      <li><span class="tag new">NEW</span> Worker dashboard: new workers see connection guide first + welcome banner</li>
+      <li><span class="tag new">NEW</span> Worker dashboard: loading skeleton instead of "Loading..." text</li>
+      <li><span class="tag new">NEW</span> Balance pill shows USD tooltip on hover</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

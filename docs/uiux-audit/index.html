@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OpenClaw.jobs — UI/UX Audit</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background:#111; color:#eee; padding:2rem; }
+  h1 { font-size:2rem; margin-bottom:.5rem; }
+  .subtitle { color:#888; margin-bottom:2rem; }
+  .section { margin-bottom:3rem; }
+  .section h2 { font-size:1.3rem; color:#f97316; margin-bottom:1rem; border-bottom:1px solid #333; padding-bottom:.5rem; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap:1.5rem; }
+  .card { background:#1a1a1a; border:1px solid #333; border-radius:12px; overflow:hidden; }
+  .card img { width:100%; display:block; cursor:pointer; transition:transform .2s; }
+  .card img:hover { transform:scale(1.02); }
+  .card .info { padding:1rem; }
+  .card .info h3 { font-size:.9rem; margin-bottom:.3rem; }
+  .card .info p { font-size:.8rem; color:#888; line-height:1.5; }
+  .card .info .issue { color:#ef4444; font-weight:600; }
+  .card .info .ok { color:#22c55e; }
+  .card .info .warn { color:#eab308; }
+  .tag { display:inline-block; font-size:.7rem; padding:2px 8px; border-radius:4px; margin-right:4px; }
+  .tag.critical { background:#7f1d1d; color:#fca5a5; }
+  .tag.major { background:#78350f; color:#fcd34d; }
+  .tag.ok { background:#14532d; color:#86efac; }
+  .tag.mobile { background:#1e3a5f; color:#93c5fd; }
+  .summary { background:#1a1a1a; border:1px solid #333; border-radius:12px; padding:1.5rem; margin-bottom:2rem; }
+  .summary ul { margin-left:1.2rem; margin-top:.5rem; }
+  .summary li { margin-bottom:.3rem; font-size:.9rem; color:#ccc; }
+</style>
+</head>
+<body>
+
+<h1>OpenClaw.jobs — UI/UX Audit</h1>
+<p class="subtitle">2026-02-27 | Pre-Phase-9 | 16 screenshots captured</p>
+
+<div class="summary">
+  <h2 style="color:#f97316;margin-bottom:.5rem;">Key Findings</h2>
+  <ul>
+    <li><span class="tag critical">CRITICAL</span> 404 page is white — breaks dark theme completely</li>
+    <li><span class="tag critical">CRITICAL</span> Chat is 480px fixed height + single-line input — unusable for complex tasks</li>
+    <li><span class="tag critical">CRITICAL</span> No markdown rendering — AI results display as plain text</li>
+    <li><span class="tag critical">CRITICAL</span> No navigation between buyer ↔ worker sides</li>
+    <li><span class="tag major">MAJOR</span> Zero onboarding — new users see empty dashboards with all zeros</li>
+    <li><span class="tag major">MAJOR</span> Landing page mixes marketing and product — unfocused</li>
+    <li><span class="tag major">MAJOR</span> Worker registration has no explanation or guidance</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2>1. Landing Page (Unauthenticated)</h2>
+  <div class="grid">
+    <div class="card">
+      <img src="screenshots/01-landing-unauth.png" onclick="window.open(this.src)" alt="Landing desktop">
+      <div class="info">
+        <h3>Desktop 1440px <span class="tag critical">ISSUES</span></h3>
+        <p>
+          Page tries to be both marketing AND product. Hero + sign-in gate + pricing cards + how-it-works + worker CTA = too much.
+          Chat area shows a lock icon + "Sign in to get started" — not compelling.
+          Pricing cards (5🦐–500🦐) are misleading fixed values.
+          "Become a Lobster" section has NO link to /worker.
+        </p>
+      </div>
+    </div>
+    <div class="card">
+      <img src="screenshots/01-landing-unauth-mobile.png" onclick="window.open(this.src)" alt="Landing mobile">
+      <div class="info">
+        <h3>Mobile 390px <span class="tag mobile">MOBILE</span> <span class="tag major">ISSUES</span></h3>
+        <p>
+          Content stacks into very long scroll. Pricing cards show 3+2 awkward grid.
+          Sign-in box takes excessive vertical space. Overall feels like endless dark scrolling.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>2. Login Page</h2>
+  <div class="grid">
+    <div class="card">
+      <img src="screenshots/02-login.png" onclick="window.open(this.src)" alt="Login desktop">
+      <div class="info">
+        <h3>Desktop <span class="tag ok">OK</span></h3>
+        <p>
+          Clean, centered. Google + GitHub + Dev login. Lobster emoji at top.
+          Minor: the "or" divider between dev login and "Back to home" is redundant.
+        </p>
+      </div>
+    </div>
+    <div class="card">
+      <img src="screenshots/02-login-mobile.png" onclick="window.open(this.src)" alt="Login mobile">
+      <div class="info">
+        <h3>Mobile <span class="tag ok">OK</span></h3>
+        <p>Good mobile adaptation. Buttons are full-width and tappable.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>3. Chat Interface (Authenticated)</h2>
+  <div class="grid">
+    <div class="card">
+      <img src="screenshots/04-chat-interface.png" onclick="window.open(this.src)" alt="Chat desktop">
+      <div class="info">
+        <h3>Desktop — couldn't capture auth state <span class="tag critical">ISSUES</span></h3>
+        <p>
+          From code review: authenticated view shows a 480px-tall chat box with single-line input.
+          <br><br>
+          <span class="issue">Problems:</span><br>
+          • Fixed h-[480px] — too small for complex results<br>
+          • Single-line &lt;input&gt; — can't write multi-paragraph prompts<br>
+          • No markdown rendering — code blocks/lists render as plain text<br>
+          • No conversation history sidebar<br>
+          • No "New Chat" button<br>
+          • No task type selector or templates<br>
+          • Empty state just shows 🦞 emoji + generic text
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>4. Buyer Dashboard</h2>
+  <div class="grid">
+    <div class="card">
+      <img src="screenshots/05-dashboard.png" onclick="window.open(this.src)" alt="Dashboard desktop">
+      <div class="info">
+        <h3>Desktop (redirects to login when unauth) <span class="tag major">ISSUES</span></h3>
+        <p>
+          From code review: shows BalanceCard (left) + ConversationList (right).
+          <br><br>
+          <span class="issue">Problems:</span><br>
+          • New user sees 0🦐 balance + "No conversations yet" — dead screen<br>
+          • No guided prompt to deposit first funds<br>
+          • No link back to chat from dashboard<br>
+          • Balance shows raw cents number without dollar context
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>5. Worker Token Gate</h2>
+  <div class="grid">
+    <div class="card">
+      <img src="screenshots/06-worker-tokengate.png" onclick="window.open(this.src)" alt="Worker gate desktop">
+      <div class="info">
+        <h3>Sign In Tab — Desktop <span class="tag ok">DECENT</span></h3>
+        <p>
+          Clean centered layout. Worker ID + Bearer token fields. Orange sign-in button.
+          Minor: no explanation of where to get a token if you don't have one.
+        </p>
+      </div>
+    </div>
+    <div class="card">
+      <img src="screenshots/07-worker-register-tab.png" onclick="window.open(this.src)" alt="Worker register desktop">
+      <div class="info">
+        <h3>Register Tab <span class="tag major">ISSUES</span></h3>
+        <p>
+          <span class="issue">Way too minimal.</span> Just a native &lt;select&gt; dropdown (Claude) + "Register New Worker" button.
+          <br><br>
+          • No explanation of what registering does<br>
+          • No info on earnings, tier system, requirements<br>
+          • Native select breaks dark theme styling<br>
+          • No indication that credentials will be shown only once
+        </p>
+      </div>
+    </div>
+    <div class="card">
+      <img src="screenshots/06-worker-tokengate-mobile.png" onclick="window.open(this.src)" alt="Worker gate mobile">
+      <div class="info">
+        <h3>Mobile <span class="tag ok">OK</span></h3>
+        <p>Stacks well. Buttons are tappable.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>6. Error Pages</h2>
+  <div class="grid">
+    <div class="card">
+      <img src="screenshots/09-404.png" onclick="window.open(this.src)" alt="404 page">
+      <div class="info">
+        <h3>404 Page <span class="tag critical">CRITICAL</span></h3>
+        <p>
+          <span class="issue">WHITE background with black text.</span>
+          Default Next.js 404. Completely breaks the dark theme.
+          No nav, no branding, no link back.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>7. Worker Dashboard (Authenticated — from code review)</h2>
+  <div class="grid">
+    <div class="card" style="border-color:#333;">
+      <div class="info">
+        <h3>Dashboard Content <span class="tag major">ISSUES</span></h3>
+        <p>
+          Layout: EarningsCard + TierProgress (top row) → ProfileSection + ConnectionGuide (bottom row)
+          <br><br>
+          <span class="issue">Problems:</span><br>
+          • New worker sees ALL zeros: 0🦐 available, 0 tasks, "new" tier<br>
+          • Connection guide (most important for new workers) is buried at bottom-right<br>
+          • No "what to do next" guidance<br>
+          • Naming inconsistency: nav says "Worker", title says "Lobster Dashboard"<br>
+          • Withdraw button disabled with small "Minimum 500🦐" text — confusing
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr style="border-color:#333;margin:3rem 0;">
+<p style="color:#666;font-size:.8rem;">
+  Full audit details in <code>docs/uiux-audit/AUDIT.md</code>
+</p>
+</body>
+</html>
