@@ -22,7 +22,7 @@ export default function LoginPage() {
         {/* OAuth buttons */}
         <div className="space-y-3">
           <button
-            onClick={() => signIn("google", { callbackUrl: "/" })}
+            onClick={() => signIn("google", { callbackUrl: "/chat" })}
             className="flex w-full items-center justify-center gap-3 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-500 hover:bg-zinc-800"
           >
             <GoogleIcon />
@@ -30,7 +30,7 @@ export default function LoginPage() {
           </button>
 
           <button
-            onClick={() => signIn("github", { callbackUrl: "/" })}
+            onClick={() => signIn("github", { callbackUrl: "/chat" })}
             className="flex w-full items-center justify-center gap-3 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-500 hover:bg-zinc-800"
           >
             <GitHubIcon />
@@ -75,7 +75,7 @@ function DevLoginForm() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          signIn("dev-login", { email, callbackUrl: "/" });
+          signIn("dev-login", { email, callbackUrl: "/chat" });
         }}
         className="space-y-2"
       >

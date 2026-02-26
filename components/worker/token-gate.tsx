@@ -76,9 +76,9 @@ export function TokenGate({ onAuthenticated }: TokenGateProps) {
     <div className="mx-auto max-w-sm space-y-6">
       <div className="text-center">
         <div className="text-4xl">🦞</div>
-        <h1 className="mt-3 text-2xl font-bold text-zinc-100">Lobster Dashboard</h1>
+        <h1 className="mt-3 text-2xl font-bold text-zinc-100">Worker Dashboard</h1>
         <p className="mt-1 text-sm text-zinc-500">
-          Enter your worker token or register a new worker
+          Sign in with your credentials or register a new worker
         </p>
       </div>
 

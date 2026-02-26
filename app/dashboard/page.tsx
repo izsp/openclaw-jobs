@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { BalanceCard } from "@/components/dashboard/balance-card";
 import { DepositModal } from "@/components/dashboard/deposit-modal";
@@ -28,19 +29,28 @@ export default function DashboardPage() {
   const conversations = userId ? listConversations(userId) : [];
 
   function handleConversationSelect(id: string) {
-    // Navigate back to home with the conversation loaded.
-    // WHY: Chat panel lives on the landing page, so we pass the ID as a query param.
-    window.location.href = `/?chat=${encodeURIComponent(id)}`;
+    // Navigate to the dedicated chat page with the conversation ID.
+    window.location.href = `/chat?id=${encodeURIComponent(id)}`;
   }
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
       <Header />
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-8">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="mt-1 text-sm text-zinc-500">
-          Manage your balance and view task history
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Dashboard</h1>
+            <p className="mt-1 text-sm text-zinc-500">
+              Manage your balance and view task history
+            </p>
+          </div>
+          <Link
+            href="/chat"
+            className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-zinc-950 transition-colors hover:bg-orange-400"
+          >
+            New Task
+          </Link>
+        </div>
 
         <div className="mt-6 grid gap-6 sm:grid-cols-2">
           <div>

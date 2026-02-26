@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { ConversationSummary } from "@/lib/chat/chat-types";
 
 interface ConversationListProps {
@@ -20,10 +21,17 @@ export function ConversationList({ conversations, onSelect }: ConversationListPr
   if (conversations.length === 0) {
     return (
       <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 text-center">
-        <p className="text-sm text-zinc-500">No conversations yet</p>
+        <div className="text-2xl">🦞</div>
+        <p className="mt-2 text-sm text-zinc-400">No tasks yet</p>
         <p className="mt-1 text-xs text-zinc-600">
-          Start chatting to see your task history here
+          Submit your first task to see results here
         </p>
+        <Link
+          href="/chat"
+          className="mt-4 inline-block rounded-lg bg-orange-500 px-4 py-2 text-xs font-medium text-zinc-950 transition-colors hover:bg-orange-400"
+        >
+          Start a Task
+        </Link>
       </div>
     );
   }

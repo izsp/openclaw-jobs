@@ -10,18 +10,27 @@ export function Header() {
   const { balance } = useBalance(isAuthenticated);
 
   return (
-    <nav className="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
+    <nav className="flex items-center justify-between border-b border-zinc-800 px-4 py-3 sm:px-6 sm:py-4">
       <Link href="/" className="text-lg font-bold tracking-tight">
         OpenClaw<span className="text-orange-500">.jobs</span>
       </Link>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <Link
           href="/worker"
-          className="text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+          className="hidden text-sm text-zinc-500 transition-colors hover:text-zinc-300 sm:block"
         >
           For Workers
         </Link>
+
+        {isAuthenticated && (
+          <Link
+            href="/chat"
+            className="text-sm text-zinc-400 transition-colors hover:text-zinc-200"
+          >
+            Chat
+          </Link>
+        )}
 
         {isAuthenticated && balance && (
           <Link
@@ -38,7 +47,7 @@ export function Header() {
         ) : (
           <button
             onClick={() => signIn()}
-            className="rounded-full border border-zinc-700 px-4 py-1.5 text-sm font-medium text-zinc-300 transition-colors hover:border-orange-500 hover:text-orange-500"
+            className="rounded-full border border-zinc-700 px-3 py-1.5 text-sm font-medium text-zinc-300 transition-colors hover:border-orange-500 hover:text-orange-500 sm:px-4"
           >
             Sign in
           </button>

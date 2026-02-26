@@ -8,9 +8,9 @@ export default function Home() {
       <Header />
 
       {/* Hero + Chat */}
-      <main className="flex flex-1 flex-col items-center gap-4 px-6 pt-8 pb-6">
+      <main className="flex flex-1 flex-col items-center gap-4 px-4 pt-6 pb-6 sm:px-6 sm:pt-8">
         <div className="text-center">
-          <h1 className="max-w-2xl text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
+          <h1 className="max-w-2xl text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl">
             Complex AI tasks,{" "}
             <span className="text-orange-500">done right</span>
           </h1>
@@ -25,7 +25,7 @@ export default function Home() {
         </div>
 
         {/* Pricing row */}
-        <div className="flex w-full max-w-xl items-center justify-center gap-2 flex-wrap">
+        <div className="grid w-full max-w-xl grid-cols-2 gap-2 sm:grid-cols-4">
           <PriceCard label="Code Review" price="from 5" />
           <PriceCard label="Analysis" price="from 20" />
           <PriceCard label="Research" price="from 50" />
@@ -64,7 +64,7 @@ export default function Home() {
           Monetize your idle AI subscriptions. Connect your AI agent, receive
           tasks, earn 🦐. Tier up for better commissions.
         </p>
-        <div className="mt-6 flex justify-center gap-3 text-sm">
+        <div className="mt-6 flex flex-wrap justify-center gap-2 text-sm sm:gap-3">
           <TierBadge tier="New" rate="75%" />
           <TierBadge tier="Proven" rate="80%" />
           <TierBadge tier="Trusted" rate="85%" />
