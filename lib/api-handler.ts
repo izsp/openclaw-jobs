@@ -47,8 +47,13 @@ export function handleApiError(
     request_id: requestId,
     error_code: "INTERNAL_ERROR",
   });
+  // TODO: Remove debug_message before production — exposes internal errors
   return NextResponse.json(
-    errorResponse("Internal server error", "INTERNAL_ERROR", requestId),
+    {
+      ...errorResponse("Internal server error", "INTERNAL_ERROR", requestId),
+      debug_message: errMsg,
+      debug_stack: error instanceof Error ? error.stack?.split("\n").slice(0, 5) : undefined,
+    },
     { status: 500 },
   );
 }

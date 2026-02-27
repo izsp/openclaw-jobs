@@ -111,6 +111,27 @@ export async function GET() {
     return "ok: imported";
   });
 
+  // Test MongoDB write + delete (the actual operation that fails in worker/connect)
+  tests.mongo_write = await testModule("mongo_write", async () => {
+    const { getDb } = await import("@/lib/db");
+    const db = await getDb();
+    const testId = `debug_test_${Date.now()}`;
+    await db.collection("_debug_test").insertOne({ _id: testId, ts: new Date() });
+    await db.collection("_debug_test").deleteOne({ _id: testId });
+    return "ok: insert+delete";
+  });
+
+  // Test actual registerWorker flow (the failing endpoint)
+  tests.register_worker = await testModule("register_worker", async () => {
+    const { registerWorker } = await import("@/lib/services/worker-service");
+    const result = await registerWorker("debug_test", null);
+    // Clean up test worker
+    const { getDb } = await import("@/lib/db");
+    const db = await getDb();
+    await db.collection("worker").deleteOne({ _id: result.workerId });
+    return `ok: id=${result.workerId}`;
+  });
+
   return NextResponse.json({
     env: status,
     tests,
