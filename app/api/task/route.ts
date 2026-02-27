@@ -5,20 +5,24 @@
 import { NextResponse } from "next/server";
 import { createTaskSchema } from "@/lib/validators/task.validator";
 import { createTask } from "@/lib/services/task-service";
-import { successResponse } from "@/lib/types/api.types";
+import { successResponse, errorResponse } from "@/lib/types/api.types";
 import { requireAuth, handleApiError, generateRequestId } from "@/lib/api-handler";
+import { HTTP_STATUS, PAYLOAD_LIMITS } from "@/lib/constants";
+import { enforceRateLimit } from "@/lib/enforce-rate-limit";
+import { readJsonBody } from "@/lib/validate-payload";
 
 export async function POST(request: Request) {
   const requestId = generateRequestId();
   try {
+    await enforceRateLimit(request, "task_submit");
     const { userId } = await requireAuth();
 
-    const body: unknown = await request.json();
+    const body: unknown = await readJsonBody(request, PAYLOAD_LIMITS.TASK_INPUT);
     const parsed = createTaskSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: parsed.error.message, code: "VALIDATION_ERROR", request_id: requestId },
-        { status: 400 },
+        errorResponse(parsed.error.issues[0].message, "VALIDATION_ERROR", requestId),
+        { status: HTTP_STATUS.BAD_REQUEST },
       );
     }
 

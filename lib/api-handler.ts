@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import { AppError, AuthError } from "@/lib/errors";
 import { errorResponse } from "@/lib/types/api.types";
 import { generateRequestId } from "@/lib/request-id";
+import { logError } from "@/lib/logger";
 
 /**
  * Extracts the authenticated user ID from the session.
@@ -35,7 +36,11 @@ export function handleApiError(
     );
   }
 
-  console.error(`[${requestId}] Unexpected error:`, error);
+  const errMsg = error instanceof Error ? error.message : "Unknown error";
+  logError(`Unexpected error: ${errMsg}`, {
+    request_id: requestId,
+    error_code: "INTERNAL_ERROR",
+  });
   return NextResponse.json(
     errorResponse("Internal server error", "INTERNAL_ERROR", requestId),
     { status: 500 },

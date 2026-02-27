@@ -8,15 +8,16 @@ import { requireWorkerAuth } from "@/lib/worker-auth";
 import { bindWorkerPayout } from "@/lib/services/worker-bind-service";
 import { handleApiError, generateRequestId } from "@/lib/api-handler";
 import { successResponse } from "@/lib/types/api.types";
-import { HTTP_STATUS } from "@/lib/constants";
+import { HTTP_STATUS, PAYLOAD_LIMITS } from "@/lib/constants";
 import { ValidationError } from "@/lib/errors";
+import { readJsonBody } from "@/lib/validate-payload";
 
 export async function POST(request: Request) {
   const requestId = generateRequestId();
   try {
     const worker = await requireWorkerAuth(request);
 
-    const body = await request.json();
+    const body = await readJsonBody(request, PAYLOAD_LIMITS.SMALL_BODY);
     const parsed = bindPayoutSchema.safeParse(body);
     if (!parsed.success) {
       throw new ValidationError(parsed.error.issues[0].message);

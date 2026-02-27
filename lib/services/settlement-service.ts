@@ -70,9 +70,11 @@ export async function maybeInjectSpotCheck(
     funded_by: "platform",
   };
 
+  // WHY: Spot-check tasks are platform-funded — don't charge the original buyer.
   const spotCheckTask: TaskDocument = {
     ...originalTask,
     _id: spotCheckId,
+    buyer_id: "platform",
     status: "pending",
     worker_id: null,
     assigned_at: null,

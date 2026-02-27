@@ -1,7 +1,4 @@
-/**
- * Dispatch service — task claiming and result submission.
- * Uses atomic findOneAndUpdate to prevent double-claiming.
- */
+/** Task claiming and result submission via atomic findOneAndUpdate. */
 import { COLLECTIONS } from "@/lib/constants";
 import type {
   TaskDocument,
@@ -138,12 +135,15 @@ function buildClaimFilter(
   };
 
   const { preferences } = worker.profile;
+  const typeFilter: Record<string, unknown> = {};
   if (preferences.accept.length > 0) {
-    filter.type = { $in: preferences.accept };
+    typeFilter.$in = preferences.accept;
   }
   if (preferences.reject.length > 0) {
-    const existing = (filter.type as Record<string, unknown>) ?? {};
-    filter.type = { ...existing, $nin: preferences.reject };
+    typeFilter.$nin = preferences.reject;
+  }
+  if (Object.keys(typeFilter).length > 0) {
+    filter.type = typeFilter;
   }
   if (preferences.min_price > 0) {
     filter.price_cents = { $gte: preferences.min_price };

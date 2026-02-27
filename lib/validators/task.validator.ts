@@ -3,6 +3,9 @@
  */
 import { z } from "zod";
 
+/** Safe JSON primitive — rejects objects/arrays to prevent NoSQL operator injection. */
+const safeJsonPrimitive = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+
 /** Valid task types: built-in or skill:* prefix. */
 const taskTypeSchema = z
   .string()
@@ -21,7 +24,7 @@ const messageSchema = z.object({
 /** Task input payload. */
 const taskInputSchema = z.object({
   messages: z.array(messageSchema).min(1).max(100),
-  context: z.record(z.string(), z.unknown()).default({}),
+  context: z.record(z.string(), safeJsonPrimitive).default({}),
 });
 
 /** Task execution constraints. */
@@ -36,7 +39,7 @@ export const createTaskSchema = z.object({
   input: taskInputSchema,
   sensitive: z.boolean().default(false),
   constraints: constraintsSchema.default({ timeout_seconds: 60, min_output_length: 0 }),
-  input_preview: z.record(z.string(), z.unknown()).nullable().default(null),
+  input_preview: z.record(z.string(), safeJsonPrimitive).nullable().default(null),
 });
 
 /** Path param for task endpoints. */

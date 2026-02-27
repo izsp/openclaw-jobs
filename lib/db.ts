@@ -1,3 +1,8 @@
+/**
+ * MongoDB connection singleton.
+ * Uses globalThis to survive HMR in development.
+ * In serverless (Cloudflare Workers), each isolate gets its own connection.
+ */
 import { MongoClient, type Db } from "mongodb";
 
 function getMongoUri(): string {
@@ -8,31 +13,40 @@ function getMongoUri(): string {
   return uri;
 }
 
-/**
- * Global MongoClient singleton.
- * In serverless environments (Cloudflare Workers), each request may
- * create a new instance. In long-lived dev servers, this reuses the
- * connection across hot reloads via globalThis caching.
- */
-let cachedClient: MongoClient | null = null;
+// WHY: globalThis survives Next.js HMR reloads in development.
+// Module-level `let` is re-initialized on each reload, causing connection leaks.
+const globalForMongo = globalThis as unknown as {
+  _mongoClient?: MongoClient;
+  _mongoClientPromise?: Promise<MongoClient>;
+};
 
 /**
  * Returns a connected MongoClient instance.
- * Uses a module-level cache to avoid reconnecting on every request
- * during development (HMR).
+ * Uses globalThis to cache across HMR reloads in development.
+ * Connection options: 10-connection pool, 5s connect timeout, 10s socket timeout.
  *
  * @throws Error if MONGODB_URI is not set
  */
 export async function getMongoClient(): Promise<MongoClient> {
-  if (cachedClient) {
-    return cachedClient;
+  if (globalForMongo._mongoClient) {
+    return globalForMongo._mongoClient;
   }
 
-  const client = new MongoClient(getMongoUri());
-  await client.connect();
-  cachedClient = client;
+  // Prevent concurrent connection attempts
+  if (!globalForMongo._mongoClientPromise) {
+    const client = new MongoClient(getMongoUri(), {
+      maxPoolSize: 10,
+      minPoolSize: 1,
+      connectTimeoutMS: 5_000,
+      socketTimeoutMS: 10_000,
+    });
+    globalForMongo._mongoClientPromise = client.connect().then(() => {
+      globalForMongo._mongoClient = client;
+      return client;
+    });
+  }
 
-  return client;
+  return globalForMongo._mongoClientPromise;
 }
 
 /**

@@ -3,6 +3,7 @@
  * Calculates task price based on runtime config.
  */
 import { getConfig } from "@/lib/config";
+import { ValidationError } from "@/lib/errors";
 import type { TaskPricing } from "@/lib/types";
 
 /**
@@ -19,9 +20,7 @@ export async function estimateTaskPrice(
 ): Promise<number> {
   const config = await getConfig("pricing");
   if (!config) {
-    // WHY: Fallback to a safe default if config is missing.
-    // This should never happen in production (config is seeded).
-    return 5;
+    throw new ValidationError("Pricing config not found — run setup-db seed");
   }
 
   // Skill tasks use the base type for pricing lookup

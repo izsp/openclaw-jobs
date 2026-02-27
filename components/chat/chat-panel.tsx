@@ -28,21 +28,24 @@ export function ChatPanel({ conversationId, onConversationChange }: ChatPanelPro
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const messages = conversation?.messages ?? [];
+  const onConversationChangeRef = useRef(onConversationChange);
+  onConversationChangeRef.current = onConversationChange;
 
   // Load conversation when conversationId prop changes
   useEffect(() => {
-    if (conversationId === undefined) return; // uncontrolled mode
+    if (conversationId === undefined) return;
     if (conversationId === null) {
       reset();
-    } else if (conversationId !== conversation?.id) {
+    } else {
       loadById(conversationId);
     }
-  }, [conversationId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [conversationId, reset, loadById]);
 
   // Notify parent when conversation ID changes
+  const convId = conversation?.id ?? null;
   useEffect(() => {
-    onConversationChange?.(conversation?.id ?? null);
-  }, [conversation?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    onConversationChangeRef.current?.(convId);
+  }, [convId]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
@@ -70,7 +73,7 @@ export function ChatPanel({ conversationId, onConversationChange }: ChatPanelPro
         {messages.map((msg) => (
           <ChatMessage key={msg.id} role={msg.role} content={msg.content} />
         ))}
-        {isBusy && !conversation?.task_status?.match(/completed|failed|expired/) && (
+        {isBusy && !["completed", "failed", "expired", "credited"].includes(conversation?.task_status ?? "") && (
           <div className="flex justify-start">
             <div className="rounded-2xl bg-zinc-800 px-4 py-2.5 text-sm text-zinc-400">
               <span className="animate-pulse">
@@ -159,6 +162,11 @@ function EmptyState({ balanceCents, onExampleClick }: EmptyStateProps) {
         </p>
         <p className="mt-1 text-xs text-zinc-600">
           Deep research, code review, data analysis, multi-step workflows
+        </p>
+        <p className="mt-2 max-w-md text-[11px] leading-relaxed text-zinc-700">
+          Your tasks are processed by independent workers in our Lobster
+          network who will see the full content. Avoid sharing passwords
+          or personal secrets.
         </p>
       </div>
       <div className="grid w-full max-w-lg grid-cols-1 gap-2 sm:grid-cols-2">

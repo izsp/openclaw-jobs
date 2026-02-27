@@ -8,10 +8,12 @@ import { buildWorkerStats } from "@/lib/services/worker-stats";
 import { getBalance } from "@/lib/services/balance-service";
 import { successResponse } from "@/lib/types/api.types";
 import { handleApiError, generateRequestId } from "@/lib/api-handler";
+import { enforceRateLimit } from "@/lib/enforce-rate-limit";
 
 export async function GET(request: Request) {
   const requestId = generateRequestId();
   try {
+    await enforceRateLimit(request, "worker_me");
     const worker = await requireWorkerAuth(request);
     const stats = await buildWorkerStats(worker, false);
     const balance = await getBalance(worker._id);

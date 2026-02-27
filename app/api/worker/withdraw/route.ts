@@ -7,13 +7,15 @@ import { requestWithdrawalSchema } from "@/lib/validators/withdrawal.validator";
 import { requestWithdrawal } from "@/lib/services/withdrawal-service";
 import { requireWorkerAuth } from "@/lib/worker-auth";
 import { successResponse, errorResponse } from "@/lib/types/api.types";
-import { generateRequestId } from "@/lib/api-handler";
-import { HTTP_STATUS } from "@/lib/constants";
-import { AppError } from "@/lib/errors";
+import { handleApiError, generateRequestId } from "@/lib/api-handler";
+import { HTTP_STATUS, PAYLOAD_LIMITS } from "@/lib/constants";
+import { enforceRateLimit } from "@/lib/enforce-rate-limit";
+import { readJsonBody } from "@/lib/validate-payload";
 
 export async function POST(request: Request) {
   const requestId = generateRequestId();
   try {
+    await enforceRateLimit(request, "withdrawal");
     const worker = await requireWorkerAuth(request);
 
     if (!worker.payout) {
@@ -23,11 +25,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const body: unknown = await request.json();
+    const body: unknown = await readJsonBody(request, PAYLOAD_LIMITS.SMALL_BODY);
     const parsed = requestWithdrawalSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        errorResponse(parsed.error.message, "VALIDATION_ERROR", requestId),
+        errorResponse(parsed.error.issues[0].message, "VALIDATION_ERROR", requestId),
         { status: HTTP_STATUS.BAD_REQUEST },
       );
     }
@@ -39,16 +41,6 @@ export async function POST(request: Request) {
       { status: HTTP_STATUS.OK },
     );
   } catch (error) {
-    if (error instanceof AppError) {
-      return NextResponse.json(
-        errorResponse(error.message, error.code, requestId),
-        { status: error.statusCode },
-      );
-    }
-    console.error(`[${requestId}] Withdrawal error:`, error);
-    return NextResponse.json(
-      errorResponse("Withdrawal failed", "INTERNAL_ERROR", requestId),
-      { status: HTTP_STATUS.INTERNAL_ERROR },
-    );
+    return handleApiError(error, requestId);
   }
 }

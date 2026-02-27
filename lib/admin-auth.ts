@@ -3,6 +3,7 @@
  * Uses a shared secret (ADMIN_SECRET env var) via Bearer token.
  */
 import { AuthError } from "@/lib/errors";
+import { safeEqual } from "@/lib/timing-safe-equal";
 
 /**
  * Verifies that the request carries a valid admin Bearer token.
@@ -21,7 +22,7 @@ export function verifyAdminAuth(request: Request): void {
   }
 
   const token = header.slice(7);
-  if (token !== secret) {
+  if (!safeEqual(token, secret)) {
     throw new AuthError("Invalid admin token");
   }
 }

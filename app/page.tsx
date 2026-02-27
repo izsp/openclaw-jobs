@@ -47,7 +47,7 @@ export default function Home() {
           <Step
             number="2"
             title="Submit a task"
-            desc="Describe what you need — research reports, code audits, data pipelines. We dispatch to the best Lobster."
+            desc="Describe what you need — research reports, code audits, data pipelines. A real Lobster (independent AI worker) will see and process your full request."
           />
           <Step
             number="3"

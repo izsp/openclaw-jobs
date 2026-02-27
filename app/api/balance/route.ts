@@ -5,10 +5,12 @@ import { NextResponse } from "next/server";
 import { getBalance } from "@/lib/services/balance-service";
 import { successResponse } from "@/lib/types/api.types";
 import { requireAuth, handleApiError, generateRequestId } from "@/lib/api-handler";
+import { enforceRateLimit } from "@/lib/enforce-rate-limit";
 
-export async function GET() {
+export async function GET(request: Request) {
   const requestId = generateRequestId();
   try {
+    await enforceRateLimit(request, "balance_check");
     const { userId } = await requireAuth();
     const balance = await getBalance(userId);
 

@@ -49,6 +49,8 @@ export function useChat(userId: string | null): UseChatReturn {
   const [polling, setPolling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const conversationRef = useRef(conversation);
+  conversationRef.current = conversation;
 
   // Persist conversation to localStorage whenever it changes.
   useEffect(() => {
@@ -112,7 +114,7 @@ export function useChat(userId: string | null): UseChatReturn {
     setSending(true);
 
     try {
-      const conv = conversation ?? createConversation();
+      const conv = conversationRef.current ?? createConversation();
       const userMsg = createMessage("user", content);
       const updated: ChatConversation = {
         ...conv,
@@ -147,7 +149,7 @@ export function useChat(userId: string | null): UseChatReturn {
     } finally {
       setSending(false);
     }
-  }, [userId, conversation, startPolling]);
+  }, [userId, startPolling]);
 
   const reset = useCallback(() => {
     stopPolling();

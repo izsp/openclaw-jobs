@@ -4,8 +4,9 @@
 import { NextResponse } from "next/server";
 import { taskIdParamSchema } from "@/lib/validators/task.validator";
 import { creditTask } from "@/lib/services/task-service";
-import { successResponse } from "@/lib/types/api.types";
+import { successResponse, errorResponse } from "@/lib/types/api.types";
 import { requireAuth, handleApiError, generateRequestId } from "@/lib/api-handler";
+import { HTTP_STATUS } from "@/lib/constants";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -18,8 +19,8 @@ export async function POST(request: Request, context: RouteContext) {
     const parsed = taskIdParamSchema.safeParse(id);
     if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: "Invalid task ID", code: "VALIDATION_ERROR", request_id: requestId },
-        { status: 400 },
+        errorResponse("Invalid task ID", "VALIDATION_ERROR", requestId),
+        { status: HTTP_STATUS.BAD_REQUEST },
       );
     }
 

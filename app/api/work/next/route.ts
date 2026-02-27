@@ -10,6 +10,7 @@ import { buildWorkerStats } from "@/lib/services/worker-stats";
 import { handleApiError, generateRequestId } from "@/lib/api-handler";
 import { successResponse } from "@/lib/types/api.types";
 import { HTTP_STATUS } from "@/lib/constants";
+import { enforceRateLimit } from "@/lib/enforce-rate-limit";
 
 /** Maximum long-poll wait time in seconds. */
 const MAX_WAIT_SECONDS = 30;
@@ -20,6 +21,7 @@ const POLL_INTERVAL_MS = 2000;
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
   try {
+    await enforceRateLimit(request, "work_next");
     const worker = await requireWorkerAuth(request);
 
     const waitParam = request.nextUrl.searchParams.get("wait");

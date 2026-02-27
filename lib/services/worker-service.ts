@@ -10,7 +10,7 @@ import type {
   WorkerProfile,
 } from "@/lib/types";
 import { getDb } from "@/lib/db";
-import { AuthError, NotFoundError } from "@/lib/errors";
+import { AuthError, NotFoundError, ValidationError } from "@/lib/errors";
 import { generateWorkerToken, hashToken } from "@/lib/hash-token";
 
 /** Default profile for newly registered workers. */
@@ -146,7 +146,7 @@ export async function updateWorkerProfile(
   }
 
   if (Object.keys(setFields).length === 0) {
-    throw new NotFoundError("Worker");
+    throw new ValidationError("No profile fields provided");
   }
 
   const worker = await db

@@ -43,10 +43,9 @@ describe("estimateTaskPrice", () => {
     expect(await estimateTaskPrice("chat", 50)).toBe(10);
   });
 
-  it("should fall back to 5 cents when config is missing", async () => {
+  it("should throw when pricing config is missing", async () => {
     mockGetConfig.mockResolvedValue(null);
-    const price = await estimateTaskPrice("chat", 1);
-    expect(price).toBe(5);
+    await expect(estimateTaskPrice("chat", 1)).rejects.toThrow("Pricing config not found");
   });
 
   it("should fall back to 5 cents for unknown task type", async () => {
