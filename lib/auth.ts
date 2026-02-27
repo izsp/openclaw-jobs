@@ -3,17 +3,34 @@
  * Uses AWS Cognito as the single OIDC provider (email+password + Google federated).
  * Exports handlers for API route + auth() for server-side session access.
  *
- * WHY lazy initialization: On Cloudflare Workers, process.env is only populated
- * at request time (via bindings), not at module load time. We must defer
- * NextAuth() initialization until the first request arrives.
+ * WHY fully dynamic imports: On Cloudflare Workers (OpenNext), ALL route modules
+ * are bundled into a single worker.js. Any top-level `import` of next-auth causes
+ * the Worker to hang during module initialization — even for routes that don't
+ * use auth. By using `await import()` inside each function, next-auth is only
+ * loaded when actually needed (e.g. when /api/auth/* or requireAuth() is called).
  */
-import NextAuth from "next-auth";
-import type { Session } from "next-auth";
-import Cognito from "next-auth/providers/cognito";
-import { findOrCreateUser } from "@/lib/services/user-service";
 
-function createAuth() {
-  return NextAuth({
+// WHY: We need the NextAuth return type for the singleton, but importing the
+// module itself at the top level causes Workers to hang. Use a type-only import
+// for the type, and dynamic import for the runtime value.
+import type NextAuthType from "next-auth";
+
+type NextAuthInstance = ReturnType<typeof NextAuthType>;
+
+// Lazy singleton — initialized on first auth request
+let _instance: NextAuthInstance | null = null;
+
+async function getInstance(): Promise<NextAuthInstance> {
+  if (_instance) return _instance;
+
+  const [{ default: NextAuth }, { default: Cognito }, { findOrCreateUser }] =
+    await Promise.all([
+      import("next-auth"),
+      import("next-auth/providers/cognito"),
+      import("@/lib/services/user-service"),
+    ]);
+
+  _instance = NextAuth({
     providers: [
       Cognito({
         clientId: process.env.COGNITO_CLIENT_ID,
@@ -64,37 +81,40 @@ function createAuth() {
       },
     },
   });
-}
 
-// Lazy singleton — initialized on first request when env vars are available
-let _instance: ReturnType<typeof NextAuth> | null = null;
-
-function getInstance() {
-  if (!_instance) {
-    _instance = createAuth();
-  }
   return _instance;
 }
 
 /** Auth.js route handlers for /api/auth/[...nextauth] */
 export const handlers = {
-  // WHY: cast needed because NextAuth expects NextRequest but the lazy
-  // wrapper receives the generic Request from the route handler.
-  GET: (req: unknown) => getInstance().handlers.GET(req as never),
-  POST: (req: unknown) => getInstance().handlers.POST(req as never),
+  GET: async (req: Request) => {
+    const instance = await getInstance();
+    return instance.handlers.GET(req as never);
+  },
+  POST: async (req: Request) => {
+    const instance = await getInstance();
+    return instance.handlers.POST(req as never);
+  },
 };
 
 /** Server-side session getter */
-export function auth() {
-  return getInstance().auth();
+export async function auth() {
+  const instance = await getInstance();
+  return instance.auth();
 }
 
 /** Trigger sign-in redirect */
-export function signIn(...args: Parameters<ReturnType<typeof NextAuth>["signIn"]>) {
-  return getInstance().signIn(...args);
+export async function signIn(
+  ...args: Parameters<NextAuthInstance["signIn"]>
+) {
+  const instance = await getInstance();
+  return instance.signIn(...args);
 }
 
 /** Trigger sign-out redirect */
-export function signOut(...args: Parameters<ReturnType<typeof NextAuth>["signOut"]>) {
-  return getInstance().signOut(...args);
+export async function signOut(
+  ...args: Parameters<NextAuthInstance["signOut"]>
+) {
+  const instance = await getInstance();
+  return instance.signOut(...args);
 }
