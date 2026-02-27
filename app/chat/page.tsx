@@ -4,7 +4,7 @@
  */
 "use client";
 
-import { useState, useCallback } from "react";
+import { Suspense, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { redirect } from "next/navigation";
@@ -15,6 +15,14 @@ import { listConversations } from "@/lib/chat/chat-storage";
 import { useBalance } from "@/lib/hooks/use-balance";
 
 export default function ChatPage() {
+  return (
+    <Suspense fallback={<PageShell />}>
+      <ChatPageInner />
+    </Suspense>
+  );
+}
+
+function ChatPageInner() {
   const { data: session, status } = useSession();
   const userId = session?.user?.id ?? null;
   const isAuthenticated = status === "authenticated";
