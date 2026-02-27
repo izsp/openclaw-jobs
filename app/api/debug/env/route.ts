@@ -1,6 +1,6 @@
 /**
  * GET /api/debug/env — Debug endpoint to check env var availability.
- * Returns which env vars are set (not their values).
+ * Returns which env vars are set (not their values) and tests MongoDB.
  * TODO: Remove before production launch.
  */
 import { NextResponse } from "next/server";
@@ -33,8 +33,24 @@ export async function GET() {
     }
   }
 
+  // Test MongoDB connectivity
+  let mongoStatus = "skipped";
+  if (process.env.MONGODB_URI) {
+    try {
+      const { getMongoClient } = await import("@/lib/db");
+      const client = await getMongoClient();
+      await client.db().command({ ping: 1 });
+      mongoStatus = "connected";
+    } catch (err) {
+      mongoStatus = `error: ${err instanceof Error ? err.message : String(err)}`;
+    }
+  } else {
+    mongoStatus = "MONGODB_URI not set";
+  }
+
   return NextResponse.json({
     env: status,
+    mongodb: mongoStatus,
     runtime: typeof (globalThis as Record<string, unknown>).EdgeRuntime !== "undefined" ? "edge" : "node",
     timestamp: new Date().toISOString(),
   });

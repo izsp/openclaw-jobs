@@ -32,13 +32,20 @@ function createAuth() {
        */
       async jwt({ token, account, profile }) {
         if (account && profile) {
-          // WHY: Cognito sub is the same regardless of how the user signed in
-          // (email+password or Google federation), so we use it as auth_id.
-          const cognitoSub = profile.sub as string;
-          const email = (profile.email as string) ?? null;
-          const user = await findOrCreateUser("cognito", cognitoSub, email);
-          token.userId = user._id;
-          token.role = user.role;
+          try {
+            // WHY: Cognito sub is the same regardless of how the user signed in
+            // (email+password or Google federation), so we use it as auth_id.
+            const cognitoSub = profile.sub as string;
+            const email = (profile.email as string) ?? null;
+            const user = await findOrCreateUser("cognito", cognitoSub, email);
+            token.userId = user._id;
+            token.role = user.role;
+          } catch (err) {
+            // WHY: Auth.js swallows callback errors as generic "Server error".
+            // Log the actual error so we can diagnose via wrangler tail / debug endpoint.
+            console.error("[auth] jwt callback error:", err);
+            throw err;
+          }
         }
         return token;
       },
