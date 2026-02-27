@@ -1,9 +1,12 @@
 /**
  * Shared API route handler utilities.
  * Provides auth helpers and error formatting for route handlers.
+ *
+ * WHY no top-level auth import: On Cloudflare Workers, importing next-auth
+ * at module load time causes the Worker to hang. We use a dynamic import
+ * inside requireAuth() so only routes that need authentication pay the cost.
  */
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { AppError, AuthError } from "@/lib/errors";
 import { errorResponse } from "@/lib/types/api.types";
 import { generateRequestId } from "@/lib/request-id";
@@ -14,6 +17,9 @@ import { logError } from "@/lib/logger";
  * @throws AuthError if not authenticated
  */
 export async function requireAuth(): Promise<{ userId: string }> {
+  // WHY dynamic import: next-auth causes Workers to hang when imported
+  // at module level. Lazy-loading avoids this for routes that don't need auth.
+  const { auth } = await import("@/lib/auth");
   const session = await auth();
   if (!session?.user?.id) {
     throw new AuthError("Sign in required");
