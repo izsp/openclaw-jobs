@@ -35,8 +35,9 @@ export async function getMongoClient(): Promise<MongoClient> {
   // Prevent concurrent connection attempts
   if (!globalForMongo._mongoClientPromise) {
     const client = new MongoClient(getMongoUri(), {
-      maxPoolSize: 10,
-      // WHY: minPoolSize=0 for serverless — connections can't persist across requests
+      // WHY: maxPoolSize=1 for Cloudflare Workers — each isolate handles one
+      // request at a time, so a larger pool wastes resources and may cause issues.
+      maxPoolSize: 1,
       minPoolSize: 0,
       // WHY: 15s timeouts for Cloudflare Workers — cold starts involve DNS SRV
       // lookup + TCP + TLS handshake which can exceed 5s from edge locations
