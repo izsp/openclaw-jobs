@@ -71,13 +71,15 @@ function getInstance() {
 
 /** Auth.js route handlers for /api/auth/[...nextauth] */
 export const handlers = {
-  GET: (req: Request) => getInstance().handlers.GET(req),
-  POST: (req: Request) => getInstance().handlers.POST(req),
+  // WHY: cast needed because NextAuth expects NextRequest but the lazy
+  // wrapper receives the generic Request from the route handler.
+  GET: (req: unknown) => getInstance().handlers.GET(req as never),
+  POST: (req: unknown) => getInstance().handlers.POST(req as never),
 };
 
 /** Server-side session getter */
-export function auth(): Promise<Session | null> {
-  return getInstance().auth() as Promise<Session | null>;
+export function auth() {
+  return getInstance().auth();
 }
 
 /** Trigger sign-in redirect */
