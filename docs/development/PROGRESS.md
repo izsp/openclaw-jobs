@@ -1,6 +1,6 @@
 # OpenClaw.jobs — Build Progress
 
-## Current Status: Phase 8 (Complete) → Phase 9 (Next)
+## Current Status: Phase 10 (Complete) — All Phases Done!
 Last updated: 2026-02-27
 
 ---
@@ -17,8 +17,8 @@ Last updated: 2026-02-27
 | 6 | Payment System | 🟢 Complete | Fund freeze, unfreeze cron, withdrawal, Stripe docs, 139 tests |
 | 7 | Frontend — Buyer | 🟢 Complete | API clients, chat hooks, dashboard, 163 tests |
 | 8 | Frontend — Worker Dashboard | 🟢 Complete | Token gate, earnings, tier progress, profile, connection guide, 175 tests |
-| 9 | Anti-Fraud & Security | 🔴 Not Started | Rate limiting, validation |
-| 10 | Production Readiness | 🔴 Not Started | Testing, CI/CD, logging |
+| 9 | Anti-Fraud & Security | 🟢 Complete | Rate limiting, payload validation, IP extraction, 200 tests |
+| 10 | Production Readiness | 🟢 Complete | Health check, logging, CI/CD, connection pooling, 208 tests |
 
 ---
 
@@ -151,22 +151,31 @@ Last updated: 2026-02-27
 - [x] Dev login support (`lib/auth.ts`) — Credentials provider for local testing (non-production only)
 - [x] Tests: 12 new (worker-client 9, e2e-worker-dashboard 3), total 175 passing
 
-### Phase 9: Anti-Fraud & Security
-- [ ] Rate limiting (IP + per-token)
-- [ ] Input validation + payload limits
-- [ ] Task peeking defense
-- [ ] Registration anti-abuse
-- [ ] Idempotent submit
-- [ ] Token security (SHA-256 hash only)
+### Phase 9: Anti-Fraud & Security ✅
+- [x] Rate limiting — sliding window, in-memory, per-IP (`lib/services/rate-limiter.ts`)
+- [x] Rate limit enforcement — configurable via `config:rate_limits`, applied to all public endpoints (`lib/enforce-rate-limit.ts`)
+- [x] IP extraction — Cloudflare CF-Connecting-IP, X-Real-IP, X-Forwarded-For (`lib/extract-ip.ts`)
+- [x] Payload size validation — byte-level limits enforced before JSON parsing (`lib/validate-payload.ts`)
+- [x] Payload limits applied to all POST endpoints: WORKER_CONNECT (16KB), TASK_INPUT (128KB), WORK_SUBMIT (256KB), WORKER_PROFILE (8KB), SMALL_BODY (4KB)
+- [x] Rate limiting on: registration (3/min/IP), work_next (30/min/IP), task_submit (20/min/IP), withdrawal (5/min/IP), deposit
+- [x] Token-based rate limiting for authenticated worker endpoints (`enforceWorkerRateLimit`)
+- [x] Task peeking defense — consecutive_expires counter, 3-strike suspension (Phase 5, verified)
+- [x] Registration anti-abuse — IP-based rate limiting on /api/worker/connect
+- [x] Idempotent submit — atomic findOneAndUpdate with status check (Phase 4, verified)
+- [x] Token security — SHA-256 hashing, raw tokens never stored or logged (Phase 4, verified)
+- [x] Input validation — Zod schemas on all 11+ endpoints (Phase 3-4, verified)
+- [x] Tests: 25 new (rate-limiter 7, validate-payload 6, extract-ip 6, enforce-rate-limit 6), total 200 passing
 
-### Phase 10: Production Readiness
-- [ ] Error handling + structured logging
-- [ ] Health check endpoint
-- [ ] MongoDB connection pooling
-- [ ] CI/CD pipeline (GitHub Actions → Cloudflare Pages)
-- [ ] Unit tests (business logic)
-- [ ] Integration tests (API endpoints)
-- [ ] E2E tests (Playwright)
+### Phase 10: Production Readiness ✅
+- [x] Health check endpoint (`GET /api/health`) — MongoDB ping, latency measurement, 200/503 response
+- [x] Structured JSON logger (`lib/logger.ts`) — info/warn/error levels, structured JSON in production, readable in dev
+- [x] Error logging integrated into `handleApiError` via `logError()`
+- [x] MongoDB connection pooling — `globalThis` caching for HMR survival, maxPoolSize: 10, connect/socket timeouts
+- [x] CI/CD pipeline (`.github/workflows/ci.yml`) — TypeScript check, vitest, next build on push/PR to main
+- [x] Unit tests covering all business logic (30 test files)
+- [x] Integration tests: e2e-task-lifecycle, e2e-chat-flow, e2e-worker-dashboard, e2e-qa-lifecycle
+- [x] Screenshot audit script (`scripts/screenshot-audit.ts`) — Playwright-based visual regression for all pages
+- [x] Tests: 8 new (logger 6, health 2), total 208 passing
 
 ---
 

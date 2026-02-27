@@ -44,5 +44,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# terraform
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+
 # claude code local settings
 .claude/settings.local.json

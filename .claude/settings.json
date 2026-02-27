@@ -2,6 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(git -C /Users/shawnzeng/Documents/GitHub/openclaw-jobs log --oneline -20)"
+    ],
+    "additionalDirectories": [
+      "/Users/shawnzeng/Documents/GitHub/openclaw-jobs/.claude"
     ]
   }
 }
