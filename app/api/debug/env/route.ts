@@ -35,7 +35,7 @@ export async function GET() {
 
   return NextResponse.json({
     env: status,
-    runtime: typeof globalThis.EdgeRuntime !== "undefined" ? "edge" : "node",
+    runtime: typeof (globalThis as Record<string, unknown>).EdgeRuntime !== "undefined" ? "edge" : "node",
     timestamp: new Date().toISOString(),
   });
 }
