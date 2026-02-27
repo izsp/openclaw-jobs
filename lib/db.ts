@@ -36,9 +36,13 @@ export async function getMongoClient(): Promise<MongoClient> {
   if (!globalForMongo._mongoClientPromise) {
     const client = new MongoClient(getMongoUri(), {
       maxPoolSize: 10,
-      minPoolSize: 1,
-      connectTimeoutMS: 5_000,
-      socketTimeoutMS: 10_000,
+      // WHY: minPoolSize=0 for serverless — connections can't persist across requests
+      minPoolSize: 0,
+      // WHY: 15s timeouts for Cloudflare Workers — cold starts involve DNS SRV
+      // lookup + TCP + TLS handshake which can exceed 5s from edge locations
+      connectTimeoutMS: 15_000,
+      socketTimeoutMS: 15_000,
+      serverSelectionTimeoutMS: 15_000,
     });
     globalForMongo._mongoClientPromise = client.connect().then(() => {
       globalForMongo._mongoClient = client;

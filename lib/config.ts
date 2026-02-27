@@ -34,18 +34,26 @@ export async function getConfig<K extends ConfigKey>(
     return cached.value as ConfigMap[K];
   }
 
-  const db = await getDb();
-  const doc = await db
-    .collection<PlatformConfigDocument>(COLLECTIONS.PLATFORM_CONFIG)
-    .findOne({ _id: key as PlatformConfigDocument["_id"] });
+  try {
+    const db = await getDb();
+    const doc = await db
+      .collection<PlatformConfigDocument>(COLLECTIONS.PLATFORM_CONFIG)
+      .findOne({ _id: key as PlatformConfigDocument["_id"] });
 
-  if (!doc) {
+    if (!doc) {
+      return null;
+    }
+
+    const typed = doc as ConfigMap[K];
+    cache.set(key, { value: typed, expiresAt: Date.now() + CACHE_TTL_MS });
+    return typed;
+  } catch (err) {
+    // WHY: On serverless (Cloudflare Workers), MongoDB may be temporarily
+    // unreachable. Return null so callers fall back to hardcoded defaults
+    // instead of crashing the entire request.
+    console.error(`[config] Failed to load "${key}":`, err);
     return null;
   }
-
-  const typed = doc as ConfigMap[K];
-  cache.set(key, { value: typed, expiresAt: Date.now() + CACHE_TTL_MS });
-  return typed;
 }
 
 /**
