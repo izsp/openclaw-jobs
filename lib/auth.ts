@@ -1,57 +1,19 @@
 /**
  * Auth.js v5 configuration.
+ * Uses AWS Cognito as the single OIDC provider (email+password + Google federated).
  * Exports handlers for API route + auth() for server-side session access.
  */
 import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
-import GitHub from "next-auth/providers/github";
-import Credentials from "next-auth/providers/credentials";
+import Cognito from "next-auth/providers/cognito";
 import { findOrCreateUser } from "@/lib/services/user-service";
-import type { AuthProvider } from "@/lib/types";
-
-/**
- * Maps Auth.js provider IDs to our AuthProvider type.
- */
-function toAuthProvider(providerId: string): AuthProvider {
-  if (providerId === "google") return "google";
-  if (providerId === "github") return "github";
-  return "email";
-}
-
-/**
- * Dev-only Credentials provider for quick local testing.
- * Accepts any email — no password required.
- * Only included when NODE_ENV !== "production".
- */
-function devCredentialsProvider() {
-  if (process.env.NODE_ENV === "production") return [];
-  return [
-    Credentials({
-      id: "dev-login",
-      name: "Dev Login",
-      credentials: {
-        email: { label: "Email", type: "email", placeholder: "test@openclaw.jobs" },
-      },
-      async authorize(credentials) {
-        const email = credentials?.email;
-        if (!email || typeof email !== "string") return null;
-        return { id: email, email, name: email.split("@")[0] };
-      },
-    }),
-  ];
-}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    Cognito({
+      clientId: process.env.COGNITO_CLIENT_ID,
+      clientSecret: process.env.COGNITO_CLIENT_SECRET,
+      issuer: process.env.COGNITO_ISSUER,
     }),
-    GitHub({
-      clientId: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    }),
-    ...devCredentialsProvider(),
   ],
   session: { strategy: "jwt" },
   pages: {
@@ -60,27 +22,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     /**
      * On sign-in, find or create user in our database.
-     * Attach our internal user ID to the JWT token.
+     * Cognito sub is stable across all login methods (email/password, Google).
      */
     async jwt({ token, account, profile }) {
       if (account && profile) {
-        const provider = toAuthProvider(account.provider);
-        const authId = account.providerAccountId;
-        const email = profile.email ?? null;
-
-        const user = await findOrCreateUser(provider, authId, email);
+        // WHY: Cognito sub is the same regardless of how the user signed in
+        // (email+password or Google federation), so we use it as auth_id.
+        const cognitoSub = profile.sub as string; // Cognito always provides sub
+        const email = (profile.email as string) ?? null;
+        const user = await findOrCreateUser("cognito", cognitoSub, email);
         token.userId = user._id;
         token.role = user.role;
       }
-
-      // Dev credentials: profile is null, create user from token info
-      if (account?.provider === "dev-login" && !token.userId) {
-        const email = token.email ?? "dev@openclaw.jobs";
-        const user = await findOrCreateUser("email", email, email);
-        token.userId = user._id;
-        token.role = user.role;
-      }
-
       return token;
     },
 

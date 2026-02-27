@@ -42,10 +42,7 @@ export const TRANSACTION_TYPES = [
 
 // ─── Auth Providers ──────────────────────────────────────────────────────────
 export const AUTH_PROVIDERS = [
-  "google",
-  "github",
-  "email",
-  "anonymous",
+  "cognito",
 ] as const;
 
 // ─── User Roles ──────────────────────────────────────────────────────────────
@@ -93,4 +90,6 @@ export const PAYLOAD_LIMITS = {
   TASK_INPUT: 128 * 1024,
   WORK_SUBMIT: 256 * 1024,
   WORKER_PROFILE: 8 * 1024,
+  /** Small payloads: deposit, bind-email, bind-payout, withdrawal */
+  SMALL_BODY: 4 * 1024,
 } as const;

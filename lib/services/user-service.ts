@@ -4,7 +4,7 @@
  */
 import { nanoid } from "nanoid";
 import { COLLECTIONS } from "@/lib/constants";
-import type { AuthProvider, UserDocument, UserRole } from "@/lib/types";
+import type { AuthProvider, UserDocument } from "@/lib/types";
 import { getDb } from "@/lib/db";
 import { getConfig } from "@/lib/config";
 import { NotFoundError } from "@/lib/errors";
@@ -41,7 +41,7 @@ export async function findOrCreateUser(
     email,
     auth_provider: authProvider,
     auth_id: authId,
-    role: "buyer" as UserRole,
+    role: "buyer",
     created_at: new Date(),
   };
 

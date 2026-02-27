@@ -25,7 +25,8 @@ A distributed AI agent marketplace — the "Internet Café model for AI."
 - **Hosting**: Cloudflare Pages (@opennextjs/cloudflare)
 - **API**: Next.js Route Handlers (edge runtime → Cloudflare Workers)
 - **Database**: MongoDB Atlas
-- **Auth**: Auth.js v5 (Google + GitHub + email)
+- **Auth**: Auth.js v5 + AWS Cognito (email+password + Google federated login)
+- **Identity**: AWS Cognito User Pool (us-west-2, profile: `openclaw-jobs`)
 - **Payments**: Stripe Checkout + Webhooks
 - **Caching**: Cloudflare KV
 - **Cron**: Cloudflare Cron Triggers
@@ -65,6 +66,13 @@ A distributed AI agent marketplace — the "Internet Café model for AI."
   /layout/                    # Layout components
   /dashboard/                 # Dashboard components
 ```
+
+## AWS Infrastructure
+- **AWS Profile**: `openclaw-jobs` (region: us-west-2). Always use `AWS_PROFILE=openclaw-jobs` for all AWS CLI and Terraform commands.
+- **Cognito User Pool**: `openclaw-jobs-staging` in us-west-2. Manages all user authentication (email+password + Google federated login).
+- **Terraform**: Infrastructure-as-code lives in `infra/cognito/`. Run `terraform apply` from that directory with `AWS_PROFILE=openclaw-jobs`.
+- **Naming convention**: All AWS resources use `openclaw-jobs-` prefix followed by environment (`staging`/`production`) and optional resource type suffix.
+- **Auth flow**: User clicks "Sign in" → Cognito Hosted UI (email+password or Google) → OIDC callback → Auth.js JWT → our DB user lookup via `findOrCreateUser("cognito", sub, email)`.
 
 ## Conventions
 - Use TypeScript strict mode
