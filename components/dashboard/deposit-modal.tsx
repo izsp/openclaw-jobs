@@ -11,9 +11,9 @@ interface DepositModalProps {
 
 const TIERS = [
   { cents: 500, label: "Starter", shrimp: "500🦐", price: "$5" },
-  { cents: 1000, label: "Standard", shrimp: "1,000🦐", price: "$10" },
-  { cents: 2000, label: "Pro", shrimp: "2,000🦐", price: "$20" },
-  { cents: 5000, label: "Business", shrimp: "5,000🦐", price: "$50" },
+  { cents: 2000, label: "Standard", shrimp: "2,000🦐", price: "$20" },
+  { cents: 10000, label: "Pro", shrimp: "10,000🦐", price: "$100" },
+  { cents: 50000, label: "Business", shrimp: "50,000🦐", price: "$500" },
 ];
 
 export function DepositModal({ open, onClose, onSuccess }: DepositModalProps) {

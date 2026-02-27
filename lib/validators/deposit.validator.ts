@@ -8,7 +8,7 @@ export const createDepositSchema = z.object({
   amount_cents: z
     .number()
     .int()
-    .refine((v) => [500, 1000, 2000, 5000].includes(v), {
-      message: "Amount must be 500, 1000, 2000, or 5000 cents",
+    .refine((v) => [500, 2000, 10000, 50000].includes(v), {
+      message: "Amount must be 500, 2000, 10000, or 50000 cents",
     }),
 });

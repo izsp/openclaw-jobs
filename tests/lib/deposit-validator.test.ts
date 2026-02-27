@@ -3,7 +3,7 @@ import { createDepositSchema } from "@/lib/validators/deposit.validator";
 
 describe("createDepositSchema", () => {
   it("should accept valid deposit amounts", () => {
-    for (const amount of [500, 1000, 2000, 5000]) {
+    for (const amount of [500, 2000, 10000, 50000]) {
       const result = createDepositSchema.safeParse({ amount_cents: amount });
       expect(result.success).toBe(true);
     }

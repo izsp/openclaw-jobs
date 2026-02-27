@@ -7,7 +7,7 @@
 import Stripe from "stripe";
 import { SHRIMP_PER_DOLLAR } from "@/lib/constants";
 import { getConfig } from "@/lib/config";
-import { creditBalance } from "./balance-service";
+import { creditBalance, getBalance } from "./balance-service";
 import { ValidationError } from "@/lib/errors";
 
 /**
@@ -26,23 +26,23 @@ function getStripeClient(): Stripe {
 const DEPOSIT_TIERS: Record<number, { name: string; description: string; envKey: string }> = {
   500: {
     name: "OpenClaw Credits — Starter Pack",
-    description: "500 🦐 credits for AI task processing on OpenClaw.jobs",
+    description: "500 🦐 credits ($5) for AI task processing on OpenClaw.jobs",
     envKey: "STRIPE_PRICE_500",
   },
-  1000: {
-    name: "OpenClaw Credits — Standard Pack",
-    description: "1,000 🦐 credits for AI task processing on OpenClaw.jobs",
-    envKey: "STRIPE_PRICE_1000",
-  },
   2000: {
-    name: "OpenClaw Credits — Pro Pack",
-    description: "2,000 🦐 credits for AI task processing on OpenClaw.jobs",
+    name: "OpenClaw Credits — Standard Pack",
+    description: "2,000 🦐 credits ($20) for AI task processing on OpenClaw.jobs",
     envKey: "STRIPE_PRICE_2000",
   },
-  5000: {
+  10000: {
+    name: "OpenClaw Credits — Pro Pack",
+    description: "10,000 🦐 credits ($100) for AI task processing on OpenClaw.jobs",
+    envKey: "STRIPE_PRICE_10000",
+  },
+  50000: {
     name: "OpenClaw Credits — Business Pack",
-    description: "5,000 🦐 credits for AI task processing on OpenClaw.jobs",
-    envKey: "STRIPE_PRICE_5000",
+    description: "50,000 🦐 credits ($500) for AI task processing on OpenClaw.jobs",
+    envKey: "STRIPE_PRICE_50000",
   },
 };
 
@@ -126,19 +126,28 @@ export async function handleCheckoutComplete(
     throw new ValidationError("Missing user_id or amount_cents in metadata");
   }
 
-  // Check for first-deposit bonus
-  const signupConfig = await getConfig("signup");
-  const bonusPct = signupConfig?.first_deposit_bonus_pct ?? 0;
+  // WHY: Bonus only applies on the very first deposit (total_deposited === 0).
+  // Checking total_deposited is safe because creditBalance atomically increments it.
+  const balance = await getBalance(userId);
+  const isFirstDeposit = balance.total_deposited === 0;
 
-  // WHY: Bonus only applies once. We apply it on every deposit for now;
-  // a "first deposit" flag check will be added in Phase 9 (anti-fraud).
-  const bonusCents = Math.floor(amountCents * bonusPct);
+  let bonusCents = 0;
+  if (isFirstDeposit) {
+    const signupConfig = await getConfig("signup");
+    const bonusPct = signupConfig?.first_deposit_bonus_pct ?? 0;
+    bonusCents = Math.floor(amountCents * bonusPct);
+  }
   const totalCents = amountCents + bonusCents;
+
+  const paymentIntent = session.payment_intent;
+  if (!paymentIntent || typeof paymentIntent !== "string") {
+    throw new ValidationError("Missing payment_intent in Stripe session");
+  }
 
   const balanceAfter = await creditBalance(
     userId,
     totalCents,
-    session.payment_intent as string,
+    paymentIntent,
     "deposit",
   );
 
