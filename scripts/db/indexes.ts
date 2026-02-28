@@ -13,7 +13,11 @@ export const COLLECTION_INDEXES: Record<string, IndexDefinition[]> = {
   user: [
     {
       key: { email: 1 },
-      options: { unique: true, sparse: true, name: "user_email_unique" },
+      options: {
+        unique: true,
+        partialFilterExpression: { email: { $type: "string" } },
+        name: "user_email_unique",
+      },
     },
     {
       key: { auth_provider: 1, auth_id: 1 },
@@ -72,7 +76,15 @@ export const COLLECTION_INDEXES: Record<string, IndexDefinition[]> = {
     },
     {
       key: { email: 1 },
-      options: { unique: true, sparse: true, name: "worker_email_unique" },
+      // WHY partialFilterExpression instead of sparse: MongoDB sparse indexes
+      // still include documents with email: null (only excludes missing fields).
+      // partialFilterExpression with $type: "string" excludes null values entirely,
+      // allowing multiple workers to have email: null.
+      options: {
+        unique: true,
+        partialFilterExpression: { email: { $type: "string" } },
+        name: "worker_email_unique",
+      },
     },
   ],
 

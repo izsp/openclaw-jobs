@@ -116,9 +116,32 @@ export async function GET() {
     const { getDb } = await import("@/lib/db");
     const db = await getDb();
     const testId = `debug_test_${Date.now()}`;
-    await db.collection("_debug_test").insertOne({ _id: testId, ts: new Date() });
-    await db.collection("_debug_test").deleteOne({ _id: testId });
+    // WHY: Using untyped collection to avoid ObjectId type constraint
+    const col = db.collection("_debug_test");
+    await col.insertOne({ _id: testId as never, ts: new Date() });
+    await col.deleteOne({ _id: testId as never });
     return "ok: insert+delete";
+  });
+
+  // Fix worker_email_unique index: drop sparse, recreate with partialFilter
+  tests.fix_worker_index = await testModule("fix_worker_index", async () => {
+    const { getDb } = await import("@/lib/db");
+    const db = await getDb();
+    const col = db.collection("worker");
+    // Drop the old sparse index if it exists
+    try { await col.dropIndex("worker_email_unique"); } catch { /* may not exist */ }
+    // Delete any leftover debug workers that block the fix
+    await col.deleteMany({ worker_type: "debug_test" } as never);
+    // Recreate with partialFilterExpression (allows multiple null emails)
+    await col.createIndex(
+      { email: 1 },
+      {
+        unique: true,
+        partialFilterExpression: { email: { $type: "string" } },
+        name: "worker_email_unique",
+      },
+    );
+    return "ok: index recreated with partialFilter";
   });
 
   // Test actual registerWorker flow (the failing endpoint)
@@ -128,7 +151,7 @@ export async function GET() {
     // Clean up test worker
     const { getDb } = await import("@/lib/db");
     const db = await getDb();
-    await db.collection("worker").deleteOne({ _id: result.workerId });
+    await db.collection("worker").deleteOne({ _id: result.workerId as never });
     return `ok: id=${result.workerId}`;
   });
 
