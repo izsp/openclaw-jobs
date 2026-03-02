@@ -1,6 +1,4 @@
-"use client";
-
-import { signIn } from "next-auth/react";
+import Link from "next/link";
 
 export function SignInPrompt() {
   return (
@@ -13,20 +11,12 @@ export function SignInPrompt() {
         Create an account to submit tasks to our Lobster network.
         Complex research, code review, data analysis and more.
       </p>
-      <div className="flex gap-3">
-        <button
-          onClick={() => signIn("google")}
-          className="rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-500"
-        >
-          Google
-        </button>
-        <button
-          onClick={() => signIn("github")}
-          className="rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-500"
-        >
-          GitHub
-        </button>
-      </div>
+      <Link
+        href="/login"
+        className="rounded-lg bg-orange-500 px-6 py-2.5 text-sm font-medium text-zinc-950 transition-colors hover:bg-orange-400"
+      >
+        Sign in
+      </Link>
     </div>
   );
 }

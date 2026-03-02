@@ -1,11 +1,14 @@
 /**
  * Auth.js v5 configuration.
- * Uses AWS Cognito as the single OIDC provider (email+password + Google federated).
- * Exports handlers for API route + auth() for server-side session access.
+ * Supports two sign-in paths:
+ *   1. Cognito OIDC (Hosted UI — Google federation)
+ *   2. Credentials (email + password → Cognito InitiateAuth API)
  */
 import NextAuth from "next-auth";
 import Cognito from "next-auth/providers/cognito";
+import Credentials from "next-auth/providers/credentials";
 import { findOrCreateUser } from "@/lib/services/user-service";
+import { authenticateUser } from "@/lib/services/cognito-service";
 
 const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -13,6 +16,21 @@ const { handlers, auth, signIn, signOut } = NextAuth({
       clientId: process.env.COGNITO_CLIENT_ID,
       clientSecret: process.env.COGNITO_CLIENT_SECRET,
       issuer: process.env.COGNITO_ISSUER,
+    }),
+    Credentials({
+      credentials: {
+        email: { type: "email" },
+        password: { type: "password" },
+      },
+      async authorize(credentials) {
+        const email = credentials.email as string;
+        const password = credentials.password as string;
+        if (!email || !password) return null;
+
+        const result = await authenticateUser(email, password);
+        const user = await findOrCreateUser("cognito", result.sub, result.email);
+        return { id: user._id, email: user.email, role: user.role };
+      },
     }),
   ],
   session: { strategy: "jwt" },
@@ -30,18 +48,24 @@ const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     /**
      * On sign-in, find or create user in our database.
-     * Cognito sub is stable across all login methods (email/password, Google).
+     * Handles both OIDC (Cognito provider) and Credentials paths.
      */
-    async jwt({ token, account, profile }) {
-      if (account && profile) {
-        // WHY: Cognito sub is the same regardless of how the user signed in
-        // (email+password or Google federation), so we use it as auth_id.
+    async jwt({ token, account, profile, user }) {
+      // Path 1: Cognito OIDC (Google federation via Hosted UI)
+      if (account?.provider === "cognito" && profile) {
         const cognitoSub = profile.sub as string;
         const email = (profile.email as string) ?? null;
-        const user = await findOrCreateUser("cognito", cognitoSub, email);
-        token.userId = user._id;
+        const dbUser = await findOrCreateUser("cognito", cognitoSub, email);
+        token.userId = dbUser._id;
+        token.role = dbUser.role;
+      }
+
+      // Path 2: Credentials (email + password)
+      if (account?.provider === "credentials" && user) {
+        token.userId = user.id;
         token.role = user.role;
       }
+
       return token;
     },
 
