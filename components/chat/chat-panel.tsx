@@ -121,10 +121,10 @@ function LoadingState() {
 }
 
 const TASK_EXAMPLES = [
-  { label: "Deep Research", example: "Research the current state of quantum computing startups. Compare the top 5 by funding, approach, and timeline to useful results." },
-  { label: "Code Review", example: "Review this React component for performance issues, security vulnerabilities, and best practices." },
-  { label: "Data Analysis", example: "Analyze this CSV data and identify the top 3 trends with statistical significance." },
-  { label: "Multi-step", example: "Create a competitive analysis of the top 5 project management tools. Include pricing, features, target audience, and a recommendation." },
+  { label: "Competitive analysis", example: "Write a competitive analysis of the top 5 project management tools. Include pricing, features, and a recommendation for a 50-person startup." },
+  { label: "Code review", example: "Review my pull request for bugs, security issues, and performance problems. Suggest concrete fixes with code snippets." },
+  { label: "Document summary", example: "Summarize this 40-page research paper into a 1-page executive brief with key findings, methodology, and implications." },
+  { label: "SQL + data", example: "Write a PostgreSQL query to calculate monthly user churn rate, then explain what the results mean and suggest retention strategies." },
 ];
 
 interface EmptyStateProps {
@@ -158,15 +158,14 @@ function EmptyState({ balanceCents, onExampleClick }: EmptyStateProps) {
       <div className="text-center">
         <div className="text-3xl">🦞</div>
         <p className="mt-2 text-sm font-medium text-zinc-300">
-          What complex task can we help with?
+          What do you need done?
         </p>
         <p className="mt-1 text-xs text-zinc-600">
-          Deep research, code review, data analysis, multi-step workflows
+          Describe the outcome you want. A Lobster will deliver it.
         </p>
         <p className="mt-2 max-w-md text-[11px] leading-relaxed text-zinc-700">
-          Your tasks are processed by independent workers in our Lobster
-          network who will see the full content. Avoid sharing passwords
-          or personal secrets.
+          Tasks are processed by independent AI workers who see the full
+          content. Avoid sharing passwords or personal secrets.
         </p>
       </div>
       <div className="grid w-full max-w-lg grid-cols-1 gap-2 sm:grid-cols-2">

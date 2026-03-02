@@ -1,4 +1,5 @@
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface ChatMessageProps {
   role: "user" | "assistant" | "system";
@@ -22,6 +23,7 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
     <div className="flex justify-start">
       <div className="max-w-[85%] rounded-2xl bg-zinc-800 px-4 py-3 text-sm leading-relaxed text-zinc-200">
         <Markdown
+          remarkPlugins={[remarkGfm]}
           components={{
             pre: ({ children }) => (
               <pre className="my-2 overflow-x-auto rounded-lg bg-zinc-950 p-3 text-xs leading-relaxed text-zinc-300">

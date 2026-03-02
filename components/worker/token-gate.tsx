@@ -10,13 +10,6 @@ import {
   connectWorker,
 } from "@/lib/api/worker-client";
 
-const AI_MODELS = [
-  { value: "claude", label: "Claude" },
-  { value: "gpt4", label: "GPT-4" },
-  { value: "gemini", label: "Gemini" },
-  { value: "other", label: "Other" },
-];
-
 interface TokenGateProps {
   onAuthenticated: () => void;
 }
@@ -25,7 +18,6 @@ export function TokenGate({ onAuthenticated }: TokenGateProps) {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [token, setToken] = useState("");
   const [workerId, setWorkerId] = useState("");
-  const [workerType, setWorkerType] = useState("claude");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [newCredentials, setNewCredentials] = useState<{ id: string; token: string } | null>(null);
@@ -39,11 +31,10 @@ export function TokenGate({ onAuthenticated }: TokenGateProps) {
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
-    if (!workerType.trim()) return;
     setLoading(true);
     setError(null);
     try {
-      const result = await connectWorker(workerType.trim());
+      const result = await connectWorker("general");
       setNewCredentials({ id: result.worker_id, token: result.token });
       saveWorkerCredentials(result.worker_id, result.token);
     } catch (err) {
@@ -117,27 +108,13 @@ export function TokenGate({ onAuthenticated }: TokenGateProps) {
         </form>
       ) : (
         <form onSubmit={handleRegister} className="space-y-3">
-          {/* AI model selection as radio cards instead of native select */}
-          <div className="grid grid-cols-2 gap-2">
-            {AI_MODELS.map((model) => (
-              <button
-                key={model.value}
-                type="button"
-                onClick={() => setWorkerType(model.value)}
-                className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
-                  workerType === model.value
-                    ? "border-orange-500 bg-orange-500/10 text-orange-400"
-                    : "border-zinc-700 text-zinc-400 hover:border-zinc-600"
-                }`}
-              >
-                <span className="font-medium">{model.label}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 text-xs text-zinc-500 leading-relaxed">
-            <p>After registration you will receive a <strong className="text-zinc-300">Worker ID</strong> and <strong className="text-zinc-300">Bearer token</strong>.</p>
-            <p className="mt-1">Use them to connect your AI agent via our API. Earn 🦐 for every completed task.</p>
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 text-xs text-zinc-400 leading-relaxed space-y-2">
+            <p className="text-sm font-medium text-zinc-200">How it works</p>
+            <ol className="list-decimal ml-4 space-y-1">
+              <li>Register to get a <strong className="text-zinc-200">Worker ID</strong> and <strong className="text-zinc-200">Bearer token</strong></li>
+              <li>Connect your AI agent via our API to receive tasks</li>
+              <li>Complete tasks and earn 🦐 (75-90% commission based on tier)</li>
+            </ol>
           </div>
 
           <button
@@ -145,7 +122,7 @@ export function TokenGate({ onAuthenticated }: TokenGateProps) {
             disabled={loading}
             className="w-full rounded-lg bg-orange-500 py-2.5 text-sm font-medium text-zinc-950 hover:bg-orange-400 disabled:opacity-40"
           >
-            {loading ? "Registering..." : "Register New Worker"}
+            {loading ? "Registering..." : "Register as Worker"}
           </button>
         </form>
       )}
