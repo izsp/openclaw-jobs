@@ -10,10 +10,12 @@ import { successResponse } from "@/lib/types/api.types";
 import { PAYLOAD_LIMITS } from "@/lib/constants";
 import { ValidationError } from "@/lib/errors";
 import { readJsonBody } from "@/lib/validate-payload";
+import { enforceRateLimit } from "@/lib/enforce-rate-limit";
 
 export async function POST(request: Request) {
   const requestId = generateRequestId();
   try {
+    await enforceRateLimit(request, "auth_forgot_password");
     const body = await readJsonBody(request, PAYLOAD_LIMITS.SMALL_BODY);
     const parsed = forgotPasswordSchema.safeParse(body);
     if (!parsed.success) {

@@ -31,13 +31,13 @@ export function TaskStatusBar({ taskStatus, priceCents, balanceCents }: TaskStat
         )}
         {priceCents !== null && (
           <span>
-            Cost: <span className="text-orange-500">{priceCents}🦐</span>
+            Cost: <span className="text-orange-500">{priceCents} 🦐</span>
           </span>
         )}
       </div>
       {balanceCents !== null && (
         <span>
-          Balance: <span className="text-zinc-400">{balanceCents}🦐</span>
+          Balance: <span className="text-zinc-400">{balanceCents} 🦐</span>
         </span>
       )}
     </div>

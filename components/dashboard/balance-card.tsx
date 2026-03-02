@@ -11,11 +11,11 @@ export function BalanceCard({ balance, onDeposit }: BalanceCardProps) {
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
       <h2 className="text-sm font-medium text-zinc-500">Available Balance</h2>
-      <div className="mt-2 flex items-baseline gap-2">
+      <div className="mt-2 flex items-baseline gap-1.5">
         <span className="text-3xl font-bold text-orange-500">
           {balance.amount_cents}
         </span>
-        <span className="text-sm text-zinc-500">🦐</span>
+        <span className="text-lg">🦐</span>
       </div>
       <p className="mt-1 text-xs text-zinc-600">
         = ${(balance.amount_cents / 100).toFixed(2)} USD
@@ -23,7 +23,7 @@ export function BalanceCard({ balance, onDeposit }: BalanceCardProps) {
 
       {balance.frozen_cents > 0 && (
         <div className="mt-3 text-xs text-zinc-500">
-          Frozen: <span className="text-yellow-500">{balance.frozen_cents}🦐</span>
+          Frozen: <span className="text-yellow-500">{balance.frozen_cents} 🦐</span>
         </div>
       )}
 
@@ -47,7 +47,7 @@ function StatItem({ label, value }: { label: string; value: number }) {
   return (
     <div>
       <div className="text-zinc-500">{label}</div>
-      <div className="mt-0.5 font-medium text-zinc-300">{value}🦐</div>
+      <div className="mt-0.5 font-medium text-zinc-300">{value} 🦐</div>
     </div>
   );
 }

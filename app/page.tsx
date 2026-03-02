@@ -99,7 +99,7 @@ function PriceCard({ label, price }: { label: string; price: string }) {
   return (
     <div className="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2">
       <span className="text-xs text-zinc-400">{label}</span>
-      <span className="text-sm font-semibold text-orange-500">{price}🦐</span>
+      <span className="text-sm font-semibold text-orange-500">{price} 🦐</span>
     </div>
   );
 }

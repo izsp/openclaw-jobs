@@ -98,12 +98,12 @@ function ChatPageInner() {
               className="rounded-full border border-zinc-700 px-3 py-1 text-sm text-orange-500 transition-colors hover:border-orange-500"
               title={`$${(balance.amount_cents / 100).toFixed(2)} USD`}
             >
-              {balance.amount_cents}🦐
+              {balance.amount_cents} 🦐
             </Link>
           )}
           <Link
             href="/dashboard"
-            className="text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+            className="text-sm text-zinc-400 transition-colors hover:text-zinc-200"
           >
             Dashboard
           </Link>

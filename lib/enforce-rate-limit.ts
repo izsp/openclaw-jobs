@@ -14,6 +14,11 @@ const ONE_MINUTE_MS = 60_000;
 /** Default rate limits when config is unavailable. */
 const DEFAULTS: Record<string, RateLimitRule> = {
   registration: { per_ip_per_min: 3 },
+  auth_register: { per_ip_per_min: 3 },
+  auth_verify: { per_ip_per_min: 5 },
+  auth_forgot_password: { per_ip_per_min: 3 },
+  auth_reset_password: { per_ip_per_min: 5 },
+  auth_resend_code: { per_ip_per_min: 2 },
   work_next: { per_ip_per_min: 30 },
   task_submit: { per_min: 20 },
   work_submit: { per_min: 30 },
