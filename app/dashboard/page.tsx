@@ -69,6 +69,10 @@ export default function DashboardPage() {
         </div>
       </main>
 
+      <footer className="px-6 py-3 text-right text-[10px] text-zinc-700">
+        {process.env.NEXT_PUBLIC_BUILD_VERSION ?? "dev"}
+      </footer>
+
       <DepositModal
         open={depositOpen}
         onClose={() => setDepositOpen(false)}

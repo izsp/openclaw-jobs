@@ -21,6 +21,9 @@ ENV MONGODB_URI=mongodb://build:27017/build
 ENV NEXTAUTH_SECRET=build-secret-placeholder-32chars00
 ENV NEXTAUTH_URL=http://localhost:3000
 
+ARG BUILD_VERSION=dev
+ENV NEXT_PUBLIC_BUILD_VERSION=${BUILD_VERSION}
+
 RUN npm run build
 
 # ─── Stage 3: Production image ────────────────────────────────────────────────
