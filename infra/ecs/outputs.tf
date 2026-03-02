@@ -25,10 +25,15 @@ output "cloudwatch_log_group" {
 
 output "nextauth_url" {
   description = "NEXTAUTH_URL — use for Cognito callback URL"
-  value       = var.domain_name != "" ? "https://${var.domain_name}" : "http://${aws_lb.app.dns_name}"
+  value       = var.domain_name != "" ? "https://staging.${var.domain_name}" : "http://${aws_lb.app.dns_name}"
 }
 
 output "github_actions_role_arn" {
   description = "Set as AWS_DEPLOY_ROLE_ARN secret in GitHub repository"
   value       = aws_iam_role.github_actions.arn
+}
+
+output "route53_nameservers" {
+  description = "Set these as nameservers at GoDaddy registrar"
+  value       = var.domain_name != "" ? aws_route53_zone.app[0].name_servers : []
 }

@@ -85,7 +85,7 @@ resource "aws_lambda_function" "cron_caller" {
 
   environment {
     variables = {
-      APP_URL         = var.domain_name != "" ? "https://${var.domain_name}" : "http://${aws_lb.app.dns_name}"
+      APP_URL         = var.domain_name != "" ? "https://staging.${var.domain_name}" : "http://${aws_lb.app.dns_name}"
       CRON_SECRET_SSM = aws_ssm_parameter.cron_secret.name
     }
   }

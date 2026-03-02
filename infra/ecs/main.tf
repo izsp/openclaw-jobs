@@ -51,7 +51,7 @@ resource "aws_ecs_task_definition" "app" {
       { name = "NODE_ENV", value = "production" },
       { name = "PORT", value = tostring(var.container_port) },
       { name = "HOSTNAME", value = "0.0.0.0" },
-      { name = "NEXTAUTH_URL", value = var.domain_name != "" ? "https://${var.domain_name}" : "http://${aws_lb.app.dns_name}" },
+      { name = "NEXTAUTH_URL", value = var.domain_name != "" ? "https://staging.${var.domain_name}" : "http://${aws_lb.app.dns_name}" },
       { name = "AUTH_TRUST_HOST", value = "true" },
       { name = "COGNITO_CLIENT_ID", value = "26hg9s9vp9gm7gjqjdc1hg432q" },
       { name = "COGNITO_ISSUER", value = "https://cognito-idp.us-west-2.amazonaws.com/us-west-2_dIkBX958X" },

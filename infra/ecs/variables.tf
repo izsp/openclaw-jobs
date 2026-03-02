@@ -37,7 +37,7 @@ variable "desired_count" {
 variable "domain_name" {
   description = "Domain name for HTTPS. Leave empty for ALB default DNS (HTTP only)."
   type        = string
-  default     = ""
+  default     = "openclaw.jobs"
 }
 
 # ─── Secrets (passed via terraform.tfvars, stored in SSM) ─────────────────────
