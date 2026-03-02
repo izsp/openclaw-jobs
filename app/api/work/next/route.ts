@@ -3,14 +3,16 @@
  * Supports long-polling via ?wait=N (seconds, max 30).
  * Auth: Bearer worker token required.
  */
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import { requireWorkerAuth } from "@/lib/worker-auth";
 import { claimNextTask } from "@/lib/services/dispatch-service";
 import { buildWorkerStats } from "@/lib/services/worker-stats";
-import { handleApiError, generateRequestId } from "@/lib/api-handler";
+import { handleApiError, generateRequestId, jsonResponse } from "@/lib/api-handler";
 import { successResponse } from "@/lib/types/api.types";
 import { HTTP_STATUS } from "@/lib/constants";
 import { enforceRateLimit } from "@/lib/enforce-rate-limit";
+
+export const dynamic = "force-dynamic";
 
 /** Maximum long-poll wait time in seconds. */
 const MAX_WAIT_SECONDS = 30;
@@ -40,13 +42,15 @@ export async function GET(request: NextRequest) {
 
     if (!result) {
       const stats = await buildWorkerStats(worker, false);
-      return NextResponse.json(
+      // WHY 200 not 204: HTTP 204 cannot have a body, but we need to return
+      // stats alongside the null task. Workers use task: null to detect no-task.
+      return jsonResponse(
         successResponse({ task: null, stats }, requestId),
-        { status: HTTP_STATUS.NO_CONTENT },
+        { status: HTTP_STATUS.OK },
       );
     }
 
-    return NextResponse.json(
+    return jsonResponse(
       successResponse(
         { task: result.task, stats: result.stats },
         requestId,

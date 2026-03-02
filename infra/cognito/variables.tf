@@ -18,6 +18,7 @@ variable "callback_urls" {
   type        = list(string)
   default = [
     "http://localhost:3000/api/auth/callback/cognito",
+    "https://openclaw-jobs.zzsspp99.workers.dev/api/auth/callback/cognito",
   ]
 }
 
@@ -26,5 +27,6 @@ variable "logout_urls" {
   type        = list(string)
   default = [
     "http://localhost:3000",
+    "https://openclaw-jobs.zzsspp99.workers.dev",
   ]
 }

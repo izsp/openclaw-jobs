@@ -42,6 +42,20 @@ async function getInstance(): Promise<NextAuthInstance> {
     pages: {
       signIn: "/login",
     },
+    // WHY: Auth.js swallows errors as generic "Configuration" or "Server error".
+    // Custom logger exposes the actual error for debugging on Workers.
+    logger: {
+      error(code, ...message) {
+        console.error("[auth-error]", code, JSON.stringify(message));
+      },
+      warn(code) {
+        console.warn("[auth-warn]", code);
+      },
+      debug(code, ...message) {
+        console.debug("[auth-debug]", code, JSON.stringify(message));
+      },
+    },
+    debug: true,
     callbacks: {
       /**
        * On sign-in, find or create user in our database.
@@ -86,14 +100,39 @@ async function getInstance(): Promise<NextAuthInstance> {
 }
 
 /** Auth.js route handlers for /api/auth/[...nextauth] */
+// WHY pass-through args: Next.js App Router passes (req, { params }) to catch-all
+// route handlers. Auth.js v5 needs the params to determine the action (signin,
+// callback, session, etc.). Dropping the context caused `error=Configuration`.
 export const handlers = {
-  GET: async (req: Request) => {
-    const instance = await getInstance();
-    return instance.handlers.GET(req as never);
+  GET: async (...args: unknown[]) => {
+    try {
+      const instance = await getInstance();
+      const response = await (instance.handlers.GET as (...a: unknown[]) => Promise<Response>)(
+        ...args,
+      );
+      // Log redirects to error page for debugging
+      if (response.status === 302) {
+        const location = response.headers.get("location") ?? "";
+        if (location.includes("error=")) {
+          console.error("[auth-handler] GET redirect to error:", location);
+        }
+      }
+      return response;
+    } catch (err) {
+      console.error("[auth-handler] GET threw:", err);
+      throw err;
+    }
   },
-  POST: async (req: Request) => {
-    const instance = await getInstance();
-    return instance.handlers.POST(req as never);
+  POST: async (...args: unknown[]) => {
+    try {
+      const instance = await getInstance();
+      return await (instance.handlers.POST as (...a: unknown[]) => Promise<Response>)(
+        ...args,
+      );
+    } catch (err) {
+      console.error("[auth-handler] POST threw:", err);
+      throw err;
+    }
   },
 };
 

@@ -1,20 +1,21 @@
 /**
  * GET /api/balance — Check current user balance.
  */
-import { NextResponse } from "next/server";
 import { getBalance } from "@/lib/services/balance-service";
 import { successResponse } from "@/lib/types/api.types";
-import { requireAuth, handleApiError, generateRequestId } from "@/lib/api-handler";
+import { requireAuth, handleApiError, generateRequestId, jsonResponse } from "@/lib/api-handler";
 import { enforceRateLimit } from "@/lib/enforce-rate-limit";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const requestId = generateRequestId();
   try {
     await enforceRateLimit(request, "balance_check");
-    const { userId } = await requireAuth();
+    const { userId } = await requireAuth(request);
     const balance = await getBalance(userId);
 
-    return NextResponse.json(
+    return jsonResponse(
       successResponse(
         {
           amount_cents: balance.amount_cents,

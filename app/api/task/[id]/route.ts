@@ -1,13 +1,14 @@
 /**
  * GET /api/task/[id] — Check task status and result.
  */
-import { NextResponse } from "next/server";
 import { taskIdParamSchema } from "@/lib/validators/task.validator";
 import { getTaskForBuyer } from "@/lib/services/task-service";
 import { successResponse, errorResponse } from "@/lib/types/api.types";
-import { requireAuth, handleApiError, generateRequestId } from "@/lib/api-handler";
+import { requireAuth, handleApiError, generateRequestId, jsonResponse } from "@/lib/api-handler";
 import { HTTP_STATUS } from "@/lib/constants";
 import { enforceRateLimit } from "@/lib/enforce-rate-limit";
+
+export const dynamic = "force-dynamic";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -15,12 +16,12 @@ export async function GET(request: Request, context: RouteContext) {
   const requestId = generateRequestId();
   try {
     await enforceRateLimit(request, "task_check");
-    const { userId } = await requireAuth();
+    const { userId } = await requireAuth(request);
 
     const { id } = await context.params;
     const parsed = taskIdParamSchema.safeParse(id);
     if (!parsed.success) {
-      return NextResponse.json(
+      return jsonResponse(
         errorResponse("Invalid task ID", "VALIDATION_ERROR", requestId),
         { status: HTTP_STATUS.BAD_REQUEST },
       );
@@ -28,7 +29,7 @@ export async function GET(request: Request, context: RouteContext) {
 
     const task = await getTaskForBuyer(parsed.data, userId);
 
-    return NextResponse.json(
+    return jsonResponse(
       successResponse(
         {
           task_id: task._id,

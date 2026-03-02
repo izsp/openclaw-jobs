@@ -37,17 +37,27 @@ export async function initializeBalance(
 
 /**
  * Returns the current balance for a user.
- *
- * @throws NotFoundError if no balance document exists
+ * Auto-initializes a zero balance if none exists (graceful handling for
+ * workers/users created before balance initialization was added).
  */
 export async function getBalance(userId: string): Promise<BalanceDocument> {
   const db = await getDb();
-  const balance = await db
+  let balance = await db
     .collection<BalanceDocument>(COLLECTIONS.BALANCE)
     .findOne({ _id: userId });
 
   if (!balance) {
-    throw new NotFoundError("Balance");
+    // WHY: Graceful fallback — create a zero balance rather than error.
+    // This handles workers/users created before initializeBalance was wired up,
+    // and also any race conditions during registration.
+    await initializeBalance(userId, 0);
+    balance = await db
+      .collection<BalanceDocument>(COLLECTIONS.BALANCE)
+      .findOne({ _id: userId });
+
+    if (!balance) {
+      throw new NotFoundError("Balance");
+    }
   }
   return balance;
 }

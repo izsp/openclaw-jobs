@@ -12,6 +12,7 @@ import type {
 import { getDb } from "@/lib/db";
 import { AuthError, NotFoundError, ValidationError } from "@/lib/errors";
 import { generateWorkerToken, hashToken } from "@/lib/hash-token";
+import { initializeBalance } from "./balance-service";
 
 /** Default profile for newly registered workers. */
 const DEFAULT_PROFILE: WorkerProfile = {
@@ -75,6 +76,10 @@ export async function registerWorker(
 
   const db = await getDb();
   await db.collection<WorkerDocument>(COLLECTIONS.WORKER).insertOne(worker);
+
+  // WHY: Workers need a balance record to display earnings on the dashboard.
+  // initializeBalance uses upsert, so it's safe even if called multiple times.
+  await initializeBalance(workerId, 0);
 
   return { workerId, token, worker };
 }

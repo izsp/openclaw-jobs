@@ -155,6 +155,24 @@ export async function GET() {
     return `ok: id=${result.workerId}`;
   });
 
+  // Test OIDC discovery from within the Worker (diagnose auth Configuration error)
+  tests.oidc_discovery = await testModule("oidc_discovery", async () => {
+    const issuer = process.env.COGNITO_ISSUER;
+    if (!issuer) return "COGNITO_ISSUER not set";
+    const url = `${issuer}/.well-known/openid-configuration`;
+    const resp = await fetch(url);
+    if (!resp.ok) return `ERROR: HTTP ${resp.status}`;
+    const data = await resp.json() as Record<string, unknown>;
+    return `ok: issuer=${data.issuer} authz=${data.authorization_endpoint}`;
+  });
+
+  // Test Auth.js getInstance() initialization
+  tests.auth_init = await testModule("auth_init", async () => {
+    const { auth } = await import("@/lib/auth");
+    const session = await auth();
+    return `ok: session=${JSON.stringify(session)}`;
+  });
+
   return NextResponse.json({
     env: status,
     tests,

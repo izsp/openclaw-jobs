@@ -2,25 +2,26 @@
  * POST /api/task — Submit a new task for the worker network.
  * Validates input, estimates price, deducts balance, creates task.
  */
-import { NextResponse } from "next/server";
 import { createTaskSchema } from "@/lib/validators/task.validator";
 import { createTask } from "@/lib/services/task-service";
 import { successResponse, errorResponse } from "@/lib/types/api.types";
-import { requireAuth, handleApiError, generateRequestId } from "@/lib/api-handler";
+import { requireAuth, handleApiError, generateRequestId, jsonResponse } from "@/lib/api-handler";
 import { HTTP_STATUS, PAYLOAD_LIMITS } from "@/lib/constants";
 import { enforceRateLimit } from "@/lib/enforce-rate-limit";
 import { readJsonBody } from "@/lib/validate-payload";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const requestId = generateRequestId();
   try {
     await enforceRateLimit(request, "task_submit");
-    const { userId } = await requireAuth();
+    const { userId } = await requireAuth(request);
 
     const body: unknown = await readJsonBody(request, PAYLOAD_LIMITS.TASK_INPUT);
     const parsed = createTaskSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
+      return jsonResponse(
         errorResponse(parsed.error.issues[0].message, "VALIDATION_ERROR", requestId),
         { status: HTTP_STATUS.BAD_REQUEST },
       );
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
       inputPreview: parsed.data.input_preview,
     });
 
-    return NextResponse.json(
+    return jsonResponse(
       successResponse(
         {
           task_id: result.taskId,
