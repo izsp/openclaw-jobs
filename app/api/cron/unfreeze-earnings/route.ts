@@ -1,5 +1,5 @@
 /**
- * GET /api/cron/unfreeze-earnings — Cloudflare Cron Trigger handler.
+ * GET /api/cron/unfreeze-earnings — EventBridge scheduled rule handler.
  * Moves matured frozen earnings to available balance (runs hourly).
  * Protected by CRON_SECRET header.
  */

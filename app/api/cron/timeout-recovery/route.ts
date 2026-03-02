@@ -1,5 +1,5 @@
 /**
- * GET /api/cron/timeout-recovery — Cloudflare Cron Trigger handler.
+ * GET /api/cron/timeout-recovery — EventBridge scheduled rule handler.
  * Resets expired assigned tasks back to pending.
  * Protected by CRON_SECRET header to prevent external calls.
  */

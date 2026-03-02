@@ -1,5 +1,5 @@
 /**
- * GET /api/cron/benchmark-inject — Cloudflare Cron Trigger handler.
+ * GET /api/cron/benchmark-inject — EventBridge scheduled rule handler.
  * Injects a benchmark task with a known-good answer for QA calibration.
  * Protected by CRON_SECRET header.
  */

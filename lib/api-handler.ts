@@ -1,12 +1,9 @@
 /**
  * Shared API route handler utilities.
  * Provides auth helpers and error formatting for route handlers.
- *
- * WHY no top-level auth import: On Cloudflare Workers, importing next-auth
- * at module load time causes the Worker to hang. We use a dynamic import
- * inside requireAuth() so only routes that need authentication pay the cost.
  */
 import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 import { AppError, AuthError } from "@/lib/errors";
 import { errorResponse } from "@/lib/types/api.types";
 import { generateRequestId } from "@/lib/request-id";
@@ -15,15 +12,7 @@ import { logError } from "@/lib/logger";
 /**
  * Extracts the authenticated user ID from the JWT in the request cookie.
  * Uses getToken() from next-auth/jwt to read the JWT directly from the
- * request headers, bypassing Next.js cookies() API.
- *
- * WHY getToken instead of auth(): On Cloudflare Workers (OpenNext), auth()
- * uses Next.js cookies() which is unreliable in route handler context.
- * getToken() reads cookies directly from the request object, making it
- * work consistently across Node.js and Workers environments.
- *
- * WHY dynamic import: Importing next-auth at module level causes Workers
- * to hang. Lazy-loading ensures only routes that need auth pay the cost.
+ * request headers, which is more explicit than the auth() helper.
  *
  * @param request - The incoming HTTP request (required for cookie reading)
  * @throws AuthError if not authenticated
@@ -31,12 +20,11 @@ import { logError } from "@/lib/logger";
 export async function requireAuth(
   request: Request,
 ): Promise<{ userId: string }> {
-  const { getToken } = await import("next-auth/jwt");
   const secret =
     process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "";
 
-  // WHY: On HTTPS (Cloudflare Workers), Auth.js sets cookies with __Secure-
-  // prefix. getToken must know this to look for the correct cookie name.
+  // WHY: On HTTPS, Auth.js sets cookies with __Secure- prefix.
+  // getToken must know this to look for the correct cookie name.
   // Locally (http://localhost), no prefix is used.
   const secureCookie = request.url.startsWith("https://");
 
@@ -74,13 +62,8 @@ export function handleApiError(
     request_id: requestId,
     error_code: "INTERNAL_ERROR",
   });
-  // TODO: Remove debug_message before production — exposes internal errors
   return NextResponse.json(
-    {
-      ...errorResponse("Internal server error", "INTERNAL_ERROR", requestId),
-      debug_message: errMsg,
-      debug_stack: error instanceof Error ? error.stack?.split("\n").slice(0, 5) : undefined,
-    },
+    errorResponse("Internal server error", "INTERNAL_ERROR", requestId),
     { status: 500, headers: NO_CACHE_HEADERS },
   );
 }

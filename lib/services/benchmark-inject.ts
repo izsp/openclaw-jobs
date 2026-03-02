@@ -1,7 +1,7 @@
 /**
  * Benchmark task injection — periodically injects tasks with known-good answers.
  * Used for: new worker calibration, quality baseline, detecting degradation.
- * Called by a Cloudflare Cron Trigger (e.g. every 5 minutes).
+ * Called by a EventBridge scheduled rule (e.g. every 5 minutes).
  */
 import { nanoid } from "nanoid";
 import { COLLECTIONS, ID_PREFIX } from "@/lib/constants";

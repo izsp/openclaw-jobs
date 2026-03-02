@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.env*
+.wrangler
+.open-next
+.claude
+infra
+tests
+docs
+scripts
+coverage
+.terraform
+*.tfstate*
+*.tfvars
+.DS_Store

@@ -12,7 +12,6 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@opennextjs/cloudflare": "1.17.1",
     "mongodb": "7.1.0",
     "nanoid": "5.1.6",
     "next": "16.1.6",

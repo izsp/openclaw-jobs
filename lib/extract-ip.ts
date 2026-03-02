@@ -1,13 +1,12 @@
 /**
  * Extracts the client IP address from a request.
- * Checks Cloudflare and standard proxy headers.
+ * Checks standard proxy headers (ALB, nginx, etc.).
  */
 
 /** Header priority for IP extraction (most reliable first). */
 const IP_HEADERS = [
-  "cf-connecting-ip",
-  "x-real-ip",
   "x-forwarded-for",
+  "x-real-ip",
 ] as const;
 
 /**

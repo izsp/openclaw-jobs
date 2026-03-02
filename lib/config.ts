@@ -48,7 +48,7 @@ export async function getConfig<K extends ConfigKey>(
     cache.set(key, { value: typed, expiresAt: Date.now() + CACHE_TTL_MS });
     return typed;
   } catch (err) {
-    // WHY: On serverless (Cloudflare Workers), MongoDB may be temporarily
+    // WHY: During startup or transient outages, MongoDB may be temporarily
     // unreachable. Return null so callers fall back to hardcoded defaults
     // instead of crashing the entire request.
     console.error(`[config] Failed to load "${key}":`, err);

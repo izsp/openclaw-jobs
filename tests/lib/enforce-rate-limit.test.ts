@@ -18,7 +18,7 @@ vi.mock("@/lib/config", () => ({
 
 function makeRequest(ip: string): Request {
   return new Request("http://localhost/test", {
-    headers: { "cf-connecting-ip": ip },
+    headers: { "x-forwarded-for": ip },
   });
 }
 

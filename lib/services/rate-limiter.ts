@@ -2,10 +2,8 @@
  * In-memory sliding window rate limiter.
  * Tracks request counts per key (IP or token) within a configurable window.
  *
- * Limitations: in-memory state is per-instance, so on Cloudflare Workers
- * each isolate has its own counters. For stricter enforcement, upgrade to
- * Cloudflare KV or Durable Objects. This still prevents burst abuse within
- * a single isolate and is effective for single-instance dev/staging.
+ * In-memory state is per-process. For a single ECS task, this is effectively
+ * global. For multi-task scaling, consider Redis or ElastiCache.
  */
 
 /** Result of a rate limit check. */

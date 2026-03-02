@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 
@@ -30,6 +28,6 @@ jobs:
       - name: Build
         run: npx next build
         env:
-          MONGODB_URI: ${{ secrets.MONGODB_URI || 'mongodb://localhost:27017/openclaw-test' }}
-          NEXTAUTH_SECRET: ci-test-secret
+          MONGODB_URI: mongodb://localhost:27017/openclaw-test
+          NEXTAUTH_SECRET: ci-test-secret-placeholder-32chars
           NEXTAUTH_URL: http://localhost:3000

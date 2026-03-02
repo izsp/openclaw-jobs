@@ -1,7 +1,7 @@
 /**
  * Structured JSON logger for API request tracking.
  * Outputs machine-parseable logs for monitoring and debugging.
- * In production, these are captured by Cloudflare's log system.
+ * In production, these are captured by CloudWatch Logs via container stdout.
  */
 
 type LogLevel = "info" | "warn" | "error";

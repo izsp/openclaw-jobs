@@ -1,17 +1,11 @@
 /**
- * MongoDB connection management for Cloudflare Workers.
+ * MongoDB connection management.
  *
- * WHY fresh connections in Workers: Cloudflare Workers' hang detector tracks I/O
- * from the current request. When a MongoClient is cached in globalThis across
- * requests, its TCP sockets become untracked by the runtime's I/O scheduler. On
- * the next request, reusing the stale socket triggers hang detection ("code had
- * hung and would never generate a response").
+ * Uses a cached MongoClient via globalThis to maintain a persistent connection
+ * pool across requests. This is the standard Node.js pattern — the pool handles
+ * connection reuse automatically (~2-20ms per query).
  *
- * Solution: In Workers, create a fresh MongoClient for each getDb() call.
- * Connection cost is ~100-400ms warm (DNS cached). The 5s connect timeout ensures
- * cold-start DNS failures resolve quickly so retries succeed.
- *
- * In development, we cache via globalThis to avoid connection leaks during HMR.
+ * In development, the globalThis cache also prevents connection leaks during HMR.
  */
 import { MongoClient, type Db } from "mongodb";
 
@@ -23,52 +17,34 @@ function getMongoUri(): string {
   return uri;
 }
 
-/** Detect Cloudflare Workers environment. */
-function isWorkersRuntime(): boolean {
-  return (
-    typeof navigator !== "undefined" &&
-    navigator.userAgent === "Cloudflare-Workers"
-  );
-}
-
-/** Connection options tuned for Workers cold starts. */
-const WORKERS_OPTIONS = {
-  maxPoolSize: 1,
-  minPoolSize: 0,
-  // WHY 5s: On Workers cold start, the first DNS SRV lookup may timeout while
-  // Cloudflare's resolver caches it. A 5s timeout lets the first attempt fail
-  // quickly so the retry succeeds with cached DNS. Total worst case: ~6s.
-  connectTimeoutMS: 5_000,
-  socketTimeoutMS: 10_000,
-  serverSelectionTimeoutMS: 5_000,
+/** Connection pool settings. */
+const CONNECTION_OPTIONS = {
+  maxPoolSize: 10,
+  minPoolSize: 1,
+  connectTimeoutMS: 10_000,
+  socketTimeoutMS: 30_000,
+  serverSelectionTimeoutMS: 10_000,
 } as const;
 
-/** Connection options for development (more generous). */
-const DEV_OPTIONS = {
-  maxPoolSize: 5,
-  minPoolSize: 0,
-  connectTimeoutMS: 15_000,
-  socketTimeoutMS: 15_000,
-  serverSelectionTimeoutMS: 15_000,
-} as const;
-
-// ─── Development mode: cached client via globalThis ───
+// ─── Cached client via globalThis ───
 
 const globalForMongo = globalThis as unknown as {
   _mongoClient?: MongoClient;
   _mongoClientPromise?: Promise<MongoClient>;
 };
 
-async function getDevClient(): Promise<MongoClient> {
+async function getCachedClient(): Promise<MongoClient> {
   if (globalForMongo._mongoClient) {
     return globalForMongo._mongoClient;
   }
   if (!globalForMongo._mongoClientPromise) {
-    const client = new MongoClient(getMongoUri(), DEV_OPTIONS);
+    const client = new MongoClient(getMongoUri(), CONNECTION_OPTIONS);
     globalForMongo._mongoClientPromise = client.connect().then(() => {
       globalForMongo._mongoClient = client;
       return client;
     });
+    // WHY: If connect() fails (e.g. DNS timeout), clear the cached promise
+    // so the next call retries instead of returning the rejected promise forever.
     globalForMongo._mongoClientPromise.catch(() => {
       globalForMongo._mongoClientPromise = undefined;
     });
@@ -76,49 +52,19 @@ async function getDevClient(): Promise<MongoClient> {
   return globalForMongo._mongoClientPromise;
 }
 
-// ─── Workers mode: fresh client per call ───
-
-/** Max connection retries (handles DNS cold-start failures). */
-const MAX_RETRIES = 3;
-
-async function getWorkersClient(): Promise<MongoClient> {
-  let lastError: unknown;
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      const client = new MongoClient(getMongoUri(), WORKERS_OPTIONS);
-      await client.connect();
-      return client;
-    } catch (err) {
-      lastError = err;
-      if (attempt < MAX_RETRIES) {
-        console.warn(
-          `[db] Workers connect attempt ${attempt}/${MAX_RETRIES} failed:`,
-          err instanceof Error ? err.message : err,
-        );
-      }
-    }
-  }
-  throw lastError;
-}
-
 // ─── Public API ───
 
 /**
- * Returns a connected MongoClient instance.
- * - In Workers: fresh client (caller should close when done, or let GC handle it)
- * - In dev: cached client via globalThis
+ * Returns a connected MongoClient instance from the connection pool.
+ * The client is cached — multiple calls return the same instance.
  */
 export async function getMongoClient(): Promise<MongoClient> {
-  if (isWorkersRuntime()) {
-    return getWorkersClient();
-  }
-  return getDevClient();
+  return getCachedClient();
 }
 
 /**
  * Returns the default database instance.
- * In Workers, each call creates a fresh connection (~100-400ms warm).
- * For multiple operations, prefer `withDb()` to share one connection.
+ * Uses the cached connection pool for fast queries (~2-20ms).
  */
 export async function getDb(): Promise<Db> {
   const client = await getMongoClient();
@@ -126,9 +72,8 @@ export async function getDb(): Promise<Db> {
 }
 
 /**
- * Executes a callback with a database connection, ensuring cleanup in Workers.
- * This is the preferred way to access MongoDB when making multiple queries in
- * a single handler, as it shares one connection for all operations.
+ * Executes a callback with a database connection.
+ * Shares the cached connection pool — no per-call overhead.
  *
  * @example
  * const result = await withDb(async (db) => {
@@ -138,14 +83,6 @@ export async function getDb(): Promise<Db> {
  * });
  */
 export async function withDb<T>(fn: (db: Db) => Promise<T>): Promise<T> {
-  if (isWorkersRuntime()) {
-    const client = await getWorkersClient();
-    try {
-      return await fn(client.db());
-    } finally {
-      await client.close().catch(() => {});
-    }
-  }
-  const client = await getDevClient();
+  const client = await getMongoClient();
   return fn(client.db());
 }

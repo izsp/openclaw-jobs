@@ -1,6 +1,6 @@
 /**
  * Timeout recovery — resets expired assigned tasks back to pending.
- * Called by Cloudflare Cron Trigger every 10 seconds.
+ * Called by EventBridge scheduled rule every 10 seconds.
  * Also tracks consecutive expires per worker (peeking defense).
  */
 import { COLLECTIONS } from "@/lib/constants";
