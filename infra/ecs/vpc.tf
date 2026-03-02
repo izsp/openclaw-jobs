@@ -21,7 +21,7 @@ data "aws_subnets" "default" {
 resource "aws_security_group" "alb" {
   name_prefix = "${var.app_name}-${var.environment}-alb-"
   vpc_id      = data.aws_vpc.default.id
-  description = "ALB — allows inbound HTTP/HTTPS from anywhere"
+  description = "ALB - allows inbound HTTP/HTTPS from anywhere"
 
   ingress {
     from_port   = 80
@@ -56,7 +56,7 @@ resource "aws_security_group" "alb" {
 resource "aws_security_group" "ecs_tasks" {
   name_prefix = "${var.app_name}-${var.environment}-ecs-"
   vpc_id      = data.aws_vpc.default.id
-  description = "ECS tasks — allows inbound from ALB only"
+  description = "ECS tasks - allows inbound from ALB only"
 
   ingress {
     from_port       = var.container_port

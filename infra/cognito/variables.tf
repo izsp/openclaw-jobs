@@ -19,6 +19,7 @@ variable "callback_urls" {
   default = [
     "http://localhost:3000/api/auth/callback/cognito",
     "https://openclaw-jobs.zzsspp99.workers.dev/api/auth/callback/cognito",
+    # ECS ALB — add HTTPS URL once domain + ACM certificate is configured
   ]
 }
 
@@ -28,5 +29,6 @@ variable "logout_urls" {
   default = [
     "http://localhost:3000",
     "https://openclaw-jobs.zzsspp99.workers.dev",
+    # ECS ALB — add HTTPS URL once domain + ACM certificate is configured
   ]
 }
