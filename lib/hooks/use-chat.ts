@@ -86,11 +86,12 @@ export function useChat(userId: string | null): UseChatReturn {
           const updated = { ...prev, task_status: status.status, updated_at: Date.now() };
 
           if (status.status === "completed" && status.output) {
+            const outputText = status.output.content;
             const alreadyHasResult = prev.messages.some(
-              (m) => m.role === "assistant" && m.content === status.output,
+              (m) => m.role === "assistant" && m.content === outputText,
             );
             if (!alreadyHasResult) {
-              updated.messages = [...prev.messages, createMessage("assistant", status.output)];
+              updated.messages = [...prev.messages, createMessage("assistant", outputText)];
             }
           }
           return updated;
@@ -123,13 +124,16 @@ export function useChat(userId: string | null): UseChatReturn {
       };
       setConversation(updated);
 
-      // Build input with full conversation context for multi-turn.
-      const allMessages = updated.messages.map((m) => `${m.role}: ${m.content}`).join("\n");
-
+      // Build structured input with full conversation context for multi-turn.
       const result = await submitTask({
         type: "chat",
-        input: allMessages,
-        input_preview: content.slice(0, 100),
+        input: {
+          messages: updated.messages.map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+        },
+        input_preview: { text: content.slice(0, 100) },
       });
 
       setConversation((prev) => {

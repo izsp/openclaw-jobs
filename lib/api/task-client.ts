@@ -5,10 +5,13 @@ import { fetchApi } from "./fetch-api";
 
 export interface SubmitTaskInput {
   type: string;
-  input: string;
+  input: {
+    messages: Array<{ role: string; content: string }>;
+    context?: Record<string, unknown>;
+  };
   sensitive?: boolean;
   constraints?: Record<string, unknown>;
-  input_preview?: string;
+  input_preview?: Record<string, unknown> | null;
 }
 
 export interface SubmitTaskResult {
@@ -18,12 +21,17 @@ export interface SubmitTaskResult {
   deadline: string;
 }
 
+export interface TaskOutput {
+  content: string;
+  format: string;
+}
+
 export interface TaskStatus {
   task_id: string;
   status: string;
   type: string;
   price_cents: number;
-  output: string | null;
+  output: TaskOutput | null;
   completed_at: string | null;
   created_at: string;
 }
