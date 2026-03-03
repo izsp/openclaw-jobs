@@ -3,6 +3,16 @@ import type { WORKER_TIERS } from "@/lib/constants";
 /** Worker tier literal derived from constants. */
 export type WorkerTier = (typeof WORKER_TIERS)[number];
 
+/** A predefined task template offered by a worker. */
+export interface WorkerOffering {
+  id: string;
+  title: string;
+  description: string;
+  starting_price: number;
+  welcome_message: string;
+  task_type: string;
+}
+
 /** Worker preference configuration. */
 export interface WorkerPreferences {
   accept: string[];
@@ -61,6 +71,11 @@ export interface WorkerDocument {
   payout: WorkerPayout | null;
   profile: WorkerProfile;
   tier: WorkerTier;
+  slug: string | null;
+  display_name: string | null;
+  bio: string | null;
+  avatar_url: string | null;
+  offerings: WorkerOffering[];
   tasks_claimed: number;
   tasks_completed: number;
   tasks_expired: number;
@@ -74,6 +89,19 @@ export interface WorkerDocument {
   suspended_until: Date | null;
   created_at: Date;
   last_seen: Date | null;
+}
+
+/** Public-facing worker profile (safe to expose). */
+export interface WorkerPublicProfile {
+  worker_id: string;
+  slug: string;
+  display_name: string;
+  bio: string | null;
+  avatar_url: string | null;
+  tier: WorkerTier;
+  tasks_completed: number;
+  total_earned: number;
+  offerings: WorkerOffering[];
 }
 
 /** Stats returned to worker on each /work/next and /work/submit response. */

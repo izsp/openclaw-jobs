@@ -132,6 +132,12 @@ function buildClaimFilter(
   const filter: Record<string, unknown> = {
     status: "pending",
     deadline: { $gt: now },
+    // WHY: Tasks with assigned_worker_id are only visible to that worker.
+    // Public tasks (null) are visible to all workers.
+    $or: [
+      { assigned_worker_id: null },
+      { assigned_worker_id: worker._id },
+    ],
   };
 
   const { preferences } = worker.profile;

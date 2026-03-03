@@ -149,12 +149,23 @@ function matchesFilter(
   filter: Record<string, unknown>,
 ): boolean {
   for (const [key, value] of Object.entries(filter)) {
+    // Handle $or operator
+    if (key === "$or" && Array.isArray(value)) {
+      const orMatched = value.some((subFilter: Record<string, unknown>) =>
+        matchesFilter(doc, subFilter),
+      );
+      if (!orMatched) return false;
+      continue;
+    }
     if (typeof value === "object" && value !== null && !Array.isArray(value)) {
       const ops = value as Record<string, unknown>;
       if ("$gte" in ops && (doc[key] as number) < (ops.$gte as number)) return false;
       if ("$gt" in ops && (doc[key] as number) <= (ops.$gt as number)) return false;
       if ("$in" in ops && !(ops.$in as unknown[]).includes(doc[key])) return false;
       if ("$ne" in ops && doc[key] === ops.$ne) return false;
+    } else if (value === null) {
+      // Match null and undefined (like MongoDB does for null queries)
+      if (doc[key] !== null && doc[key] !== undefined) return false;
     } else if (doc[key] !== value) {
       return false;
     }
@@ -314,6 +325,11 @@ describe("E2E: Task Lifecycle", () => {
         limits: { daily_max_tasks: 100, concurrent: 1 },
       },
       tier: "new",
+      slug: null,
+      display_name: null,
+      bio: null,
+      avatar_url: null,
+      offerings: [],
       tasks_claimed: 0,
       tasks_completed: 0,
       tasks_expired: 0,

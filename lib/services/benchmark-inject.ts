@@ -86,6 +86,7 @@ export async function injectBenchmarkTask(): Promise<string | null> {
     constraints: template.constraints,
     price_cents: template.price_cents,
     status: "pending",
+    assigned_worker_id: null,
     worker_id: null,
     assigned_at: null,
     deadline,

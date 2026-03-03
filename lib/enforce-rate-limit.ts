@@ -27,6 +27,7 @@ const DEFAULTS: Record<string, RateLimitRule> = {
   balance_check: { per_ip_per_min: 30 },
   task_check: { per_ip_per_min: 30 },
   worker_me: { per_ip_per_min: 20 },
+  worker_profile: { per_ip_per_min: 30 },
 };
 
 /**

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChatPanel } from "@/components/chat/chat-panel";
 import { Header } from "@/components/layout/header";
+import { FeaturedLobsters } from "@/components/landing/featured-lobsters";
 
 export default function Home() {
   return (
@@ -56,6 +57,9 @@ export default function Home() {
           />
         </div>
       </section>
+
+      {/* Featured Lobsters */}
+      <FeaturedLobsters />
 
       {/* For workers */}
       <section className="border-t border-zinc-800 bg-zinc-900 px-6 py-16 text-center">

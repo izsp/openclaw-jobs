@@ -16,14 +16,21 @@ interface ChatPanelProps {
   onConversationChange?: (id: string | null) => void;
   /** Called when a task example is clicked — fills the input directly. */
   onExampleClick?: (text: string) => void;
+  /** Pre-assigned worker ID for directed tasks. */
+  assignedWorkerId?: string | null;
+  /** Welcome message to display from worker offering. */
+  welcomeMessage?: string | null;
 }
 
-export function ChatPanel({ conversationId, onConversationChange }: ChatPanelProps = {}) {
+export function ChatPanel({ conversationId, onConversationChange, assignedWorkerId, welcomeMessage }: ChatPanelProps = {}) {
   const { data: session, status } = useSession();
   const userId = session?.user?.id ?? null;
   const isAuthenticated = status === "authenticated";
 
-  const { conversation, sending, polling, error, send, reset, loadById } = useChat(userId);
+  const { conversation, sending, polling, error, send, reset, loadById } = useChat(
+    userId,
+    assignedWorkerId ? { assignedWorkerId } : undefined,
+  );
   const { balance } = useBalance(isAuthenticated);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -64,11 +71,14 @@ export function ChatPanel({ conversationId, onConversationChange }: ChatPanelPro
     <div className="flex min-h-[400px] flex-1 flex-col rounded-xl border border-zinc-800 bg-zinc-900/50">
       {/* Messages area */}
       <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
-        {messages.length === 0 && (
+        {messages.length === 0 && !welcomeMessage && (
           <EmptyState
             balanceCents={balance?.amount_cents ?? null}
             onExampleClick={send}
           />
+        )}
+        {welcomeMessage && messages.length === 0 && (
+          <ChatMessage role="assistant" content={welcomeMessage} />
         )}
         {messages.map((msg) => (
           <ChatMessage key={msg.id} role={msg.role} content={msg.content} />

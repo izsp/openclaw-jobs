@@ -14,6 +14,11 @@ import { getTaskStatus, type TaskStatus } from "@/lib/api/task-client";
 const POLL_INTERVAL_MS = 2000;
 const TERMINAL_STATUSES = new Set(["completed", "failed", "expired", "credited"]);
 
+interface UseChatOptions {
+  /** Pre-assigned worker ID for directed tasks. */
+  assignedWorkerId?: string | null;
+}
+
 interface UseChatReturn {
   conversation: ChatConversation | null;
   sending: boolean;
@@ -43,7 +48,8 @@ function createMessage(role: ChatMessage["role"], content: string): ChatMessage 
   return { id: crypto.randomUUID(), role, content, timestamp: Date.now() };
 }
 
-export function useChat(userId: string | null): UseChatReturn {
+export function useChat(userId: string | null, options?: UseChatOptions): UseChatReturn {
+  const assignedWorkerId = options?.assignedWorkerId ?? null;
   const [conversation, setConversation] = useState<ChatConversation | null>(null);
   const [sending, setSending] = useState(false);
   const [polling, setPolling] = useState(false);
@@ -125,7 +131,7 @@ export function useChat(userId: string | null): UseChatReturn {
       setConversation(updated);
 
       // Build structured input with full conversation context for multi-turn.
-      const result = await submitTask({
+      const taskInput: Parameters<typeof submitTask>[0] = {
         type: "chat",
         input: {
           messages: updated.messages.map((m) => ({
@@ -134,7 +140,11 @@ export function useChat(userId: string | null): UseChatReturn {
           })),
         },
         input_preview: { text: content.slice(0, 100) },
-      });
+      };
+      if (assignedWorkerId) {
+        taskInput.assigned_worker_id = assignedWorkerId;
+      }
+      const result = await submitTask(taskInput);
 
       setConversation((prev) => {
         if (!prev) return prev;
@@ -153,7 +163,7 @@ export function useChat(userId: string | null): UseChatReturn {
     } finally {
       setSending(false);
     }
-  }, [userId, startPolling]);
+  }, [userId, assignedWorkerId, startPolling]);
 
   const reset = useCallback(() => {
     stopPolling();

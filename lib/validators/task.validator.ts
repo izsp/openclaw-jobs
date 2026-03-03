@@ -40,6 +40,7 @@ export const createTaskSchema = z.object({
   sensitive: z.boolean().default(false),
   constraints: constraintsSchema.default({ timeout_seconds: 60, min_output_length: 0 }),
   input_preview: z.record(z.string(), safeJsonPrimitive).nullable().default(null),
+  assigned_worker_id: z.string().startsWith("w_").optional(),
 });
 
 /** Path param for task endpoints. */

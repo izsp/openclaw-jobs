@@ -1,10 +1,11 @@
 /**
  * Dedicated chat page for authenticated users.
  * Full-screen layout with conversation sidebar + chat panel.
+ * Supports ?worker=<slug>&offering=<id> for pre-assigned worker chats.
  */
 "use client";
 
-import { Suspense, useState, useCallback } from "react";
+import { Suspense, useState, useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { redirect } from "next/navigation";
@@ -13,6 +14,7 @@ import { ChatPanel } from "@/components/chat/chat-panel";
 import { ChatSidebar } from "@/components/chat/chat-sidebar";
 import { listConversations } from "@/lib/chat/chat-storage";
 import { useBalance } from "@/lib/hooks/use-balance";
+import { useWorkerOffering } from "@/lib/hooks/use-worker-offering";
 
 export default function ChatPage() {
   return (
@@ -30,6 +32,11 @@ function ChatPageInner() {
 
   const searchParams = useSearchParams();
   const urlId = searchParams.get("id");
+  const workerSlug = searchParams.get("worker");
+  const offeringId = searchParams.get("offering");
+
+  // Resolve worker profile + offering when URL params are present
+  const { workerId, welcomeMessage } = useWorkerOffering(workerSlug, offeringId);
 
   const [activeConvId, setActiveConvId] = useState<string | null>(urlId);
   const [sidebarKey, setSidebarKey] = useState(0);
@@ -126,6 +133,8 @@ function ChatPageInner() {
           <ChatPanel
             conversationId={activeConvId}
             onConversationChange={handleConversationChange}
+            assignedWorkerId={workerId}
+            welcomeMessage={welcomeMessage}
           />
         </div>
       </div>

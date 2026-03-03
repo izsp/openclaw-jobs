@@ -23,6 +23,7 @@ interface CreateTaskParams {
   sensitive: boolean;
   constraints: TaskConstraints;
   inputPreview: Record<string, unknown> | null;
+  assignedWorkerId?: string | null;
 }
 
 interface CreateTaskResult {
@@ -41,7 +42,7 @@ interface CreateTaskResult {
 export async function createTask(
   params: CreateTaskParams,
 ): Promise<CreateTaskResult> {
-  const { buyerId, type, input, sensitive, constraints, inputPreview } = params;
+  const { buyerId, type, input, sensitive, constraints, inputPreview, assignedWorkerId } = params;
 
   const messageCount = input.messages.length;
   const priceCents = await estimateTaskPrice(type, messageCount);
@@ -68,6 +69,7 @@ export async function createTask(
     constraints,
     price_cents: priceCents,
     status: "pending",
+    assigned_worker_id: assignedWorkerId ?? null,
     worker_id: null,
     assigned_at: null,
     deadline,

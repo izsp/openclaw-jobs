@@ -86,6 +86,14 @@ export const COLLECTION_INDEXES: Record<string, IndexDefinition[]> = {
         name: "worker_email_unique",
       },
     },
+    {
+      key: { slug: 1 },
+      options: {
+        unique: true,
+        partialFilterExpression: { slug: { $type: "string" } },
+        name: "worker_slug_unique",
+      },
+    },
   ],
 
   audit_log: [

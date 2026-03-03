@@ -46,6 +46,7 @@ export interface TaskDocument {
   constraints: TaskConstraints;
   price_cents: number;
   status: TaskStatus;
+  assigned_worker_id: string | null;
   worker_id: string | null;
   assigned_at: Date | null;
   deadline: Date | null;

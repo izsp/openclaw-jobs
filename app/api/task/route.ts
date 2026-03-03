@@ -34,6 +34,7 @@ export async function POST(request: Request) {
       sensitive: parsed.data.sensitive,
       constraints: parsed.data.constraints,
       inputPreview: parsed.data.input_preview,
+      assignedWorkerId: parsed.data.assigned_worker_id,
     });
 
     return jsonResponse(

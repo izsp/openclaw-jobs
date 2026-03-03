@@ -12,6 +12,7 @@ export interface SubmitTaskInput {
   sensitive?: boolean;
   constraints?: Record<string, unknown>;
   input_preview?: Record<string, unknown> | null;
+  assigned_worker_id?: string;
 }
 
 export interface SubmitTaskResult {
