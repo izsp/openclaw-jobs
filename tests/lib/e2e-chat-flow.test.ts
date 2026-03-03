@@ -73,8 +73,10 @@ describe("E2E: buyer chat flow", () => {
 
     const taskResult = await submitTask({
       type: "chat",
-      input: "user: Explain quantum computing in simple terms",
-      input_preview: "Explain quantum computing in simple terms",
+      input: {
+        messages: [{ role: "user", content: "Explain quantum computing in simple terms" }],
+      },
+      input_preview: { text: "Explain quantum computing in simple terms" },
     });
 
     expect(taskResult.task_id).toBe("task_abc123");
@@ -121,14 +123,14 @@ describe("E2E: buyer chat flow", () => {
     expect(poll2.status).toBe("assigned");
 
     // Step 4: Poll — third check returns "completed" with the result
-    const workerResult = "Quantum computing uses qubits instead of classical bits...";
+    const workerOutput = { content: "Quantum computing uses qubits instead of classical bits...", format: "text" };
     mockFetch.mockResolvedValueOnce(
       apiResponse({
         task_id: "task_abc123",
         status: "completed",
         type: "chat",
         price_cents: 20,
-        output: workerResult,
+        output: workerOutput,
         completed_at: "2026-02-26T12:01:00.000Z",
         created_at: "2026-02-26T12:00:00.000Z",
       }),
@@ -136,7 +138,7 @@ describe("E2E: buyer chat flow", () => {
 
     const poll3 = await getTaskStatus("task_abc123");
     expect(poll3.status).toBe("completed");
-    expect(poll3.output).toBe(workerResult);
+    expect(poll3.output).toEqual(workerOutput);
 
     // Step 5: Build conversation and persist to localStorage
     const conversation: ChatConversation = {
@@ -146,7 +148,7 @@ describe("E2E: buyer chat flow", () => {
       price_cents: 20,
       messages: [
         { id: "m1", role: "user", content: "Explain quantum computing in simple terms", timestamp: Date.now() - 1000 },
-        { id: "m2", role: "assistant", content: workerResult, timestamp: Date.now() },
+        { id: "m2", role: "assistant", content: workerOutput.content, timestamp: Date.now() },
       ],
       created_at: Date.now() - 1000,
       updated_at: Date.now(),
@@ -159,7 +161,7 @@ describe("E2E: buyer chat flow", () => {
     expect(reloaded).toHaveLength(1);
     expect(reloaded[0].task_id).toBe("task_abc123");
     expect(reloaded[0].messages).toHaveLength(2);
-    expect(reloaded[0].messages[1].content).toBe(workerResult);
+    expect(reloaded[0].messages[1].content).toBe(workerOutput.content);
 
     // Step 7: Verify the conversation summary
     const summaries = listConversations(USER_ID);
@@ -187,7 +189,7 @@ describe("E2E: buyer chat flow", () => {
     );
 
     await expect(
-      submitTask({ type: "chat", input: "expensive task" }),
+      submitTask({ type: "chat", input: { messages: [{ role: "user", content: "expensive task" }] } }),
     ).rejects.toThrow("Insufficient balance");
   });
 
@@ -240,8 +242,10 @@ describe("E2E: buyer chat flow", () => {
 
     const turn1 = await submitTask({
       type: "chat",
-      input: "user: What is Rust?",
-      input_preview: "What is Rust?",
+      input: {
+        messages: [{ role: "user", content: "What is Rust?" }],
+      },
+      input_preview: { text: "What is Rust?" },
     });
     messages.push({ id: "m1", role: "user", content: "What is Rust?", timestamp: 1 });
 
@@ -252,14 +256,14 @@ describe("E2E: buyer chat flow", () => {
         status: "completed",
         type: "chat",
         price_cents: 5,
-        output: "Rust is a systems programming language...",
+        output: { content: "Rust is a systems programming language...", format: "text" },
         completed_at: "2026-02-26T12:01:00.000Z",
         created_at: "2026-02-26T12:00:00.000Z",
       }),
     );
 
     const result1 = await getTaskStatus(turn1.task_id);
-    messages.push({ id: "m2", role: "assistant", content: result1.output!, timestamp: 2 });
+    messages.push({ id: "m2", role: "assistant", content: result1.output!.content, timestamp: 2 });
 
     // Turn 2: User follows up — input includes full history
     mockFetch.mockResolvedValueOnce(
@@ -271,13 +275,15 @@ describe("E2E: buyer chat flow", () => {
       }, 201),
     );
 
-    const fullContext = messages.map((m) => `${m.role}: ${m.content}`).join("\n")
-      + "\nuser: How does its ownership model work?";
-
     const turn2 = await submitTask({
       type: "chat",
-      input: fullContext,
-      input_preview: "How does its ownership model work?",
+      input: {
+        messages: [
+          ...messages.map((m) => ({ role: m.role, content: m.content })),
+          { role: "user", content: "How does its ownership model work?" },
+        ],
+      },
+      input_preview: { text: "How does its ownership model work?" },
     });
     messages.push({ id: "m3", role: "user", content: "How does its ownership model work?", timestamp: 3 });
 
@@ -287,9 +293,10 @@ describe("E2E: buyer chat flow", () => {
     // Verify multi-turn context was sent to the backend
     const lastCall = mockFetch.mock.calls[mockFetch.mock.calls.length - 1];
     const body = JSON.parse(lastCall[1].body);
-    expect(body.input).toContain("What is Rust?");
-    expect(body.input).toContain("Rust is a systems programming language");
-    expect(body.input).toContain("How does its ownership model work?");
+    const allContent = body.input.messages.map((m: { content: string }) => m.content).join(" ");
+    expect(allContent).toContain("What is Rust?");
+    expect(allContent).toContain("Rust is a systems programming language");
+    expect(allContent).toContain("How does its ownership model work?");
   });
 
   it("should persist and reload multi-conversation history", () => {
