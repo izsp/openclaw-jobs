@@ -55,6 +55,14 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
     onConversationChangeRef.current?.(convId);
   }, [convId]);
 
+  const handleCredit = useCallback(async (taskId: string) => {
+    try {
+      await creditTask(taskId);
+    } catch {
+      // Credit errors are non-critical for the chat flow
+    }
+  }, []);
+
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
   }, [messages.length]);
@@ -67,14 +75,6 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
   }
 
   const isBusy = sending || polling;
-
-  const handleCredit = useCallback(async (taskId: string) => {
-    try {
-      await creditTask(taskId);
-    } catch {
-      // Credit errors are non-critical for the chat flow
-    }
-  }, []);
 
   return (
     <div className="flex min-h-[400px] flex-1 flex-col rounded-xl border border-zinc-800 bg-zinc-900/50">
