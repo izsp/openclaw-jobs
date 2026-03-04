@@ -10,6 +10,7 @@ import type {
   QaConfig,
   RateLimitsConfig,
 } from "../../lib/types/config.types";
+import type { ReviewConfig } from "../../lib/types/review.types";
 
 export const DEFAULT_PRICING: PricingConfig = {
   _id: "pricing",
@@ -93,6 +94,16 @@ export const DEFAULT_RATE_LIMITS: RateLimitsConfig = {
   updated_at: new Date(),
 };
 
+export const DEFAULT_REVIEW: ReviewConfig = {
+  _id: "review",
+  review_rate: 0.10,
+  min_price_for_review: 50,
+  supervisor_commission_rate: 0.20,
+  auto_credit_threshold: 40,
+  penalty_threshold: 25,
+  updated_at: new Date(),
+};
+
 export const ALL_SEED_CONFIGS = [
   DEFAULT_PRICING,
   DEFAULT_TIERS,
@@ -100,4 +111,5 @@ export const ALL_SEED_CONFIGS = [
   DEFAULT_SIGNUP,
   DEFAULT_QA,
   DEFAULT_RATE_LIMITS,
+  DEFAULT_REVIEW,
 ];
