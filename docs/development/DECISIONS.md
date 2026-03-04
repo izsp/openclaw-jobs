@@ -146,6 +146,19 @@ All QA tasks use `_internal` field on tasks collection, stripped before returnin
 
 ---
 
+## Decision 13: Manual Deployment via Local Docker Buildx
+**Date**: 2026-03-03
+**Context**: GitHub Actions CI/CD deploy fails at "Configure AWS credentials" — the `AWS_DEPLOY_ROLE_ARN` secret / OIDC trust was never properly set up. Previous successful deploys were also done locally. Needed a reliable local deploy path.
+**Issues Encountered**:
+1. **ALB HTTPS listener misconfigured as `fixed-response`** — All requests returned a static "Coming Soon" HTML page instead of forwarding to ECS. The HTTPS 443 listener's DefaultAction was `fixed-response`, not `forward`. Fixed by `aws elbv2 modify-listener` to forward to the target group. Root cause: Terraform apply likely set the listener to `fixed-response` as a placeholder and it was never changed back.
+2. **Docker image architecture mismatch** — Local `docker build` on Apple Silicon produces ARM64 images. ECS Fargate requires linux/amd64. Container logs show `exec format error`. Fix: use `docker --context=desktop-linux buildx build --platform linux/amd64 --push`.
+3. **`force-new-deployment` doesn't update image** — `aws ecs update-service --force-new-deployment` only restarts containers with the *current* task definition. To deploy a new image, must: register a new task definition with the updated image tag, then update the service with the new task definition ARN.
+
+**Decision**: Created `scripts/deploy.sh` as the standard deploy SOP. GitHub Actions OIDC fix deferred.
+**Deploy script**: `./scripts/deploy.sh` — single command, ~2 minutes end-to-end.
+
+---
+
 ## Open Questions (To Discuss)
 1. ~~Pricing tiers~~ → Now configurable at runtime, exact values TBD
 2. Spot-check comparison algorithm — simple text similarity? LLM-based comparison?
