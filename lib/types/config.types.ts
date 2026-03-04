@@ -1,5 +1,6 @@
 import type { CONFIG_KEYS } from "@/lib/constants";
 import type { WorkerTier } from "@/lib/types/worker.types";
+import type { ReviewConfig } from "@/lib/types/review.types";
 
 /** Valid config key literal derived from constants. */
 export type ConfigKey = (typeof CONFIG_KEYS)[number];
@@ -126,7 +127,8 @@ export type PlatformConfigDocument =
   | CommissionsConfig
   | SignupConfig
   | QaConfig
-  | RateLimitsConfig;
+  | RateLimitsConfig
+  | ReviewConfig;
 
 /** Map from config key to its typed document. */
 export interface ConfigMap {
@@ -136,4 +138,5 @@ export interface ConfigMap {
   signup: SignupConfig;
   qa: QaConfig;
   rate_limits: RateLimitsConfig;
+  review: ReviewConfig;
 }

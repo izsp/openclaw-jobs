@@ -13,6 +13,7 @@ import { NotFoundError, ConflictError, SuspendedError } from "@/lib/errors";
 import { settleTaskPayment, maybeInjectSpotCheck } from "./settlement-service";
 import { buildWorkerStats } from "./worker-stats";
 import { compareQaResult } from "./qa-compare";
+import { maybeInjectReview, handleReviewCompletion } from "./review-service";
 
 /** Result returned when a task is claimed. */
 export interface ClaimResult {
@@ -114,7 +115,15 @@ export async function submitTaskResult(
   // If this was a QA task, trigger comparison against the reference
   const completedTask = { ...task, output, status: "completed" as const };
   if (completedTask._internal.is_qa) {
-    await compareQaResult(completedTask as TaskDocument);
+    // Supervisor review tasks produce JSON verdicts
+    if (completedTask._internal.qa_type === "supervisor_review") {
+      await handleReviewCompletion(completedTask as TaskDocument);
+    } else {
+      await compareQaResult(completedTask as TaskDocument);
+    }
+  } else {
+    // Non-QA task: maybe inject a supervisor review
+    await maybeInjectReview(completedTask as TaskDocument, worker);
   }
 
   return {

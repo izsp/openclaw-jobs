@@ -49,7 +49,7 @@ export const AUTH_PROVIDERS = [
 export const USER_ROLES = ["buyer", "seller", "both"] as const;
 
 // ─── QA Types ────────────────────────────────────────────────────────────────
-export const QA_TYPES = ["spot_check", "shadow", "benchmark"] as const;
+export const QA_TYPES = ["spot_check", "shadow", "benchmark", "supervisor_review"] as const;
 
 // ─── Platform Config Keys ────────────────────────────────────────────────────
 export const CONFIG_KEYS = [
@@ -59,6 +59,7 @@ export const CONFIG_KEYS = [
   "signup",
   "qa",
   "rate_limits",
+  "review",
 ] as const;
 
 // ─── Currency ────────────────────────────────────────────────────────────────
