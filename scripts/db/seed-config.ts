@@ -60,6 +60,7 @@ export const DEFAULT_SIGNUP: SignupConfig = {
   first_deposit_bonus_pct: 0.20,
   referral_buyer_credit_cents: 100,
   referral_seller_pct: 0.05,
+  invite_codes: [],
   updated_at: new Date(),
 };
 

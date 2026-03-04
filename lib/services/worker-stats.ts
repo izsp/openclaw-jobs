@@ -34,6 +34,7 @@ export async function buildWorkerStats(
     completion_rate: Math.round(completionRate * 100) / 100,
     credit_request_rate: Math.round(creditRate * 100) / 100,
     tier: worker.tier,
+    status: worker.status ?? "active",
     tier_changed: false,
     next_tier: nextTierInfo.nextTier,
     next_tier_requires: nextTierInfo.requires,

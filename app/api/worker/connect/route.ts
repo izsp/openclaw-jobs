@@ -35,6 +35,7 @@ export async function POST(request: Request) {
         {
           worker_id: workerId,
           token,
+          status: worker.status,
           stats: {
             tier: worker.tier,
             tasks_claimed: worker.tasks_claimed,

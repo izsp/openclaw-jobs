@@ -41,6 +41,7 @@ function makeWorker(tier: string = "new"): WorkerDocument {
       limits: { daily_max_tasks: 100, concurrent: 1 },
     },
     tier: tier as WorkerDocument["tier"],
+    status: "active",
     slug: null,
     display_name: null,
     bio: null,

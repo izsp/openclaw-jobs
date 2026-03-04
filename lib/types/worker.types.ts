@@ -1,7 +1,10 @@
-import type { WORKER_TIERS } from "@/lib/constants";
+import type { WORKER_TIERS, WORKER_STATUSES } from "@/lib/constants";
 
 /** Worker tier literal derived from constants. */
 export type WorkerTier = (typeof WORKER_TIERS)[number];
+
+/** Worker status literal derived from constants. */
+export type WorkerStatus = (typeof WORKER_STATUSES)[number];
 
 /** A predefined task template offered by a worker. */
 export interface WorkerOffering {
@@ -71,6 +74,7 @@ export interface WorkerDocument {
   payout: WorkerPayout | null;
   profile: WorkerProfile;
   tier: WorkerTier;
+  status: WorkerStatus;
   slug: string | null;
   display_name: string | null;
   bio: string | null;
@@ -99,6 +103,7 @@ export interface WorkerPublicProfile {
   bio: string | null;
   avatar_url: string | null;
   tier: WorkerTier;
+  status: WorkerStatus;
   tasks_completed: number;
   total_earned: number;
   offerings: WorkerOffering[];
@@ -110,6 +115,7 @@ export interface WorkerStats {
   completion_rate: number;
   credit_request_rate: number;
   tier: WorkerTier;
+  status: WorkerStatus;
   tier_changed: boolean;
   next_tier: WorkerTier | null;
   next_tier_requires: Record<string, unknown> | null;

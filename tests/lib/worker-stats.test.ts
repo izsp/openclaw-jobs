@@ -29,6 +29,7 @@ function makeWorker(overrides: Partial<WorkerDocument> = {}): WorkerDocument {
       limits: { daily_max_tasks: 100, concurrent: 1 },
     },
     tier: "new",
+    status: "active",
     slug: null,
     display_name: null,
     bio: null,

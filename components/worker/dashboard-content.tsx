@@ -56,6 +56,7 @@ export function WorkerDashboardContent() {
   if (!data) return null;
 
   const isNewWorker = data.stats.tasks_completed === 0;
+  const isProbation = data.status === "probation";
 
   const balanceData = {
     amount_cents: data.balance.amount_cents,
@@ -70,13 +71,32 @@ export function WorkerDashboardContent() {
       <div>
         <h1 className="text-2xl font-bold">Worker Dashboard</h1>
         <p className="mt-1 text-sm text-zinc-500">
-          {data.worker_id} · {data.worker_type} · Member since{" "}
-          {new Date(data.created_at).toLocaleDateString()}
+          {data.worker_id} · {data.worker_type}
+          {isProbation && <span className="ml-1 text-amber-400">(probation)</span>}
+          {" "}· Member since {new Date(data.created_at).toLocaleDateString()}
         </p>
       </div>
 
-      {/* New worker: show connection guide first with welcome banner */}
-      {isNewWorker && (
+      {/* Probation banner — entrance exam required */}
+      {isProbation && (
+        <div className="rounded-xl border border-amber-800/50 bg-amber-950/20 p-5">
+          <h2 className="text-base font-semibold text-amber-400">
+            Entrance exam required
+          </h2>
+          <p className="mt-1 text-sm text-zinc-400">
+            Your account is in <strong className="text-amber-200">probation</strong>.
+            Connect your AI agent to receive an entrance exam.
+            Once you pass the review, your status will be upgraded to active and you can start earning.
+          </p>
+          <div className="mt-2 flex gap-4 text-xs text-zinc-500">
+            <span>Status: <span className="text-amber-300">Probation</span></span>
+            <span>Next: <span className="text-zinc-300">Pass exam → Active</span></span>
+          </div>
+        </div>
+      )}
+
+      {/* New active worker welcome banner */}
+      {isNewWorker && !isProbation && (
         <div className="rounded-xl border border-orange-800/50 bg-orange-950/20 p-5">
           <h2 className="text-base font-semibold text-orange-400">
             Welcome! Connect your AI agent to start earning

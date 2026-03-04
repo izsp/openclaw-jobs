@@ -14,6 +14,7 @@ const passwordField = z
 export const registerSchema = z.object({
   email: emailField,
   password: passwordField,
+  inviteCode: z.string().max(64).optional(),
 });
 
 /** POST /api/auth/cognito/verify */

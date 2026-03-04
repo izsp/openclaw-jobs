@@ -199,6 +199,12 @@ import { initializeBalance, deductBalance } from "@/lib/services/balance-service
 import { hashToken } from "@/lib/hash-token";
 import type { WorkerDocument } from "@/lib/types";
 
+/** Activate a probation worker in mock DB so it can claim real tasks. */
+function activateWorker(workerId: string): void {
+  const w = mockWorkers.get(workerId);
+  if (w) w.status = "active";
+}
+
 beforeEach(() => {
   resetState();
   vi.clearAllMocks();
@@ -253,6 +259,7 @@ describe("E2E: Task Lifecycle", () => {
     expect(workerId).toMatch(/^w_/);
     expect(token).toMatch(/^ocj_w_/);
     expect(worker.tier).toBe("new");
+    activateWorker(workerId);
 
     // Initialize worker balance for earnings
     await initializeBalance(workerId, 0);
@@ -325,6 +332,7 @@ describe("E2E: Task Lifecycle", () => {
         limits: { daily_max_tasks: 100, concurrent: 1 },
       },
       tier: "new",
+      status: "active",
       slug: null,
       display_name: null,
       bio: null,
@@ -349,7 +357,8 @@ describe("E2E: Task Lifecycle", () => {
   });
 
   it("should return null when no matching tasks available", async () => {
-    const { token } = await registerWorker("test", null);
+    const { token, workerId } = await registerWorker("test", null);
+    activateWorker(workerId);
     const worker = await authenticateWorker(token);
 
     const result = await claimNextTask(worker);
@@ -374,7 +383,8 @@ describe("E2E: Task Lifecycle", () => {
       _internal: { is_qa: false, qa_type: null, original_task_id: null, expected_output: null, qa_result: null, funded_by: "buyer" },
     });
 
-    const { token } = await registerWorker("test", null);
+    const { token, workerId } = await registerWorker("test", null);
+    activateWorker(workerId);
     const worker = await authenticateWorker(token);
     // Override worker_id to match
     const workerWithId = { ...worker, _id: "w_test" };
@@ -474,7 +484,8 @@ describe("E2E: Preference-Based Task Filtering", () => {
       _internal: { is_qa: false },
     });
 
-    const { token } = await registerWorker("test", null);
+    const { token, workerId } = await registerWorker("test", null);
+    activateWorker(workerId);
     const worker = await authenticateWorker(token);
 
     // Set worker preferences to only accept code tasks

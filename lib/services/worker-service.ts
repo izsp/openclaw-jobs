@@ -59,6 +59,7 @@ export async function registerWorker(
     payout: null,
     profile: DEFAULT_PROFILE,
     tier: "new",
+    status: "probation",
     slug: null,
     display_name: null,
     bio: null,
@@ -114,6 +115,11 @@ export async function authenticateWorker(
 
   if (!worker) {
     throw new AuthError("Invalid worker token");
+  }
+
+  // WHY: Backward compat — workers created before status field default to active.
+  if (!worker.status) {
+    (worker as WorkerDocument).status = "active";
   }
 
   return worker;

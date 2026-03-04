@@ -9,11 +9,12 @@ import type {
   WorkerStats,
 } from "@/lib/types";
 import { getDb } from "@/lib/db";
-import { NotFoundError, ConflictError, SuspendedError } from "@/lib/errors";
+import { NotFoundError, ConflictError, SuspendedError, AuthError } from "@/lib/errors";
 import { settleTaskPayment, maybeInjectSpotCheck } from "./settlement-service";
 import { buildWorkerStats } from "./worker-stats";
 import { compareQaResult } from "./qa-compare";
 import { maybeInjectReview, handleReviewCompletion } from "./review-service";
+import { injectEntranceExam, insertEntranceExamReview } from "./probation-service";
 
 /** Result returned when a task is claimed. */
 export interface ClaimResult {
@@ -40,6 +41,14 @@ export async function claimNextTask(
 ): Promise<ClaimResult | null> {
   if (worker.suspended_until && worker.suspended_until > new Date()) {
     throw new SuspendedError(worker.suspended_until);
+  }
+
+  const status = worker.status ?? "active";
+  if (status === "suspended") {
+    throw new AuthError("Worker account is suspended");
+  }
+  if (status === "probation") {
+    return claimEntranceExam(worker);
   }
 
   const db = await getDb();
@@ -100,6 +109,17 @@ export async function submitTaskResult(
     return throwSubmitError(db, taskId, worker._id);
   }
 
+  // WHY: Entrance exam tasks are free — skip settlement, inject review instead.
+  if (task._internal.qa_type === "entrance_exam") {
+    const completedExam = { ...task, output, status: "completed" as const };
+    await insertEntranceExamReview(completedExam as TaskDocument);
+    return {
+      taskId,
+      earnedCents: 0,
+      stats: await buildWorkerStats(worker, false),
+    };
+  }
+
   const earnedCents = await settleTaskPayment(worker, task);
 
   await db.collection<WorkerDocument>(COLLECTIONS.WORKER).updateOne(
@@ -130,6 +150,40 @@ export async function submitTaskResult(
     taskId,
     earnedCents,
     stats: await buildWorkerStats(worker, true),
+  };
+}
+
+/** Injects and atomically claims an entrance exam for a probation worker. */
+async function claimEntranceExam(
+  worker: WorkerDocument,
+): Promise<ClaimResult | null> {
+  const exam = await injectEntranceExam(worker._id);
+  const db = await getDb();
+  const now = new Date();
+
+  const claimed = await db
+    .collection<TaskDocument>(COLLECTIONS.TASK)
+    .findOneAndUpdate(
+      { _id: exam._id, status: "pending" },
+      { $set: { status: "assigned" as const, worker_id: worker._id, assigned_at: now } },
+      { returnDocument: "after" },
+    );
+
+  if (!claimed) {
+    // Already assigned (race condition or re-poll) — return existing assigned exam
+    const assigned = await db
+      .collection<TaskDocument>(COLLECTIONS.TASK)
+      .findOne({ _id: exam._id, worker_id: worker._id, status: "assigned" });
+    if (!assigned) return null;
+    return {
+      task: stripInternalFields(assigned),
+      stats: await buildWorkerStats(worker, false),
+    };
+  }
+
+  return {
+    task: stripInternalFields(claimed),
+    stats: await buildWorkerStats(worker, false),
   };
 }
 

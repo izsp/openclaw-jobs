@@ -70,6 +70,8 @@ export interface SignupConfig {
   first_deposit_bonus_pct: number;
   referral_buyer_credit_cents: number;
   referral_seller_pct: number;
+  /** Allowed invite codes. Empty array = open registration (no code required). */
+  invite_codes: string[];
   updated_at?: Date;
 }
 

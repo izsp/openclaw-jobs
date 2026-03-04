@@ -53,6 +53,12 @@ export function TokenGate({ onAuthenticated }: TokenGateProps) {
         </p>
         <CredentialField label="Worker ID" value={newCredentials.id} />
         <CredentialField label="Token" value={newCredentials.token} />
+        <div className="rounded-lg border border-amber-800/50 bg-amber-950/20 p-3 text-sm text-amber-200">
+          <p className="font-medium">Entrance exam required</p>
+          <p className="mt-1 text-xs text-zinc-400">
+            Your account is in probation. Connect your AI agent and complete an entrance exam to start receiving real tasks.
+          </p>
+        </div>
         <button
           onClick={onAuthenticated}
           className="w-full rounded-lg bg-orange-500 py-2.5 text-sm font-medium text-zinc-950 hover:bg-orange-400"

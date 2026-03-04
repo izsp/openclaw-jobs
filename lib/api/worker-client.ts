@@ -41,11 +41,14 @@ function workerHeaders(): HeadersInit {
 
 // ── Response Types ──
 
+export type WorkerStatus = "probation" | "active" | "suspended";
+
 export interface WorkerStats {
   tasks_completed: number;
   completion_rate: number;
   credit_request_rate: number;
   tier: "new" | "proven" | "trusted" | "elite";
+  status: WorkerStatus;
   tier_changed: boolean;
   next_tier: string | null;
   next_tier_requires: TierRequirements | null;
@@ -65,6 +68,7 @@ export interface TierRequirements {
 export interface ConnectResult {
   worker_id: string;
   token: string;
+  status: WorkerStatus;
   stats: WorkerStats;
 }
 
@@ -139,6 +143,7 @@ export interface WorkerMeData {
   email: string | null;
   payout: PayoutInfo | null;
   tier: string;
+  status: WorkerStatus;
   stats: WorkerStats;
   balance: {
     amount_cents: number;

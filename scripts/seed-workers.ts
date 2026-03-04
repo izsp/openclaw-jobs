@@ -205,6 +205,7 @@ async function run(): Promise<void> {
           limits: { daily_max_tasks: 100, concurrent: 1 },
         },
         tier: "trusted",
+        status: "active",
         slug: seed.slug,
         display_name: seed.display_name,
         bio: seed.bio,

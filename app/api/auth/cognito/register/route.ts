@@ -11,6 +11,17 @@ import { HTTP_STATUS, PAYLOAD_LIMITS } from "@/lib/constants";
 import { ValidationError } from "@/lib/errors";
 import { readJsonBody } from "@/lib/validate-payload";
 import { enforceRateLimit } from "@/lib/enforce-rate-limit";
+import { getConfig } from "@/lib/config";
+
+/** Validates invite code against configured codes. No-op if config has empty array. */
+async function validateInviteCode(code: string | undefined): Promise<void> {
+  const signupConfig = await getConfig("signup");
+  const codes = signupConfig?.invite_codes ?? [];
+  if (codes.length === 0) return;
+  if (!code || !codes.includes(code)) {
+    throw new ValidationError("Invalid invite code");
+  }
+}
 
 export async function POST(request: Request) {
   const requestId = generateRequestId();
@@ -22,7 +33,11 @@ export async function POST(request: Request) {
       throw new ValidationError(parsed.error.issues[0].message);
     }
 
-    const { email, password } = parsed.data;
+    const { email, password, inviteCode } = parsed.data;
+
+    // WHY: Validate invite code BEFORE Cognito signup to avoid orphan accounts.
+    await validateInviteCode(inviteCode);
+
     const { userSub } = await signUpUser(email, password);
 
     return NextResponse.json(

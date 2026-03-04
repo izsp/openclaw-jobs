@@ -17,6 +17,9 @@ export const ID_PREFIX = {
   TOKEN: "ocj_w_",
 } as const;
 
+// ─── Worker Statuses ────────────────────────────────────────────────────────
+export const WORKER_STATUSES = ["probation", "active", "suspended"] as const;
+
 // ─── Worker Tiers ────────────────────────────────────────────────────────────
 export const WORKER_TIERS = ["new", "proven", "trusted", "elite"] as const;
 
@@ -49,7 +52,7 @@ export const AUTH_PROVIDERS = [
 export const USER_ROLES = ["buyer", "seller", "both"] as const;
 
 // ─── QA Types ────────────────────────────────────────────────────────────────
-export const QA_TYPES = ["spot_check", "shadow", "benchmark", "supervisor_review"] as const;
+export const QA_TYPES = ["spot_check", "shadow", "benchmark", "supervisor_review", "entrance_exam"] as const;
 
 // ─── Platform Config Keys ────────────────────────────────────────────────────
 export const CONFIG_KEYS = [

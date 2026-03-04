@@ -26,8 +26,15 @@ export function TierProgress({ stats }: TierProgressProps) {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs text-zinc-500">Current Tier</p>
-          <div className={`mt-1 inline-block rounded-full border px-3 py-1 text-sm font-semibold capitalize ${colorClass}`}>
-            {stats.tier}
+          <div className="mt-1 flex items-center gap-2">
+            <span className={`inline-block rounded-full border px-3 py-1 text-sm font-semibold capitalize ${colorClass}`}>
+              {stats.tier}
+            </span>
+            {stats.status === "probation" && (
+              <span className="rounded-full border border-amber-700 px-2 py-0.5 text-xs font-medium text-amber-400">
+                probation
+              </span>
+            )}
           </div>
         </div>
         <div className="text-right">

@@ -26,6 +26,7 @@ export async function GET(request: Request) {
           email: worker.email,
           payout: worker.payout ?? null,
           tier: worker.tier,
+          status: worker.status ?? "active",
           stats,
           balance: {
             amount_cents: balance.amount_cents,

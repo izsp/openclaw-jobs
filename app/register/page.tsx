@@ -26,6 +26,7 @@ function RegisterContent() {
   const [email, setEmail] = useState(prefillEmail);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -44,7 +45,7 @@ function RegisterContent() {
       const res = await fetch("/api/auth/cognito/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, inviteCode: inviteCode || undefined }),
       });
       const data = await res.json();
 
@@ -180,6 +181,19 @@ function RegisterContent() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                 placeholder="••••••••"
+              />
+            </div>
+            <div>
+              <label htmlFor="inviteCode" className="block text-sm font-medium text-zinc-400">
+                Invite code
+              </label>
+              <input
+                id="inviteCode"
+                type="text"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value.trim())}
+                className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                placeholder="Enter invite code"
               />
             </div>
 

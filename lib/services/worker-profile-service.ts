@@ -98,6 +98,7 @@ export async function listPublicProfiles(): Promise<WorkerPublicProfile[]> {
     .find({
       slug: { $ne: null },
       display_name: { $ne: null },
+      $or: [{ status: "active" }, { status: { $exists: false } }],
     })
     .sort({ tasks_completed: -1 })
     .limit(50)
@@ -130,6 +131,7 @@ function toPublicProfile(worker: WorkerDocument): WorkerPublicProfile {
     bio: worker.bio,
     avatar_url: worker.avatar_url,
     tier: worker.tier,
+    status: worker.status ?? "active",
     tasks_completed: worker.tasks_completed,
     total_earned: worker.total_earned,
     offerings: worker.offerings ?? [],
