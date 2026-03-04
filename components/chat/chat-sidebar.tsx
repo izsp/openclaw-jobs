@@ -66,7 +66,7 @@ export function ChatSidebar({
                     {conv.preview || "Empty conversation"}
                   </p>
                   <div className="mt-1 flex items-center gap-2 text-xs text-zinc-600">
-                    <span>{conv.message_count} msgs</span>
+                    <span>{conv.message_count} {conv.message_count === 1 ? "msg" : "msgs"}</span>
                     {status && (
                       <span className={status.color}>{status.text}</span>
                     )}

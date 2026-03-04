@@ -36,7 +36,7 @@ function ChatPageInner() {
   const offeringId = searchParams.get("offering");
 
   // Resolve worker profile + offering when URL params are present
-  const { workerId, welcomeMessage } = useWorkerOffering(workerSlug, offeringId);
+  const { workerId, welcomeMessage, loading: offeringLoading } = useWorkerOffering(workerSlug, offeringId);
 
   const [activeConvId, setActiveConvId] = useState<string | null>(urlId);
   const [sidebarKey, setSidebarKey] = useState(0);
@@ -59,7 +59,7 @@ function ChatPageInner() {
     }
   }, [activeConvId]);
 
-  if (status === "loading") {
+  if (status === "loading" || offeringLoading) {
     return <PageShell />;
   }
   if (!isAuthenticated) {

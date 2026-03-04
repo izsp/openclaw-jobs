@@ -1,21 +1,33 @@
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import type { ResultMetadata } from "@/lib/chat/chat-types";
+import { TaskResultCard } from "./task-result-card";
 
 interface ChatMessageProps {
   role: "user" | "assistant" | "system";
   content: string;
+  resultMeta?: ResultMetadata;
+  onCredit?: (taskId: string) => void;
 }
 
-export function ChatMessage({ role, content }: ChatMessageProps) {
-  const isUser = role === "user";
-
-  if (isUser) {
+export function ChatMessage({ role, content, resultMeta, onCredit }: ChatMessageProps) {
+  if (role === "user") {
     return (
       <div className="flex justify-end">
         <div className="max-w-[80%] rounded-2xl bg-orange-500 px-4 py-2.5 text-sm leading-relaxed text-zinc-950 whitespace-pre-wrap">
           {content}
         </div>
       </div>
+    );
+  }
+
+  // Structured result card for completed task output
+  if (resultMeta && onCredit) {
+    return (
+      <TaskResultCard
+        message={{ id: "", role, content, timestamp: 0, result_meta: resultMeta }}
+        onCredit={onCredit}
+      />
     );
   }
 

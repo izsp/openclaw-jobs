@@ -35,6 +35,8 @@ export interface TaskStatus {
   output: TaskOutput | null;
   completed_at: string | null;
   created_at: string;
+  worker_display_name?: string | null;
+  worker_avatar_url?: string | null;
 }
 
 export interface CreditResult {

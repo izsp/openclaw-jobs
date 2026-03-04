@@ -3,6 +3,7 @@
  */
 import { taskIdParamSchema } from "@/lib/validators/task.validator";
 import { getTaskForBuyer } from "@/lib/services/task-service";
+import { lookupWorkerDisplay } from "@/lib/services/worker-display-service";
 import { successResponse, errorResponse } from "@/lib/types/api.types";
 import { requireAuth, handleApiError, generateRequestId, jsonResponse } from "@/lib/api-handler";
 import { HTTP_STATUS } from "@/lib/constants";
@@ -29,6 +30,11 @@ export async function GET(request: Request, context: RouteContext) {
 
     const task = await getTaskForBuyer(parsed.data, userId);
 
+    // Look up worker display info for completed tasks
+    const workerInfo = task.status === "completed" && task.worker_id
+      ? await lookupWorkerDisplay(task.worker_id)
+      : null;
+
     return jsonResponse(
       successResponse(
         {
@@ -39,6 +45,8 @@ export async function GET(request: Request, context: RouteContext) {
           output: task.output,
           completed_at: task.completed_at?.toISOString() ?? null,
           created_at: task.created_at.toISOString(),
+          worker_display_name: workerInfo?.display_name ?? null,
+          worker_avatar_url: workerInfo?.avatar_url ?? null,
         },
         requestId,
       ),

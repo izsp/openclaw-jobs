@@ -6,7 +6,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import type { ChatMessage, ChatConversation } from "@/lib/chat/chat-types";
+import type { ChatMessage, ChatConversation, ResultMetadata } from "@/lib/chat/chat-types";
 import { upsertConversation, loadConversations } from "@/lib/chat/chat-storage";
 import { submitTask } from "@/lib/api/task-client";
 import { getTaskStatus, type TaskStatus } from "@/lib/api/task-client";
@@ -44,8 +44,37 @@ function createConversation(): ChatConversation {
   };
 }
 
-function createMessage(role: ChatMessage["role"], content: string): ChatMessage {
-  return { id: crypto.randomUUID(), role, content, timestamp: Date.now() };
+function createMessage(
+  role: ChatMessage["role"],
+  content: string,
+  resultMeta?: ResultMetadata,
+): ChatMessage {
+  const msg: ChatMessage = { id: crypto.randomUUID(), role, content, timestamp: Date.now() };
+  if (resultMeta) msg.result_meta = resultMeta;
+  return msg;
+}
+
+/** Builds ResultMetadata from a completed task status response. */
+function buildResultMeta(status: TaskStatus): ResultMetadata {
+  const content = status.output?.content ?? "";
+  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+  const createdMs = new Date(status.created_at).getTime();
+  const completedMs = status.completed_at
+    ? new Date(status.completed_at).getTime()
+    : Date.now();
+  const durationSeconds = Math.max(0, (completedMs - createdMs) / 1000);
+
+  return {
+    task_id: status.task_id,
+    task_type: status.type,
+    price_cents: status.price_cents,
+    completed_at: status.completed_at ?? new Date().toISOString(),
+    worker_display_name: status.worker_display_name ?? null,
+    worker_avatar_url: status.worker_avatar_url ?? null,
+    word_count: wordCount,
+    duration_seconds: Math.round(durationSeconds * 10) / 10,
+    format: status.output?.format ?? "markdown",
+  };
 }
 
 export function useChat(userId: string | null, options?: UseChatOptions): UseChatReturn {
@@ -97,7 +126,11 @@ export function useChat(userId: string | null, options?: UseChatOptions): UseCha
               (m) => m.role === "assistant" && m.content === outputText,
             );
             if (!alreadyHasResult) {
-              updated.messages = [...prev.messages, createMessage("assistant", outputText)];
+              const meta = buildResultMeta(status);
+              updated.messages = [
+                ...prev.messages,
+                createMessage("assistant", outputText, meta),
+              ];
             }
           }
           return updated;

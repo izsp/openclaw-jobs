@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { ChatInput } from "./chat-input";
 import { ChatMessage } from "./chat-message";
@@ -8,6 +8,7 @@ import { TaskStatusBar } from "./task-status-bar";
 import { SignInPrompt } from "./sign-in-prompt";
 import { useChat } from "@/lib/hooks/use-chat";
 import { useBalance } from "@/lib/hooks/use-balance";
+import { creditTask } from "@/lib/api/task-client";
 
 interface ChatPanelProps {
   /** ID of conversation to load. Changes trigger load. */
@@ -67,6 +68,14 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
 
   const isBusy = sending || polling;
 
+  const handleCredit = useCallback(async (taskId: string) => {
+    try {
+      await creditTask(taskId);
+    } catch {
+      // Credit errors are non-critical for the chat flow
+    }
+  }, []);
+
   return (
     <div className="flex min-h-[400px] flex-1 flex-col rounded-xl border border-zinc-800 bg-zinc-900/50">
       {/* Messages area */}
@@ -81,7 +90,13 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
           <ChatMessage role="assistant" content={welcomeMessage} />
         )}
         {messages.map((msg) => (
-          <ChatMessage key={msg.id} role={msg.role} content={msg.content} />
+          <ChatMessage
+            key={msg.id}
+            role={msg.role}
+            content={msg.content}
+            resultMeta={msg.result_meta}
+            onCredit={handleCredit}
+          />
         ))}
         {isBusy && !["completed", "failed", "expired", "credited"].includes(conversation?.task_status ?? "") && (
           <div className="flex justify-start">
