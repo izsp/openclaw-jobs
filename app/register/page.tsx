@@ -124,8 +124,7 @@ function RegisterContent() {
       <div className="w-full max-w-sm space-y-6">
         {/* Header */}
         <div className="text-center">
-          <div className="text-4xl">🦞</div>
-          <h1 className="mt-3 text-2xl font-bold text-content">
+          <h1 className="text-2xl font-bold text-content">
             {step === "register" ? "Create your account" : "Verify your email"}
           </h1>
           <p className="mt-1 text-sm text-content-tertiary">

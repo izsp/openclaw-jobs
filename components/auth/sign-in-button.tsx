@@ -6,7 +6,7 @@ export function SignInButton() {
   return (
     <button
       onClick={() => signIn()}
-      className="rounded-full border border-zinc-700 px-4 py-1.5 text-sm font-medium text-zinc-300 transition-colors hover:border-orange-500 hover:text-orange-500"
+      className="rounded-full bg-content px-4 py-1.5 text-sm font-medium text-page transition-colors hover:opacity-90"
     >
       Sign in
     </button>

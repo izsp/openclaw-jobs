@@ -64,9 +64,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 }
 
 const TYPE_STYLES: Record<ToastType, string> = {
-  success: "border-green-800 bg-green-950/90 text-green-300",
-  error: "border-red-800 bg-red-950/90 text-red-300",
-  info: "border-zinc-700 bg-zinc-900/90 text-zinc-300",
+  success: "border-status-success/30 bg-surface/95 text-status-success",
+  error: "border-status-error/30 bg-surface/95 text-status-error",
+  info: "border-edge bg-surface/95 text-content-secondary",
 };
 
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
@@ -78,7 +78,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
       <span className="flex-1">{toast.message}</span>
       <button
         onClick={onDismiss}
-        className="shrink-0 text-zinc-500 transition-colors hover:text-zinc-300"
+        className="shrink-0 text-content-tertiary transition-colors hover:text-content-secondary"
         aria-label="Dismiss"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
