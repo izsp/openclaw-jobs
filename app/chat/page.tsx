@@ -1,6 +1,7 @@
 /**
  * Dedicated chat page for authenticated users.
  * Full-screen layout with conversation sidebar + chat panel.
+ * Results open in a side panel (desktop) or full-screen sheet (mobile).
  * Supports ?worker=<slug>&offering=<id> for pre-assigned worker chats.
  */
 "use client";
@@ -12,9 +13,12 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ChatPanel } from "@/components/chat/chat-panel";
 import { ChatSidebar } from "@/components/chat/chat-sidebar";
+import { ResultPanel } from "@/components/chat/result-panel";
+import { ResultSheet } from "@/components/chat/result-sheet";
 import { listConversations, deleteConversation } from "@/lib/chat/chat-storage";
 import { useBalance } from "@/lib/hooks/use-balance";
 import { useWorkerOffering } from "@/lib/hooks/use-worker-offering";
+import type { ChatMessage } from "@/lib/chat/chat-types";
 
 export default function ChatPage() {
   return (
@@ -35,12 +39,10 @@ function ChatPageInner() {
   const workerSlug = searchParams.get("worker");
   const offeringId = searchParams.get("offering");
 
-  // Resolve worker profile + offering when URL params are present
   const { workerId, welcomeMessage, loading: offeringLoading } = useWorkerOffering(workerSlug, offeringId);
 
   // WHY: On refresh without ?id= param, auto-select the most recent
-  // conversation so the user doesn't lose context. Prioritize conversations
-  // with active (non-terminal) tasks so polling can resume.
+  // conversation so the user doesn't lose context.
   const initialConvId = (() => {
     if (urlId) return urlId;
     if (!userId) return null;
@@ -56,8 +58,10 @@ function ChatPageInner() {
   const [sidebarKey, setSidebarKey] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Keep URL param in sync — if URL changes, update state
-  // WHY: Using derived state pattern instead of effect to avoid cascading renders
+  // Result panel state — the message currently being viewed
+  const [expandedResult, setExpandedResult] = useState<ChatMessage | null>(null);
+
+  // Keep URL param in sync
   const [prevUrlId, setPrevUrlId] = useState(urlId);
   if (urlId !== prevUrlId) {
     setPrevUrlId(urlId);
@@ -70,9 +74,33 @@ function ChatPageInner() {
     if (id && id !== activeConvId) {
       setActiveConvId(id);
     }
-    // Always bump sidebar key so it re-reads localStorage for latest status
     setSidebarKey((k) => k + 1);
   }, [activeConvId]);
+
+  // Close result panel when switching conversations
+  useEffect(() => {
+    setExpandedResult(null);
+  }, [activeConvId]);
+
+  const handleOpenResult = useCallback((message: ChatMessage) => {
+    setExpandedResult(message);
+  }, []);
+
+  const handleCloseResult = useCallback(() => {
+    setExpandedResult(null);
+  }, []);
+
+  // Stub credit handler — delegates to the chat hook via the conversation
+  const handleCredit = useCallback(async (taskId: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/task/${encodeURIComponent(taskId)}/credit`, {
+        method: "POST",
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }, []);
 
   if (status === "loading" || offeringLoading) {
     return <PageShell />;
@@ -101,12 +129,13 @@ function ChatPageInner() {
     setSidebarKey((k) => k + 1);
   }
 
+  const hasPanel = expandedResult !== null;
+
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-page text-content">
       {/* Compact header */}
       <nav className="flex shrink-0 items-center justify-between overflow-hidden border-b border-edge px-3 py-2 md:px-4 md:py-3">
         <div className="flex items-center gap-2">
-          {/* Mobile sidebar toggle */}
           <button
             onClick={() => setSidebarOpen((o) => !o)}
             className="rounded p-1.5 text-content-tertiary transition-colors hover:text-content-secondary lg:hidden"
@@ -140,7 +169,7 @@ function ChatPageInner() {
         </div>
       </nav>
 
-      {/* Main area: sidebar + chat */}
+      {/* Main area: sidebar + chat + result panel */}
       <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden">
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
@@ -149,7 +178,7 @@ function ChatPageInner() {
             onClick={() => setSidebarOpen(false)}
           />
         )}
-        {/* Sidebar: overlay on mobile, inline on desktop */}
+        {/* Sidebar */}
         <div className={`${
           sidebarOpen ? "fixed inset-y-0 left-0 z-30" : "hidden"
         } lg:relative lg:z-auto lg:block`}>
@@ -162,14 +191,45 @@ function ChatPageInner() {
             onDelete={handleDeleteConversation}
           />
         </div>
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col p-1 md:p-4">
+
+        {/* Chat panel — shrinks when result panel is open on desktop */}
+        <div className={`flex min-h-0 min-w-0 flex-1 flex-col p-1 md:p-4 ${
+          hasPanel ? "lg:max-w-[45%]" : ""
+        }`}>
           <ChatPanel
             conversationId={activeConvId}
             onConversationChange={handleConversationChange}
+            onOpenResult={handleOpenResult}
             assignedWorkerId={workerId}
             welcomeMessage={welcomeMessage}
           />
         </div>
+
+        {/* Desktop: Side panel (lg and up) */}
+        {hasPanel && expandedResult.result_meta && (
+          <div className="hidden w-[55%] lg:block">
+            <ResultPanel
+              content={expandedResult.content}
+              meta={expandedResult.result_meta}
+              onClose={handleCloseResult}
+              onCredit={handleCredit}
+              credited={false}
+            />
+          </div>
+        )}
+
+        {/* Mobile: Full-screen sheet (below lg) */}
+        {hasPanel && expandedResult.result_meta && (
+          <div className="lg:hidden">
+            <ResultSheet
+              content={expandedResult.content}
+              meta={expandedResult.result_meta}
+              onClose={handleCloseResult}
+              onCredit={handleCredit}
+              credited={false}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

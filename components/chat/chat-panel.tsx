@@ -8,22 +8,28 @@ import { TaskStatusBar } from "./task-status-bar";
 import { SignInPrompt } from "./sign-in-prompt";
 import { useChat } from "@/lib/hooks/use-chat";
 import { useBalance } from "@/lib/hooks/use-balance";
-import { DEFAULT_DEPTH_SETTINGS } from "@/lib/chat/depth-types";
+import type { ChatMessage as ChatMessageType } from "@/lib/chat/chat-types";
 
 interface ChatPanelProps {
   /** ID of conversation to load. Changes trigger load. */
   conversationId?: string | null;
   /** Called when conversation changes (for sidebar sync). */
   onConversationChange?: (id: string | null) => void;
-  /** Called when a task example is clicked — fills the input directly. */
-  onExampleClick?: (text: string) => void;
+  /** Called when user clicks to open a result in side panel / sheet. */
+  onOpenResult?: (message: ChatMessageType) => void;
   /** Pre-assigned worker ID for directed tasks. */
   assignedWorkerId?: string | null;
   /** Welcome message to display from worker offering. */
   welcomeMessage?: string | null;
 }
 
-export function ChatPanel({ conversationId, onConversationChange, assignedWorkerId, welcomeMessage }: ChatPanelProps = {}) {
+export function ChatPanel({
+  conversationId,
+  onConversationChange,
+  onOpenResult,
+  assignedWorkerId,
+  welcomeMessage,
+}: ChatPanelProps) {
   const { data: session, status } = useSession();
   const userId = session?.user?.id ?? null;
   const isAuthenticated = status === "authenticated";
@@ -49,14 +55,12 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
     }
   }, [conversationId, reset, loadById]);
 
-  // Notify parent when conversation ID or task status changes (triggers sidebar refresh)
+  // Notify parent when conversation ID or task status changes
   const convId = conversation?.id ?? null;
   const convStatus = conversation?.task_status ?? null;
   useEffect(() => {
     onConversationChangeRef.current?.(convId);
   }, [convId, convStatus]);
-
-  const handleCredit = credit;
 
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
@@ -89,9 +93,8 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
             key={msg.id}
             role={msg.role}
             content={msg.content}
-            resultMeta={msg.result_meta}
-            onCredit={handleCredit}
-            credited={conversation?.task_status === "credited"}
+            message={msg}
+            onOpenResult={onOpenResult}
           />
         ))}
         {isBusy && !["completed", "failed", "expired", "credited"].includes(conversation?.task_status ?? "") && (
@@ -160,7 +163,6 @@ function EmptyState({ balanceCents, onExampleClick }: EmptyStateProps) {
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4 px-4">
-      {/* Zero-balance onboarding prompt */}
       {!hasBalance && balanceCents !== null && (
         <div className="w-full max-w-lg rounded-lg border border-accent/20 bg-accent-subtle-bg px-4 py-3 text-center">
           <p className="text-sm font-medium text-accent-subtle-text">

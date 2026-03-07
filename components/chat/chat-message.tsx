@@ -1,17 +1,18 @@
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import type { ResultMetadata } from "@/lib/chat/chat-types";
+import type { ChatMessage as ChatMessageType } from "@/lib/chat/chat-types";
 import { TaskResultCard } from "./task-result-card";
 
 interface ChatMessageProps {
   role: "user" | "assistant" | "system";
   content: string;
-  resultMeta?: ResultMetadata;
-  onCredit?: (taskId: string) => Promise<boolean>;
-  credited?: boolean;
+  /** Full message object — needed for result card to pass to onOpen. */
+  message?: ChatMessageType;
+  /** Called when user clicks to open a result in the side panel / sheet. */
+  onOpenResult?: (message: ChatMessageType) => void;
 }
 
-export function ChatMessage({ role, content, resultMeta, onCredit, credited }: ChatMessageProps) {
+export function ChatMessage({ role, content, message, onOpenResult }: ChatMessageProps) {
   if (role === "user") {
     return (
       <div className="flex justify-end">
@@ -23,12 +24,11 @@ export function ChatMessage({ role, content, resultMeta, onCredit, credited }: C
   }
 
   // Structured result card for completed task output
-  if (resultMeta && onCredit) {
+  if (message?.result_meta && onOpenResult) {
     return (
       <TaskResultCard
-        message={{ id: "", role, content, timestamp: 0, result_meta: resultMeta }}
-        onCredit={onCredit}
-        credited={credited}
+        message={message}
+        onOpen={onOpenResult}
       />
     );
   }
