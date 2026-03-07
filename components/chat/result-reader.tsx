@@ -114,8 +114,8 @@ export function ResultReader({
 
   return (
     <div className="min-h-dvh bg-page text-content">
-      {/* Reading progress bar — fixed at very top */}
-      <div className="fixed inset-x-0 top-0 z-[60] h-[2px] pointer-events-none">
+      {/* Reading progress bar — fixed at bottom */}
+      <div className="fixed inset-x-0 bottom-0 z-[60] h-[2px] pointer-events-none">
         <div
           className="h-full bg-content-tertiary transition-[width] duration-150 ease-out"
           style={{ width: `${progress * 100}%` }}

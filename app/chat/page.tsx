@@ -1,15 +1,15 @@
 /**
  * Dedicated chat page for authenticated users.
- * Full-screen layout with conversation sidebar + chat panel.
- * Results open in a side panel (desktop) or full-screen reader page (mobile).
+ * Mobile: warm light theme. Desktop: dark theme (Claude-style).
+ * Results: side panel (desktop) or full-page reader (mobile).
  *
  * URL patterns:
  *   /chat?id=<convId>           — chat view
- *   /chat?id=<convId>&task=<id> — mobile: full-page reader (native scroll)
+ *   /chat?id=<convId>&task=<id> — mobile full-page reader
  */
 "use client";
 
-import { Suspense, useState, useCallback, useEffect } from "react";
+import { Suspense, useState, useCallback, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { redirect } from "next/navigation";
@@ -31,13 +31,10 @@ export default function ChatPage() {
   );
 }
 
-/** Finds a result message by task_id across all conversations. */
 function findResultMessage(userId: string, taskId: string): ChatMessage | null {
   const conversations = loadConversations(userId);
   for (const conv of conversations) {
-    const msg = conv.messages.find(
-      (m) => m.result_meta?.task_id === taskId,
-    );
+    const msg = conv.messages.find((m) => m.result_meta?.task_id === taskId);
     if (msg) return msg;
   }
   return null;
@@ -71,11 +68,12 @@ function ChatPageInner() {
   const [activeConvId, setActiveConvId] = useState<string | null>(initialConvId);
   const [sidebarKey, setSidebarKey] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // Desktop side panel state
   const [expandedResult, setExpandedResult] = useState<ChatMessage | null>(null);
 
-  // Keep URL param in sync
+  // Resizable panel width (percentage, desktop only)
+  const [panelWidth, setPanelWidth] = useState(55);
+  const dragging = useRef(false);
+
   const [prevUrlId, setPrevUrlId] = useState(urlId);
   if (urlId !== prevUrlId) {
     setPrevUrlId(urlId);
@@ -91,13 +89,10 @@ function ChatPageInner() {
     setSidebarKey((k) => k + 1);
   }, [activeConvId]);
 
-  // Sync URL with active conversation
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    if (params.get("task")) return;
     const currentId = params.get("id");
-    const currentTask = params.get("task");
-    // Don't override URL when in reader mode
-    if (currentTask) return;
     if (activeConvId && activeConvId !== currentId) {
       window.history.replaceState(null, "", `/chat?id=${activeConvId}`);
     } else if (!activeConvId && currentId) {
@@ -105,67 +100,71 @@ function ChatPageInner() {
     }
   }, [activeConvId]);
 
-  // Close result panel when switching conversations
-  useEffect(() => {
-    setExpandedResult(null);
-  }, [activeConvId]);
+  useEffect(() => { setExpandedResult(null); }, [activeConvId]);
 
-  // WHY: On mobile, opening a result navigates to ?task=<id> so it's a
-  // real page (native scroll → iOS address bar collapse). On desktop,
-  // it opens a side panel (no navigation needed).
   const handleOpenResult = useCallback((message: ChatMessage) => {
     if (!message.result_meta) return;
-    const taskId = message.result_meta.task_id;
-    // Desktop: side panel
     setExpandedResult(message);
-    // Mobile: push URL so it becomes a real page
+    // Mobile: navigate to reader page
     if (window.innerWidth < 1024) {
       const convId = activeConvId ?? "";
-      window.history.pushState(null, "", `/chat?id=${convId}&task=${taskId}`);
+      window.history.pushState(null, "", `/chat?id=${convId}&task=${message.result_meta.task_id}`);
     }
   }, [activeConvId]);
 
   const handleCloseResult = useCallback(() => {
     setExpandedResult(null);
-    // If URL has task param, go back
     const params = new URLSearchParams(window.location.search);
-    if (params.get("task")) {
-      window.history.back();
-    }
+    if (params.get("task")) window.history.back();
   }, []);
 
-  // WHY: Listen for browser back button to close the reader
   useEffect(() => {
     function onPopState() {
       const params = new URLSearchParams(window.location.search);
-      if (!params.get("task")) {
-        setExpandedResult(null);
-      }
+      if (!params.get("task")) setExpandedResult(null);
     }
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
+  // Resizable panel drag handler
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    dragging.current = true;
+    const startX = e.clientX;
+    const startWidth = panelWidth;
+
+    function onMove(ev: MouseEvent) {
+      if (!dragging.current) return;
+      const dx = ev.clientX - startX;
+      const vw = window.innerWidth;
+      const newWidth = startWidth - (dx / vw) * 100;
+      setPanelWidth(Math.min(70, Math.max(30, newWidth)));
+    }
+    function onUp() {
+      dragging.current = false;
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    }
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  }, [panelWidth]);
+
   const handleCredit = useCallback(async (taskId: string): Promise<boolean> => {
     try {
-      const res = await fetch(`/api/task/${encodeURIComponent(taskId)}/credit`, {
-        method: "POST",
-      });
+      const res = await fetch(`/api/task/${encodeURIComponent(taskId)}/credit`, { method: "POST" });
       return res.ok;
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   }, []);
 
-  if (status === "loading" || offeringLoading) {
-    return <PageShell />;
-  }
-  if (!isAuthenticated) {
-    redirect("/login");
-  }
+  if (status === "loading" || offeringLoading) return <PageShell />;
+  if (!isAuthenticated) redirect("/login");
 
-  // --- Mobile reader mode: full page, native scroll ---
-  // Check if we should show the reader (URL has task param)
+  // Mobile reader mode
   const readerMessage = urlTaskId && userId
     ? (expandedResult?.result_meta?.task_id === urlTaskId
         ? expandedResult
@@ -184,32 +183,13 @@ function ChatPageInner() {
     );
   }
 
-  // --- Normal chat mode ---
+  // Normal chat mode
   const conversations = userId ? listConversations(userId) : [];
-
-  function handleNewChat() {
-    setActiveConvId(null);
-  }
-
-  function handleSelectConversation(id: string) {
-    setActiveConvId(id);
-    setSidebarOpen(false);
-  }
-
-  function handleDeleteConversation(id: string) {
-    if (!userId) return;
-    deleteConversation(userId, id);
-    if (activeConvId === id) {
-      setActiveConvId(null);
-    }
-    setSidebarKey((k) => k + 1);
-  }
-
   const hasPanel = expandedResult !== null;
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-page text-content">
-      {/* Compact header */}
+    <div className="chat-layout flex h-[100dvh] flex-col overflow-hidden bg-page text-content">
+      {/* Header */}
       <nav className="flex shrink-0 items-center justify-between overflow-hidden border-b border-edge px-3 py-2 md:px-4 md:py-3">
         <div className="flex items-center gap-2">
           <button
@@ -245,33 +225,36 @@ function ChatPageInner() {
         </div>
       </nav>
 
-      {/* Main area: sidebar + chat + result panel */}
+      {/* Main area */}
       <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden">
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
-          <div
-            className="fixed inset-0 z-20 bg-overlay lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
+          <div className="fixed inset-0 z-20 bg-overlay lg:hidden" onClick={() => setSidebarOpen(false)} />
         )}
         {/* Sidebar */}
-        <div className={`${
-          sidebarOpen ? "fixed inset-y-0 left-0 z-30" : "hidden"
-        } lg:relative lg:z-auto lg:block`}>
-          <ChatSidebar
-            key={sidebarKey}
-            conversations={conversations}
-            activeId={activeConvId}
-            onSelect={handleSelectConversation}
-            onNewChat={() => { handleNewChat(); setSidebarOpen(false); }}
-            onDelete={handleDeleteConversation}
-          />
+        <div className={`${sidebarOpen ? "fixed inset-y-0 left-0 z-30" : "hidden"} lg:relative lg:z-auto lg:block`}>
+          <div className="chat-sidebar-dark h-full">
+            <ChatSidebar
+              key={sidebarKey}
+              conversations={conversations}
+              activeId={activeConvId}
+              onSelect={(id) => { setActiveConvId(id); setSidebarOpen(false); }}
+              onNewChat={() => { setActiveConvId(null); setSidebarOpen(false); }}
+              onDelete={(id) => {
+                if (!userId) return;
+                deleteConversation(userId, id);
+                if (activeConvId === id) setActiveConvId(null);
+                setSidebarKey((k) => k + 1);
+              }}
+            />
+          </div>
         </div>
 
-        {/* Chat panel — shrinks when result panel is open on desktop */}
-        <div className={`flex min-h-0 min-w-0 flex-1 flex-col p-1 md:p-4 ${
-          hasPanel ? "lg:max-w-[45%]" : ""
-        }`}>
+        {/* Chat panel */}
+        <div
+          className="flex min-h-0 min-w-0 flex-1 flex-col p-1 md:p-4"
+          style={hasPanel ? { maxWidth: `${100 - panelWidth}%` } : undefined}
+        >
           <ChatPanel
             conversationId={activeConvId}
             onConversationChange={handleConversationChange}
@@ -281,16 +264,26 @@ function ChatPageInner() {
           />
         </div>
 
-        {/* Desktop: Side panel (lg and up) */}
+        {/* Desktop: Resizable artifact panel */}
         {hasPanel && expandedResult.result_meta && (
-          <div className="hidden w-[55%] lg:block">
-            <ResultPanel
-              content={expandedResult.content}
-              meta={expandedResult.result_meta}
-              onClose={handleCloseResult}
-              onCredit={handleCredit}
-              credited={false}
-            />
+          <div className="hidden lg:flex" style={{ width: `${panelWidth}%` }}>
+            {/* Drag handle */}
+            <div
+              onMouseDown={handleDragStart}
+              className="flex w-1.5 shrink-0 cursor-col-resize items-center justify-center hover:bg-edge/50 active:bg-edge transition-colors"
+            >
+              <div className="h-8 w-0.5 rounded-full bg-content-tertiary/40" />
+            </div>
+            {/* Panel */}
+            <div className="min-w-0 flex-1">
+              <ResultPanel
+                content={expandedResult.content}
+                meta={expandedResult.result_meta}
+                onClose={handleCloseResult}
+                onCredit={handleCredit}
+                credited={false}
+              />
+            </div>
           </div>
         )}
       </div>

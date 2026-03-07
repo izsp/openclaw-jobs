@@ -13,7 +13,6 @@ interface ResultPanelProps {
   credited?: boolean;
 }
 
-/** Formats seconds into human-readable duration. */
 function formatDuration(seconds: number): string {
   if (seconds < 60) return `${seconds.toFixed(1)}s`;
   const mins = Math.floor(seconds / 60);
@@ -22,9 +21,9 @@ function formatDuration(seconds: number): string {
 }
 
 /**
- * Desktop side panel for viewing full task results.
- * Opens to the right of the chat flow — Claude artifact style.
- * Has its own scroll context, never nests inside chat scroll.
+ * Desktop artifact panel — Claude-style.
+ * Dark header/footer frame with light content area for readability.
+ * Width controlled by parent (resizable via drag handle in chat page).
  */
 export function ResultPanel({
   content,
@@ -39,9 +38,7 @@ export function ResultPanel({
   );
 
   const handleEscape = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    },
+    (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); },
     [onClose],
   );
 
@@ -65,9 +62,9 @@ export function ResultPanel({
   const displayName = meta.worker_display_name ?? "Lobster";
 
   return (
-    <div className="flex h-full w-full animate-slide-in-right flex-col border-l border-edge bg-surface">
-      {/* Header */}
-      <div className="flex shrink-0 items-center gap-3 border-b border-edge px-4 py-3">
+    <div className="flex h-full w-full animate-slide-in-right flex-col bg-surface">
+      {/* Header — dark frame */}
+      <div className="flex shrink-0 items-center gap-3 border-b border-edge px-4 py-2.5">
         <button
           onClick={onClose}
           className="rounded-lg p-1.5 text-content-tertiary transition-colors hover:bg-surface-alt hover:text-content-secondary"
@@ -79,7 +76,6 @@ export function ResultPanel({
           </svg>
         </button>
 
-        {/* Worker info */}
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <span className="truncate text-xs text-content-secondary">{displayName}</span>
           <span className="text-xs text-content-tertiary">
@@ -90,7 +86,6 @@ export function ResultPanel({
           </span>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-1">
           <button
             onClick={handleCopy}
@@ -98,39 +93,32 @@ export function ResultPanel({
           >
             {copied ? "Copied" : "Copy"}
           </button>
+          <button
+            onClick={handleCredit}
+            disabled={creditState !== "idle"}
+            className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
+              creditState === "done"
+                ? "text-status-success"
+                : "text-content-secondary hover:bg-surface-alt hover:text-content"
+            } disabled:opacity-50`}
+          >
+            {creditState === "done"
+              ? "Credited"
+              : creditState === "loading"
+                ? "..."
+                : "Credit"}
+          </button>
         </div>
       </div>
 
-      {/* Content — independent scroll */}
-      <div className="flex-1 overflow-y-auto overscroll-contain">
+      {/* Content — light theme for readability */}
+      <div className="artifact-content-light flex-1 overflow-y-auto overscroll-contain bg-page">
         <div className="mx-auto max-w-2xl">
           <ResultContent content={content} format={meta.format} />
           {meta.attachments && meta.attachments.length > 0 && (
             <AttachmentList attachments={meta.attachments} taskId={meta.task_id} />
           )}
         </div>
-      </div>
-
-      {/* Footer — credit action */}
-      <div className="flex shrink-0 items-center justify-between border-t border-edge px-4 py-2.5">
-        <span className="text-xs text-content-tertiary">
-          {meta.price_cents} 🦐
-        </span>
-        <button
-          onClick={handleCredit}
-          disabled={creditState !== "idle"}
-          className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-            creditState === "done"
-              ? "text-status-success"
-              : "text-content-secondary hover:bg-surface-alt hover:text-content"
-          } disabled:opacity-50`}
-        >
-          {creditState === "done"
-            ? "Credited"
-            : creditState === "loading"
-              ? "Crediting..."
-              : "Request Credit"}
-        </button>
       </div>
     </div>
   );
