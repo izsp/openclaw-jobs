@@ -1,11 +1,13 @@
 /**
- * Displays the current task status and price in the chat panel.
+ * Displays the current task status, price, and action buttons in the chat panel.
  */
 
 interface TaskStatusBarProps {
   taskStatus: string | null;
   priceCents: number | null;
   balanceCents: number | null;
+  onCancel?: () => void;
+  onRetry?: () => void;
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -17,12 +19,23 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   credited: { label: "Credited", color: "text-green-400" },
 };
 
-export function TaskStatusBar({ taskStatus, priceCents, balanceCents }: TaskStatusBarProps) {
+const CANCELLABLE = new Set(["pending", "assigned"]);
+const RETRYABLE = new Set(["failed", "expired"]);
+
+export function TaskStatusBar({
+  taskStatus,
+  priceCents,
+  balanceCents,
+  onCancel,
+  onRetry,
+}: TaskStatusBarProps) {
   const statusInfo = taskStatus ? STATUS_LABELS[taskStatus] : null;
+  const canCancel = taskStatus !== null && CANCELLABLE.has(taskStatus);
+  const canRetry = taskStatus !== null && RETRYABLE.has(taskStatus);
 
   return (
-    <div className="flex items-center justify-between border-t border-zinc-800 px-4 py-2 text-xs text-zinc-600">
-      <div className="flex items-center gap-3">
+    <div className="flex flex-wrap items-center justify-between gap-y-1 border-t border-zinc-800 px-2 py-1.5 text-xs text-zinc-600 md:px-4 md:py-2">
+      <div className="flex items-center gap-2 md:gap-3">
         {statusInfo && (
           <span className={statusInfo.color}>
             {taskStatus === "assigned" && <span className="mr-1 animate-pulse">●</span>}
@@ -33,6 +46,22 @@ export function TaskStatusBar({ taskStatus, priceCents, balanceCents }: TaskStat
           <span>
             Cost: <span className="text-orange-500">{priceCents} 🦐</span>
           </span>
+        )}
+        {canCancel && onCancel && (
+          <button
+            onClick={onCancel}
+            className="rounded border border-zinc-700 px-2 py-0.5 text-zinc-400 transition-colors hover:border-red-500 hover:text-red-400"
+          >
+            Cancel
+          </button>
+        )}
+        {canRetry && onRetry && (
+          <button
+            onClick={onRetry}
+            className="rounded border border-zinc-700 px-2 py-0.5 text-zinc-400 transition-colors hover:border-orange-500 hover:text-orange-400"
+          >
+            Retry
+          </button>
         )}
       </div>
       {balanceCents !== null && (

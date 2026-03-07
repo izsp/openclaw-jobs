@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { ChatInput } from "./chat-input";
 import { ChatMessage } from "./chat-message";
@@ -8,7 +8,7 @@ import { TaskStatusBar } from "./task-status-bar";
 import { SignInPrompt } from "./sign-in-prompt";
 import { useChat } from "@/lib/hooks/use-chat";
 import { useBalance } from "@/lib/hooks/use-balance";
-import { creditTask } from "@/lib/api/task-client";
+import { DEFAULT_DEPTH_SETTINGS } from "@/lib/chat/depth-types";
 
 interface ChatPanelProps {
   /** ID of conversation to load. Changes trigger load. */
@@ -28,7 +28,7 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
   const userId = session?.user?.id ?? null;
   const isAuthenticated = status === "authenticated";
 
-  const { conversation, sending, polling, error, send, reset, loadById } = useChat(
+  const { conversation, sending, polling, error, send, cancel, credit, retry, reset, loadById } = useChat(
     userId,
     assignedWorkerId ? { assignedWorkerId } : undefined,
   );
@@ -49,19 +49,14 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
     }
   }, [conversationId, reset, loadById]);
 
-  // Notify parent when conversation ID changes
+  // Notify parent when conversation ID or task status changes (triggers sidebar refresh)
   const convId = conversation?.id ?? null;
+  const convStatus = conversation?.task_status ?? null;
   useEffect(() => {
     onConversationChangeRef.current?.(convId);
-  }, [convId]);
+  }, [convId, convStatus]);
 
-  const handleCredit = useCallback(async (taskId: string) => {
-    try {
-      await creditTask(taskId);
-    } catch {
-      // Credit errors are non-critical for the chat flow
-    }
-  }, []);
+  const handleCredit = credit;
 
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
@@ -77,9 +72,9 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
   const isBusy = sending || polling;
 
   return (
-    <div className="flex min-h-[400px] flex-1 flex-col rounded-xl border border-zinc-800 bg-zinc-900/50">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-none border-0 bg-zinc-900/50 md:min-h-[400px] md:rounded-xl md:border md:border-zinc-800">
       {/* Messages area */}
-      <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
+      <div ref={scrollRef} className="min-w-0 flex-1 space-y-3 overflow-x-hidden overflow-y-auto overscroll-y-contain p-2 md:p-4">
         {messages.length === 0 && !welcomeMessage && (
           <EmptyState
             balanceCents={balance?.amount_cents ?? null}
@@ -96,6 +91,7 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
             content={msg.content}
             resultMeta={msg.result_meta}
             onCredit={handleCredit}
+            credited={conversation?.task_status === "credited"}
           />
         ))}
         {isBusy && !["completed", "failed", "expired", "credited"].includes(conversation?.task_status ?? "") && (
@@ -121,10 +117,12 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
         taskStatus={conversation?.task_status ?? null}
         priceCents={conversation?.price_cents ?? null}
         balanceCents={balance?.amount_cents ?? null}
+        onCancel={cancel}
+        onRetry={retry}
       />
 
       {/* Input */}
-      <div className="border-t border-zinc-800 p-3">
+      <div className="border-t border-zinc-800 p-2 md:p-3">
         <ChatInput onSend={send} disabled={isBusy} />
       </div>
     </div>
@@ -133,7 +131,7 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
 
 function ChatShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-[400px] flex-1 flex-col items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/50">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-none bg-zinc-900/50 md:min-h-[400px] md:rounded-xl md:border md:border-zinc-800">
       {children}
     </div>
   );

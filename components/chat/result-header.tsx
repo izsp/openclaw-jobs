@@ -1,8 +1,11 @@
 import Image from "next/image";
 import type { ResultMetadata } from "@/lib/chat/chat-types";
+import type { ArtifactSummary } from "@/lib/chat/artifact-types";
+import { ArtifactBadge } from "./viewers/artifact-badge";
 
 interface ResultHeaderProps {
   meta: ResultMetadata;
+  summary?: ArtifactSummary;
 }
 
 /** Formats seconds into human-readable duration like "3.2s" or "1m 23s". */
@@ -29,12 +32,12 @@ function badgeColor(taskType: string): string {
   return colors[taskType] ?? "bg-zinc-700/50 text-zinc-300";
 }
 
-/** Card header showing worker info, task type badge, duration, and word count. */
-export function ResultHeader({ meta }: ResultHeaderProps) {
+/** Card header showing worker info, task type badge, artifact badges, duration, and word count. */
+export function ResultHeader({ meta, summary }: ResultHeaderProps) {
   const displayName = meta.worker_display_name ?? "Anonymous Lobster";
 
   return (
-    <div className="flex items-center gap-3 border-b border-zinc-700/50 px-4 py-2.5">
+    <div className="flex flex-wrap items-center gap-1.5 border-b border-zinc-700/50 px-2.5 py-2 md:gap-2 md:px-4 md:py-2.5">
       {/* Worker avatar */}
       {meta.worker_avatar_url ? (
         <Image
@@ -57,6 +60,11 @@ export function ResultHeader({ meta }: ResultHeaderProps) {
       <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${badgeColor(meta.task_type)}`}>
         {meta.task_type}
       </span>
+
+      {/* Artifact badges */}
+      {summary && summary.totalArtifacts > 0 && (
+        <ArtifactBadge summary={summary} />
+      )}
 
       {/* Spacer */}
       <div className="flex-1" />

@@ -3,15 +3,44 @@
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { CodeBlock } from "./code-block";
+import { TableViewer } from "./viewers/table-viewer";
+import { JsonViewer } from "./viewers/json-viewer";
+import { HtmlPreview } from "./viewers/html-preview";
+import { extractTableData } from "@/lib/chat/extract-table-data";
 
 interface ResultContentProps {
   content: string;
+  /** Output format from worker (e.g. "markdown", "html", "text"). */
+  format?: string;
 }
 
-/** Enhanced markdown rendering with syntax-highlighted code blocks. */
-export function ResultContent({ content }: ResultContentProps) {
+/** Try parsing a JSON code block's content. */
+function tryParseJson(code: string): unknown | null {
+  try {
+    return JSON.parse(code);
+  } catch {
+    return null;
+  }
+}
+
+let viewerIdCounter = 0;
+
+/** Enhanced markdown rendering with rich artifact viewers. */
+export function ResultContent({ content, format }: ResultContentProps) {
+  viewerIdCounter = 0;
+
+  // WHY: When format is "html", the entire content is raw HTML (not markdown with
+  // embedded HTML blocks). Render it in an iframe preview instead of markdown parser.
+  if (format === "html") {
+    return (
+      <div className="px-4 py-3">
+        <HtmlPreview html={content} id="result-html" />
+      </div>
+    );
+  }
+
   return (
-    <div className="px-4 py-3 text-sm leading-relaxed text-zinc-200">
+    <div className="min-w-0 overflow-hidden px-2.5 py-3 text-sm leading-relaxed text-zinc-200 md:px-4">
       <Markdown
         remarkPlugins={[remarkGfm]}
         components={{
@@ -20,7 +49,28 @@ export function ResultContent({ content }: ResultContentProps) {
             const match = className?.match(/language-(\w+)/);
             const codeStr = String(children).replace(/\n$/, "");
             if (match) {
-              return <CodeBlock language={match[1]} code={codeStr} />;
+              const lang = match[1];
+              if (lang === "json") {
+                const parsed = tryParseJson(codeStr);
+                if (parsed !== null) {
+                  return (
+                    <JsonViewer
+                      data={parsed}
+                      rawJson={codeStr}
+                      id={`json-inline-${++viewerIdCounter}`}
+                    />
+                  );
+                }
+              }
+              if (lang === "html") {
+                return (
+                  <HtmlPreview
+                    html={codeStr}
+                    id={`html-inline-${++viewerIdCounter}`}
+                  />
+                );
+              }
+              return <CodeBlock language={lang} code={codeStr} />;
             }
             return (
               <code className="rounded bg-zinc-900 px-1.5 py-0.5 text-xs text-orange-400">
@@ -28,6 +78,11 @@ export function ResultContent({ content }: ResultContentProps) {
               </code>
             );
           },
+          table: ({ children }) => (
+            <TableViewerFromMd id={`table-inline-${++viewerIdCounter}`}>
+              {children}
+            </TableViewerFromMd>
+          ),
           a: ({ children, href }) => (
             <a
               href={href}
@@ -60,23 +115,31 @@ export function ResultContent({ content }: ResultContentProps) {
               {children}
             </blockquote>
           ),
-          table: ({ children }) => (
-            <div className="my-2 overflow-x-auto">
-              <table className="w-full text-xs">{children}</table>
-            </div>
-          ),
-          th: ({ children }) => (
-            <th className="border border-zinc-700 bg-zinc-900 px-2 py-1 text-left font-medium text-zinc-300">
-              {children}
-            </th>
-          ),
-          td: ({ children }) => (
-            <td className="border border-zinc-700 px-2 py-1 text-zinc-400">{children}</td>
-          ),
         }}
       >
         {content}
       </Markdown>
+    </div>
+  );
+}
+
+/** Wrapper that extracts table content from react-markdown children and renders TableViewer. */
+function TableViewerFromMd({
+  children,
+  id,
+}: {
+  children: React.ReactNode;
+  id: string;
+}) {
+  const { headers, rows } = extractTableData(children);
+
+  if (headers.length > 0) {
+    return <TableViewer headers={headers} rows={rows} id={id} />;
+  }
+
+  return (
+    <div className="my-2 overflow-x-auto">
+      <table className="w-full text-xs">{children}</table>
     </div>
   );
 }

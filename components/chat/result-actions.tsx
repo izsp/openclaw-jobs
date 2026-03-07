@@ -1,28 +1,51 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import type { Artifact } from "@/lib/chat/artifact-types";
+import { generateDownloads } from "@/lib/chat/generate-downloads";
+
+interface AttachmentMeta {
+  s3_key: string;
+  filename: string;
+  content_type: string;
+  size_bytes: number;
+}
 
 interface ResultActionsProps {
   content: string;
   taskId: string;
-  onCredit: (taskId: string) => void;
+  artifacts?: Artifact[];
+  /** Returns true if credit succeeded, false otherwise. */
+  onCredit: (taskId: string) => Promise<boolean>;
+  onExpand?: () => void;
+  /** Whether the task is already credited. */
+  credited?: boolean;
+  /** Output format from worker. */
+  format?: string;
+  /** S3 attachments from task output. */
+  attachments?: AttachmentMeta[];
 }
 
-/** Triggers a browser download of a markdown file. */
-function downloadMarkdown(content: string, taskId: string): void {
-  const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `${taskId}.md`;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-/** Action bar with Copy, Download, and Credit buttons. */
-export function ResultActions({ content, taskId, onCredit }: ResultActionsProps) {
+/** Action bar with Copy, Download(s), Expand, and Credit buttons. */
+export function ResultActions({
+  content,
+  taskId,
+  artifacts,
+  onCredit,
+  onExpand,
+  credited,
+  format,
+  attachments,
+}: ResultActionsProps) {
   const [copied, setCopied] = useState(false);
-  const [creditState, setCreditState] = useState<"idle" | "loading" | "done">("idle");
+  const [creditState, setCreditState] = useState<"idle" | "loading" | "done">(
+    credited ? "done" : "idle",
+  );
+  const [showDownloads, setShowDownloads] = useState(false);
+
+  const downloads = artifacts
+    ? generateDownloads(artifacts, content, taskId, format, attachments)
+    : [];
 
   const handleCopy = useCallback(async () => {
     await navigator.clipboard.writeText(content);
@@ -30,45 +53,76 @@ export function ResultActions({ content, taskId, onCredit }: ResultActionsProps)
     setTimeout(() => setCopied(false), 2000);
   }, [content]);
 
-  const handleDownload = useCallback(() => {
-    downloadMarkdown(content, taskId);
-  }, [content, taskId]);
-
-  const handleCredit = useCallback(() => {
+  const handleCredit = useCallback(async () => {
     setCreditState("loading");
-    onCredit(taskId);
-    // Show confirmed state after a short delay (API is async)
-    setTimeout(() => setCreditState("done"), 1000);
+    const ok = await onCredit(taskId);
+    setCreditState(ok ? "done" : "idle");
   }, [onCredit, taskId]);
 
-  const buttonClass =
-    "rounded px-3 py-1.5 text-xs font-medium transition-colors";
+  const btn = "rounded px-2 py-1 text-[11px] font-medium transition-colors md:px-3 md:py-1.5 md:text-xs";
 
   return (
-    <div className="flex items-center gap-2 border-t border-zinc-700/50 px-4 py-2.5">
+    <div className="flex flex-wrap items-center gap-1.5 border-t border-zinc-700/50 px-2.5 py-2 md:gap-2 md:px-4 md:py-2.5">
       <button
         onClick={handleCopy}
-        className={`${buttonClass} text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200`}
+        className={`${btn} text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200`}
       >
         {copied ? "Copied!" : "Copy All"}
       </button>
-      <button
-        onClick={handleDownload}
-        className={`${buttonClass} text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200`}
-      >
-        Download .md
-      </button>
+
+      {/* Download menu */}
+      <div className="relative">
+        <button
+          onClick={() => setShowDownloads((s) => !s)}
+          className={`${btn} text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200`}
+        >
+          Download ▾
+        </button>
+        {showDownloads && downloads.length > 0 && (
+          <div className="absolute bottom-full left-0 z-50 mb-1 min-w-[180px] rounded-lg border border-zinc-700 bg-zinc-900 py-1 shadow-xl">
+            {downloads.map((dl) => (
+              <button
+                key={dl.label}
+                onClick={() => {
+                  void dl.action();
+                  setShowDownloads(false);
+                }}
+                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-zinc-300 hover:bg-zinc-800"
+              >
+                <span>{dl.icon}</span>
+                <span>{dl.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Expand button */}
+      {onExpand && (
+        <button
+          onClick={onExpand}
+          className={`${btn} text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200`}
+          title="Open full-screen viewer"
+        >
+          Expand
+        </button>
+      )}
+
       <div className="flex-1" />
       <button
         onClick={handleCredit}
         disabled={creditState !== "idle"}
-        className={`${buttonClass} ${
+        className={`${btn} ${
           creditState === "done"
             ? "text-green-400"
             : "text-red-400 hover:bg-red-900/30 hover:text-red-300"
         } disabled:opacity-50`}
       >
-        {creditState === "done" ? "Credited!" : creditState === "loading" ? "Crediting..." : "Request Credit"}
+        {creditState === "done"
+          ? "Credited!"
+          : creditState === "loading"
+            ? "Crediting..."
+            : "Request Credit"}
       </button>
     </div>
   );

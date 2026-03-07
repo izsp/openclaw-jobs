@@ -7,14 +7,15 @@ interface ChatMessageProps {
   role: "user" | "assistant" | "system";
   content: string;
   resultMeta?: ResultMetadata;
-  onCredit?: (taskId: string) => void;
+  onCredit?: (taskId: string) => Promise<boolean>;
+  credited?: boolean;
 }
 
-export function ChatMessage({ role, content, resultMeta, onCredit }: ChatMessageProps) {
+export function ChatMessage({ role, content, resultMeta, onCredit, credited }: ChatMessageProps) {
   if (role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[80%] rounded-2xl bg-orange-500 px-4 py-2.5 text-sm leading-relaxed text-zinc-950 whitespace-pre-wrap">
+        <div className="max-w-[92%] overflow-hidden rounded-2xl bg-orange-500 px-3 py-2 text-sm leading-relaxed text-zinc-950 break-words whitespace-pre-wrap md:max-w-[80%] md:px-4 md:py-2.5">
           {content}
         </div>
       </div>
@@ -27,13 +28,14 @@ export function ChatMessage({ role, content, resultMeta, onCredit }: ChatMessage
       <TaskResultCard
         message={{ id: "", role, content, timestamp: 0, result_meta: resultMeta }}
         onCredit={onCredit}
+        credited={credited}
       />
     );
   }
 
   return (
     <div className="flex justify-start">
-      <div className="max-w-[85%] rounded-2xl bg-zinc-800 px-4 py-3 text-sm leading-relaxed text-zinc-200">
+      <div className="max-w-[95%] overflow-hidden rounded-2xl bg-zinc-800 px-3 py-2.5 text-sm leading-relaxed text-zinc-200 md:max-w-[85%] md:px-4 md:py-3">
         <Markdown
           remarkPlugins={[remarkGfm]}
           components={{
