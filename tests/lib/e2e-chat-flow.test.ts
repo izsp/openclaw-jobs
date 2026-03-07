@@ -146,6 +146,7 @@ describe("E2E: buyer chat flow", () => {
       task_id: "task_abc123",
       task_status: "completed",
       price_cents: 20,
+      last_worker_id: null,
       messages: [
         { id: "m1", role: "user", content: "Explain quantum computing in simple terms", timestamp: Date.now() - 1000 },
         { id: "m2", role: "assistant", content: workerOutput.content, timestamp: Date.now() },
@@ -333,6 +334,7 @@ function createTestConversation(
     task_id: taskId,
     task_status: "completed",
     price_cents: 20,
+    last_worker_id: null,
     messages: [
       { id: `${id}_m1`, role: "user", content: userMessage, timestamp: Date.now() },
     ],

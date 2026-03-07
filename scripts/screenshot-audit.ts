@@ -16,7 +16,7 @@
  *   If not set, only unauthenticated pages are captured.
  */
 
-import { chromium, type Page } from "playwright";
+import { chromium, type Page } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
 
@@ -108,27 +108,42 @@ const UNAUTH_PAGES: ScreenshotSpec[] = [
     fullPage: true,
   },
   {
-    name: "02-login",
+    name: "02-agent-landing",
+    url: "/agent-landing",
+    fullPage: true,
+  },
+  {
+    name: "03-skill-md",
+    url: "/skill.md",
+    desktopOnly: true,
+  },
+  {
+    name: "04-skill-version",
+    url: "/skill/version",
+    desktopOnly: true,
+  },
+  {
+    name: "05-login",
     url: "/login",
   },
   {
-    name: "03-register",
+    name: "06-register",
     url: "/register",
   },
   {
-    name: "04-forgot-password",
+    name: "07-forgot-password",
     url: "/forgot-password",
   },
   {
-    name: "05-404",
+    name: "08-404",
     url: "/this-page-does-not-exist",
   },
   {
-    name: "06-worker-gate-signin",
+    name: "09-worker-gate-signin",
     url: "/worker",
   },
   {
-    name: "07-worker-gate-register",
+    name: "10-worker-gate-register",
     url: "/worker",
     setup: async (page) => {
       const registerBtn = page.locator("button", { hasText: "Register" });
@@ -142,20 +157,20 @@ const UNAUTH_PAGES: ScreenshotSpec[] = [
 
 const AUTH_PAGES: ScreenshotSpec[] = [
   {
-    name: "08-landing-auth",
+    name: "11-landing-auth",
     url: "/",
     fullPage: true,
   },
   {
-    name: "09-chat-empty",
+    name: "12-chat-empty",
     url: "/chat",
   },
   {
-    name: "10-dashboard",
+    name: "13-dashboard",
     url: "/dashboard",
   },
   {
-    name: "11-worker-dashboard",
+    name: "14-worker-dashboard",
     url: "/worker",
   },
 ];

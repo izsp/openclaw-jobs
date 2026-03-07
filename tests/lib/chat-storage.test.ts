@@ -31,6 +31,7 @@ function makeConversation(overrides: Partial<ChatConversation> = {}): ChatConver
     task_id: null,
     task_status: null,
     price_cents: null,
+    last_worker_id: null,
     messages: [],
     created_at: Date.now(),
     updated_at: Date.now(),

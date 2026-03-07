@@ -10,7 +10,7 @@
  *   TEST_EMAIL=xxx TEST_PASSWORD=xxx npx tsx scripts/e2e-usecase-test.ts
  */
 
-import { chromium, type Page } from "playwright";
+import { chromium, type Page } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
 
