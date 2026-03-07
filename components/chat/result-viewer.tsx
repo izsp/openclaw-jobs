@@ -51,7 +51,7 @@ export function ResultViewer({
     parsed.artifacts.some((a) => a.type === "table");
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-zinc-900">
+    <div className="fixed inset-0 z-50 flex flex-col bg-surface-alt">
       <ResultViewerHeader
         meta={meta}
         summary={parsed.summary}

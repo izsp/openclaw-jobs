@@ -31,7 +31,7 @@ export function TaskResultCard({ message, onCredit, credited }: TaskResultCardPr
   return (
     <>
       <div className="flex justify-start">
-        <div className="flex max-h-[70vh] w-full max-w-full flex-col overflow-hidden rounded-xl border border-zinc-700/50 bg-zinc-800/80 md:max-w-[90%]">
+        <div className="flex max-h-[70vh] w-full max-w-full flex-col overflow-hidden rounded-xl border border-edge bg-surface-alt md:max-w-[90%]">
           <ResultHeader meta={meta} summary={parsed.summary} />
           <div className="relative min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
             <ResultContent content={message.content} format={meta.format} />

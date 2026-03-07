@@ -120,15 +120,15 @@ function RegisterContent() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-page px-4">
       <div className="w-full max-w-sm space-y-6">
         {/* Header */}
         <div className="text-center">
           <div className="text-4xl">🦞</div>
-          <h1 className="mt-3 text-2xl font-bold text-zinc-100">
+          <h1 className="mt-3 text-2xl font-bold text-content">
             {step === "register" ? "Create your account" : "Verify your email"}
           </h1>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-content-tertiary">
             {step === "register"
               ? "Start using OpenClaw in seconds"
               : `We sent a 6-digit code to ${email}`}
@@ -139,7 +139,7 @@ function RegisterContent() {
         {step === "register" && (
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-zinc-400">
+              <label htmlFor="email" className="block text-sm font-medium text-content-secondary">
                 Email
               </label>
               <input
@@ -149,12 +149,12 @@ function RegisterContent() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="mt-1 block w-full rounded-lg border border-input-border bg-input-bg px-3 py-2 text-sm text-content placeholder-content-tertiary focus:border-input-focus focus:outline-none focus:ring-1 focus:ring-input-focus"
                 placeholder="you@example.com"
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-zinc-400">
+              <label htmlFor="password" className="block text-sm font-medium text-content-secondary">
                 Password
               </label>
               <input
@@ -164,12 +164,12 @@ function RegisterContent() {
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="mt-1 block w-full rounded-lg border border-input-border bg-input-bg px-3 py-2 text-sm text-content placeholder-content-tertiary focus:border-input-focus focus:outline-none focus:ring-1 focus:ring-input-focus"
                 placeholder="At least 8 characters"
               />
             </div>
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-zinc-400">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-content-secondary">
                 Confirm password
               </label>
               <input
@@ -179,12 +179,12 @@ function RegisterContent() {
                 autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="mt-1 block w-full rounded-lg border border-input-border bg-input-bg px-3 py-2 text-sm text-content placeholder-content-tertiary focus:border-input-focus focus:outline-none focus:ring-1 focus:ring-input-focus"
                 placeholder="••••••••"
               />
             </div>
             <div>
-              <label htmlFor="inviteCode" className="block text-sm font-medium text-zinc-400">
+              <label htmlFor="inviteCode" className="block text-sm font-medium text-content-secondary">
                 Invite code
               </label>
               <input
@@ -192,17 +192,17 @@ function RegisterContent() {
                 type="text"
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value.trim())}
-                className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="mt-1 block w-full rounded-lg border border-input-border bg-input-bg px-3 py-2 text-sm text-content placeholder-content-tertiary focus:border-input-focus focus:outline-none focus:ring-1 focus:ring-input-focus"
                 placeholder="Enter invite code"
               />
             </div>
 
-            {error && <p className="text-sm text-red-400">{error}</p>}
+            {error && <p className="text-sm text-status-error">{error}</p>}
 
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-3 text-sm font-medium text-zinc-950 transition-colors hover:bg-orange-400 disabled:opacity-50"
+              className="flex w-full items-center justify-center rounded-lg bg-content px-4 py-3 text-sm font-medium text-page transition-colors hover:opacity-90 disabled:opacity-50"
             >
               {loading ? "Creating account..." : "Create account"}
             </button>
@@ -213,7 +213,7 @@ function RegisterContent() {
         {step === "verify" && (
           <form onSubmit={handleVerify} className="space-y-4">
             <div>
-              <label htmlFor="code" className="block text-sm font-medium text-zinc-400">
+              <label htmlFor="code" className="block text-sm font-medium text-content-secondary">
                 Verification code
               </label>
               <input
@@ -225,17 +225,17 @@ function RegisterContent() {
                 autoComplete="one-time-code"
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-center text-lg font-mono tracking-widest text-zinc-100 placeholder-zinc-600 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="mt-1 block w-full rounded-lg border border-input-border bg-input-bg px-3 py-2 text-center text-lg font-mono tracking-widest text-content placeholder-content-tertiary focus:border-input-focus focus:outline-none focus:ring-1 focus:ring-input-focus"
                 placeholder="000000"
               />
             </div>
 
-            {error && <p className="text-sm text-red-400">{error}</p>}
+            {error && <p className="text-sm text-status-error">{error}</p>}
 
             <button
               type="submit"
               disabled={loading || code.length !== 6}
-              className="flex w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-3 text-sm font-medium text-zinc-950 transition-colors hover:bg-orange-400 disabled:opacity-50"
+              className="flex w-full items-center justify-center rounded-lg bg-content px-4 py-3 text-sm font-medium text-page transition-colors hover:opacity-90 disabled:opacity-50"
             >
               {loading ? "Verifying..." : "Verify & sign in"}
             </button>
@@ -243,7 +243,7 @@ function RegisterContent() {
             <button
               type="button"
               onClick={handleResendCode}
-              className="w-full text-center text-sm text-zinc-500 transition-colors hover:text-orange-500"
+              className="w-full text-center text-sm text-content-tertiary transition-colors hover:text-content-secondary"
             >
               Resend code
             </button>
@@ -252,10 +252,10 @@ function RegisterContent() {
 
         {/* Links */}
         <div className="text-center text-sm">
-          <span className="text-zinc-600">Already have an account? </span>
+          <span className="text-content-tertiary">Already have an account? </span>
           <Link
             href="/login"
-            className="text-zinc-500 transition-colors hover:text-orange-500"
+            className="text-content-tertiary transition-colors hover:text-content-secondary"
           >
             Sign in
           </Link>
@@ -265,7 +265,7 @@ function RegisterContent() {
         <div className="text-center">
           <Link
             href="/"
-            className="text-sm text-zinc-500 transition-colors hover:text-orange-500"
+            className="text-sm text-content-tertiary transition-colors hover:text-content-secondary"
           >
             &larr; Back to home
           </Link>

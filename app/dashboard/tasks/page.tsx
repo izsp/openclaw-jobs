@@ -16,7 +16,7 @@ export default function TasksPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Tasks</h1>
-      <p className="mt-1 text-sm text-zinc-500">Your complete task history</p>
+      <p className="mt-1 text-sm text-content-tertiary">Your complete task history</p>
       <div className="mt-6">
         <ConversationList
           conversations={conversations}

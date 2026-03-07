@@ -16,10 +16,10 @@ export default function DashboardLayout({
 
   if (status === "loading") {
     return (
-      <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
+      <div className="flex min-h-screen flex-col bg-page text-content">
         <Header />
         <main className="flex flex-1 items-center justify-center">
-          <div className="text-sm text-zinc-600 animate-pulse">Loading...</div>
+          <div className="text-sm text-content-tertiary animate-pulse">Loading...</div>
         </main>
       </div>
     );
@@ -30,13 +30,13 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen flex-col bg-zinc-950 text-zinc-100">
+    <div className="flex h-screen flex-col bg-page text-content">
       {/* Top bar */}
       <div className="flex items-center">
         {/* Hamburger for mobile */}
         <button
           onClick={() => setSidebarOpen((o) => !o)}
-          className="p-4 text-zinc-400 hover:text-zinc-200 md:hidden"
+          className="p-4 text-content-secondary hover:text-content md:hidden"
           aria-label="Toggle sidebar"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -60,7 +60,7 @@ export default function DashboardLayout({
         {sidebarOpen && (
           <>
             <div
-              className="fixed inset-0 z-40 bg-black/50 md:hidden"
+              className="fixed inset-0 z-40 bg-overlay md:hidden"
               onClick={() => setSidebarOpen(false)}
             />
             <aside className="fixed inset-y-0 left-0 z-50 md:hidden">

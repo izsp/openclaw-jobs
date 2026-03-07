@@ -38,10 +38,10 @@ export function DepositModal({ open, onClose, onSuccess }: DepositModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="mx-4 w-full max-w-sm rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-        <h2 className="text-lg font-semibold text-zinc-100">Add Funds</h2>
-        <p className="mt-1 text-sm text-zinc-500">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay">
+      <div className="mx-4 w-full max-w-sm rounded-xl border border-edge bg-elevated p-6">
+        <h2 className="text-lg font-semibold text-content">Add Funds</h2>
+        <p className="mt-1 text-sm text-content-tertiary">
           Choose a credit pack. 100🦐 = $1.00 USD
         </p>
 
@@ -51,24 +51,24 @@ export function DepositModal({ open, onClose, onSuccess }: DepositModalProps) {
               key={tier.cents}
               onClick={() => handleSelect(tier.cents)}
               disabled={loading}
-              className="flex w-full items-center justify-between rounded-lg border border-zinc-700 px-4 py-3 text-sm transition-colors hover:border-orange-500 hover:bg-zinc-800 disabled:opacity-50"
+              className="flex w-full items-center justify-between rounded-lg border border-edge px-4 py-3 text-sm transition-colors hover:border-edge-strong hover:bg-surface-alt disabled:opacity-50"
             >
               <span>
-                <span className="font-medium text-zinc-200">{tier.label}</span>
-                <span className="ml-2 text-orange-500">{tier.shrimp}</span>
+                <span className="font-medium text-content">{tier.label}</span>
+                <span className="ml-2 text-content-secondary">{tier.shrimp}</span>
               </span>
-              <span className="text-zinc-400">{tier.price}</span>
+              <span className="text-content-tertiary">{tier.price}</span>
             </button>
           ))}
         </div>
 
         {error && (
-          <p className="mt-3 text-xs text-red-400">{error}</p>
+          <p className="mt-3 text-xs text-status-error">{error}</p>
         )}
 
         <button
           onClick={onClose}
-          className="mt-4 w-full text-center text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+          className="mt-4 w-full text-center text-sm text-content-tertiary transition-colors hover:text-content-secondary"
         >
           Cancel
         </button>

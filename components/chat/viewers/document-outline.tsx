@@ -54,7 +54,7 @@ export function DocumentOutline({
 
   return (
     <nav className="space-y-0.5">
-      <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+      <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
         Outline
       </div>
       {headings.map((h) => (
@@ -63,8 +63,8 @@ export function DocumentOutline({
           onClick={() => handleClick(h.slug)}
           className={`block w-full truncate rounded px-2 py-1 text-left text-xs transition-colors ${
             activeSlug === h.slug
-              ? "bg-zinc-700/50 text-orange-400"
-              : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+              ? "bg-edge-strong/50 text-accent"
+              : "text-content-secondary hover:bg-surface-alt hover:text-content"
           }`}
           style={{ paddingLeft: `${(h.level - 1) * 12 + 8}px` }}
           title={h.text}

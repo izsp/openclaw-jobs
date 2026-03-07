@@ -57,7 +57,7 @@ export function DashboardSidebar({ onNavigate }: SidebarProps) {
   }
 
   return (
-    <div className="flex h-full w-56 flex-col border-r border-zinc-800 bg-zinc-950">
+    <div className="flex h-full w-56 flex-col border-r border-edge bg-surface-alt">
       <nav className="flex-1 px-3 py-4">
         <ul className="space-y-1">
           {NAV_ITEMS.map((item) => {
@@ -69,8 +69,8 @@ export function DashboardSidebar({ onNavigate }: SidebarProps) {
                   onClick={onNavigate}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                     active
-                      ? "bg-zinc-800 text-orange-500"
-                      : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+                      ? "bg-surface text-content font-medium"
+                      : "text-content-secondary hover:bg-surface hover:text-content"
                   }`}
                 >
                   {item.icon}
@@ -82,11 +82,11 @@ export function DashboardSidebar({ onNavigate }: SidebarProps) {
         </ul>
       </nav>
 
-      <div className="border-t border-zinc-800 p-3">
+      <div className="border-t border-edge p-3">
         <Link
           href="/chat"
           onClick={onNavigate}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-medium text-zinc-950 transition-colors hover:bg-orange-400"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-content px-4 py-2.5 text-sm font-medium text-page transition-opacity hover:opacity-90"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />

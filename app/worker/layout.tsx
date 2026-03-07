@@ -21,15 +21,15 @@ export default function WorkerLayout({
 
   if (!authenticated) {
     return (
-      <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
-        <nav className="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
+      <div data-theme="dark" className="flex min-h-screen flex-col bg-page text-content">
+        <nav className="flex items-center justify-between border-b border-edge px-6 py-4">
           <Link href="/" className="text-lg font-bold tracking-tight">
-            OpenClaw<span className="text-orange-500">.jobs</span>
-            <span className="ml-2 text-xs text-zinc-500">Worker</span>
+            OpenClaw<span className="text-accent">.jobs</span>
+            <span className="ml-2 text-xs text-content-tertiary">Worker</span>
           </Link>
           <Link
             href="/"
-            className="text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+            className="text-sm text-content-tertiary transition-colors hover:text-content-secondary"
           >
             For Buyers
           </Link>
@@ -42,13 +42,13 @@ export default function WorkerLayout({
   }
 
   return (
-    <div className="flex h-screen flex-col bg-zinc-950 text-zinc-100">
+    <div data-theme="dark" className="flex h-screen flex-col bg-page text-content">
       {/* Top bar */}
       <div className="flex items-center">
         {/* Hamburger for mobile */}
         <button
           onClick={() => setSidebarOpen((o) => !o)}
-          className="p-4 text-zinc-400 hover:text-zinc-200 md:hidden"
+          className="p-4 text-content-secondary hover:text-content md:hidden"
           aria-label="Toggle sidebar"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -57,21 +57,21 @@ export default function WorkerLayout({
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
-        <nav className="flex flex-1 items-center justify-between border-b border-zinc-800 px-4 py-3 sm:px-6 sm:py-4">
+        <nav className="flex flex-1 items-center justify-between border-b border-edge px-4 py-3 sm:px-6 sm:py-4">
           <Link href="/" className="text-lg font-bold tracking-tight">
-            OpenClaw<span className="text-orange-500">.jobs</span>
-            <span className="ml-2 text-xs text-zinc-500">Worker</span>
+            OpenClaw<span className="text-accent">.jobs</span>
+            <span className="ml-2 text-xs text-content-tertiary">Worker</span>
           </Link>
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+              className="text-sm text-content-tertiary transition-colors hover:text-content-secondary"
             >
               For Buyers
             </Link>
             <button
               onClick={handleLogout}
-              className="text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+              className="text-sm text-content-tertiary transition-colors hover:text-content-secondary"
             >
               Disconnect
             </button>
@@ -89,7 +89,7 @@ export default function WorkerLayout({
         {sidebarOpen && (
           <>
             <div
-              className="fixed inset-0 z-40 bg-black/50 md:hidden"
+              className="fixed inset-0 z-40 bg-overlay md:hidden"
               onClick={() => setSidebarOpen(false)}
             />
             <aside className="fixed inset-y-0 left-0 z-50 md:hidden">

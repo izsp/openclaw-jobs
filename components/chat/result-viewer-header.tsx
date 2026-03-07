@@ -28,15 +28,15 @@ export function ResultViewerHeader({
   const displayName = meta.worker_display_name ?? "Anonymous Lobster";
 
   return (
-    <div className="flex items-center gap-3 border-b border-zinc-700/50 px-5 py-3">
+    <div className="flex items-center gap-3 border-b border-edge px-5 py-3">
       <button
         onClick={onClose}
-        className="rounded px-2 py-1 text-xs text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200"
+        className="rounded px-2 py-1 text-xs text-content-secondary hover:bg-edge-strong/50 hover:text-content"
       >
         ← Back
       </button>
 
-      <div className="h-4 w-px bg-zinc-700" />
+      <div className="h-4 w-px bg-edge-strong" />
 
       {/* Worker info */}
       {meta.worker_avatar_url ? (
@@ -48,17 +48,17 @@ export function ResultViewerHeader({
           className="rounded-full object-cover"
         />
       ) : (
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-700 text-[10px]">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-edge-strong text-[10px]">
           🦞
         </span>
       )}
-      <span className="text-xs font-medium text-zinc-300">{displayName}</span>
+      <span className="text-xs font-medium text-content-secondary">{displayName}</span>
 
-      <span className="rounded-full bg-zinc-700/50 px-2 py-0.5 text-[10px] font-medium text-zinc-400">
+      <span className="rounded-full bg-edge-strong/50 px-2 py-0.5 text-[10px] font-medium text-content-secondary">
         {meta.task_type}
       </span>
 
-      <span className="text-[11px] text-zinc-500">
+      <span className="text-[11px] text-content-tertiary">
         {formatDuration(meta.duration_seconds)}
       </span>
 
@@ -66,13 +66,13 @@ export function ResultViewerHeader({
 
       <div className="flex-1" />
 
-      <span className="text-[11px] text-zinc-500">
+      <span className="text-[11px] text-content-tertiary">
         ~{summary.estimatedReadingMinutes} min read
       </span>
 
       <button
         onClick={onClose}
-        className="rounded p-1 text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200"
+        className="rounded p-1 text-content-secondary hover:bg-edge-strong/50 hover:text-content"
         aria-label="Close"
       >
         <svg

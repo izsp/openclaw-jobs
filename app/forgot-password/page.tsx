@@ -68,17 +68,17 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-page px-4">
       <div className="w-full max-w-sm space-y-6">
         {/* Header */}
         <div className="text-center">
           <div className="text-4xl">🦞</div>
-          <h1 className="mt-3 text-2xl font-bold text-zinc-100">
+          <h1 className="mt-3 text-2xl font-bold text-content">
             {step === "email" && "Reset your password"}
             {step === "reset" && "Enter new password"}
             {step === "done" && "Password reset!"}
           </h1>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-content-tertiary">
             {step === "email" && "We'll send a verification code to your email"}
             {step === "reset" && `Enter the code sent to ${email}`}
             {step === "done" && "Your password has been updated"}
@@ -89,7 +89,7 @@ export default function ForgotPasswordPage() {
         {step === "email" && (
           <form onSubmit={handleSendCode} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-zinc-400">
+              <label htmlFor="email" className="block text-sm font-medium text-content-secondary">
                 Email
               </label>
               <input
@@ -99,17 +99,17 @@ export default function ForgotPasswordPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="mt-1 block w-full rounded-lg border border-input-border bg-input-bg px-3 py-2 text-sm text-content placeholder-content-tertiary focus:border-input-focus focus:outline-none focus:ring-1 focus:ring-input-focus"
                 placeholder="you@example.com"
               />
             </div>
 
-            {error && <p className="text-sm text-red-400">{error}</p>}
+            {error && <p className="text-sm text-status-error">{error}</p>}
 
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-3 text-sm font-medium text-zinc-950 transition-colors hover:bg-orange-400 disabled:opacity-50"
+              className="flex w-full items-center justify-center rounded-lg bg-content px-4 py-3 text-sm font-medium text-page transition-colors hover:opacity-90 disabled:opacity-50"
             >
               {loading ? "Sending code..." : "Send verification code"}
             </button>
@@ -120,7 +120,7 @@ export default function ForgotPasswordPage() {
         {step === "reset" && (
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div>
-              <label htmlFor="code" className="block text-sm font-medium text-zinc-400">
+              <label htmlFor="code" className="block text-sm font-medium text-content-secondary">
                 Verification code
               </label>
               <input
@@ -132,12 +132,12 @@ export default function ForgotPasswordPage() {
                 autoComplete="one-time-code"
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-center text-lg font-mono tracking-widest text-zinc-100 placeholder-zinc-600 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="mt-1 block w-full rounded-lg border border-input-border bg-input-bg px-3 py-2 text-center text-lg font-mono tracking-widest text-content placeholder-content-tertiary focus:border-input-focus focus:outline-none focus:ring-1 focus:ring-input-focus"
                 placeholder="000000"
               />
             </div>
             <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-zinc-400">
+              <label htmlFor="newPassword" className="block text-sm font-medium text-content-secondary">
                 New password
               </label>
               <input
@@ -147,17 +147,17 @@ export default function ForgotPasswordPage() {
                 autoComplete="new-password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="mt-1 block w-full rounded-lg border border-input-border bg-input-bg px-3 py-2 text-sm text-content placeholder-content-tertiary focus:border-input-focus focus:outline-none focus:ring-1 focus:ring-input-focus"
                 placeholder="At least 8 characters"
               />
             </div>
 
-            {error && <p className="text-sm text-red-400">{error}</p>}
+            {error && <p className="text-sm text-status-error">{error}</p>}
 
             <button
               type="submit"
               disabled={loading || code.length !== 6}
-              className="flex w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-3 text-sm font-medium text-zinc-950 transition-colors hover:bg-orange-400 disabled:opacity-50"
+              className="flex w-full items-center justify-center rounded-lg bg-content px-4 py-3 text-sm font-medium text-page transition-colors hover:opacity-90 disabled:opacity-50"
             >
               {loading ? "Resetting..." : "Reset password"}
             </button>
@@ -168,7 +168,7 @@ export default function ForgotPasswordPage() {
         {step === "done" && (
           <button
             onClick={() => router.push("/login")}
-            className="flex w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-3 text-sm font-medium text-zinc-950 transition-colors hover:bg-orange-400"
+            className="flex w-full items-center justify-center rounded-lg bg-content px-4 py-3 text-sm font-medium text-page transition-colors hover:opacity-90"
           >
             Go to sign in
           </button>
@@ -178,7 +178,7 @@ export default function ForgotPasswordPage() {
         <div className="text-center">
           <Link
             href="/login"
-            className="text-sm text-zinc-500 transition-colors hover:text-orange-500"
+            className="text-sm text-content-tertiary transition-colors hover:text-content-secondary"
           >
             &larr; Back to sign in
           </Link>

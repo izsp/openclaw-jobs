@@ -40,7 +40,7 @@ export function ResultContent({ content, format }: ResultContentProps) {
   }
 
   return (
-    <div className="min-w-0 overflow-hidden px-2.5 py-3 text-sm leading-relaxed text-zinc-200 md:px-4">
+    <div className="min-w-0 overflow-hidden px-2.5 py-3 text-sm leading-relaxed text-content md:px-4">
       <Markdown
         remarkPlugins={[remarkGfm]}
         components={{
@@ -73,7 +73,7 @@ export function ResultContent({ content, format }: ResultContentProps) {
               return <CodeBlock language={lang} code={codeStr} />;
             }
             return (
-              <code className="rounded bg-zinc-900 px-1.5 py-0.5 text-xs text-orange-400">
+              <code className="rounded bg-surface-alt px-1.5 py-0.5 text-xs text-accent">
                 {children}
               </code>
             );
@@ -86,7 +86,7 @@ export function ResultContent({ content, format }: ResultContentProps) {
           a: ({ children, href }) => (
             <a
               href={href}
-              className="text-orange-400 underline hover:text-orange-300"
+              className="text-accent underline hover:text-accent"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -99,19 +99,19 @@ export function ResultContent({ content, format }: ResultContentProps) {
           ol: ({ children }) => (
             <ol className="my-1.5 ml-4 list-decimal space-y-0.5">{children}</ol>
           ),
-          li: ({ children }) => <li className="text-zinc-300">{children}</li>,
+          li: ({ children }) => <li className="text-content-secondary">{children}</li>,
           h1: ({ children }) => (
-            <h1 className="mb-1 mt-3 text-base font-bold text-zinc-100">{children}</h1>
+            <h1 className="mb-1 mt-3 text-base font-bold text-content">{children}</h1>
           ),
           h2: ({ children }) => (
-            <h2 className="mb-1 mt-2 text-sm font-bold text-zinc-100">{children}</h2>
+            <h2 className="mb-1 mt-2 text-sm font-bold text-content">{children}</h2>
           ),
           h3: ({ children }) => (
-            <h3 className="mb-1 mt-2 text-sm font-semibold text-zinc-200">{children}</h3>
+            <h3 className="mb-1 mt-2 text-sm font-semibold text-content">{children}</h3>
           ),
           p: ({ children }) => <p className="mb-1.5 last:mb-0">{children}</p>,
           blockquote: ({ children }) => (
-            <blockquote className="my-2 border-l-2 border-zinc-600 pl-3 text-zinc-400 italic">
+            <blockquote className="my-2 border-l-2 border-edge-strong pl-3 text-content-secondary italic">
               {children}
             </blockquote>
           ),

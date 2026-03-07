@@ -62,10 +62,10 @@ export function ResultActions({
   const btn = "rounded px-2 py-1 text-[11px] font-medium transition-colors md:px-3 md:py-1.5 md:text-xs";
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 border-t border-zinc-700/50 px-2.5 py-2 md:gap-2 md:px-4 md:py-2.5">
+    <div className="flex flex-wrap items-center gap-1.5 border-t border-edge px-2.5 py-2 md:gap-2 md:px-4 md:py-2.5">
       <button
         onClick={handleCopy}
-        className={`${btn} text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200`}
+        className={`${btn} text-content-secondary hover:bg-edge-strong/50 hover:text-content`}
       >
         {copied ? "Copied!" : "Copy All"}
       </button>
@@ -74,12 +74,12 @@ export function ResultActions({
       <div className="relative">
         <button
           onClick={() => setShowDownloads((s) => !s)}
-          className={`${btn} text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200`}
+          className={`${btn} text-content-secondary hover:bg-edge-strong/50 hover:text-content`}
         >
           Download ▾
         </button>
         {showDownloads && downloads.length > 0 && (
-          <div className="absolute bottom-full left-0 z-50 mb-1 min-w-[180px] rounded-lg border border-zinc-700 bg-zinc-900 py-1 shadow-xl">
+          <div className="absolute bottom-full left-0 z-50 mb-1 min-w-[180px] rounded-lg border border-edge-strong bg-surface-alt py-1 shadow-xl">
             {downloads.map((dl) => (
               <button
                 key={dl.label}
@@ -87,7 +87,7 @@ export function ResultActions({
                   void dl.action();
                   setShowDownloads(false);
                 }}
-                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-zinc-300 hover:bg-zinc-800"
+                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-content-secondary hover:bg-surface-alt"
               >
                 <span>{dl.icon}</span>
                 <span>{dl.label}</span>
@@ -101,7 +101,7 @@ export function ResultActions({
       {onExpand && (
         <button
           onClick={onExpand}
-          className={`${btn} text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200`}
+          className={`${btn} text-content-secondary hover:bg-edge-strong/50 hover:text-content`}
           title="Open full-screen viewer"
         >
           Expand
@@ -114,8 +114,8 @@ export function ResultActions({
         disabled={creditState !== "idle"}
         className={`${btn} ${
           creditState === "done"
-            ? "text-green-400"
-            : "text-red-400 hover:bg-red-900/30 hover:text-red-300"
+            ? "text-status-success"
+            : "text-status-error hover:bg-status-error/10/30 hover:text-red-300"
         } disabled:opacity-50`}
       >
         {creditState === "done"

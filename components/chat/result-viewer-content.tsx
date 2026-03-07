@@ -53,7 +53,7 @@ export function ResultViewerContent({ content, format }: ResultViewerContentProp
   }
 
   return (
-    <div className="px-6 py-4 text-sm leading-relaxed text-zinc-200">
+    <div className="px-6 py-4 text-sm leading-relaxed text-content">
       <Markdown
         remarkPlugins={[remarkGfm]}
         components={{
@@ -63,7 +63,7 @@ export function ResultViewerContent({ content, format }: ResultViewerContentProp
             const codeStr = String(children).replace(/\n$/, "");
             if (!match) {
               return (
-                <code className="rounded bg-zinc-900 px-1.5 py-0.5 text-xs text-orange-400">
+                <code className="rounded bg-surface-alt px-1.5 py-0.5 text-xs text-accent">
                   {children}
                 </code>
               );
@@ -101,32 +101,32 @@ export function ResultViewerContent({ content, format }: ResultViewerContentProp
             </div>
           ),
           a: ({ children, href }) => (
-            <a href={href} className="text-orange-400 underline hover:text-orange-300" target="_blank" rel="noopener noreferrer">
+            <a href={href} className="text-accent underline hover:text-accent" target="_blank" rel="noopener noreferrer">
               {children}
             </a>
           ),
           ul: ({ children }) => <ul className="my-1.5 ml-4 list-disc space-y-0.5">{children}</ul>,
           ol: ({ children }) => <ol className="my-1.5 ml-4 list-decimal space-y-0.5">{children}</ol>,
-          li: ({ children }) => <li className="text-zinc-300">{children}</li>,
+          li: ({ children }) => <li className="text-content-secondary">{children}</li>,
           h1: ({ children }) => {
             const slug = slugify(extractTextFromNode(children));
-            return <h1 id={slug} className="mb-2 mt-4 text-lg font-bold text-zinc-100">{children}</h1>;
+            return <h1 id={slug} className="mb-2 mt-4 text-lg font-bold text-content">{children}</h1>;
           },
           h2: ({ children }) => {
             const slug = slugify(extractTextFromNode(children));
-            return <h2 id={slug} className="mb-1.5 mt-3 text-base font-bold text-zinc-100">{children}</h2>;
+            return <h2 id={slug} className="mb-1.5 mt-3 text-base font-bold text-content">{children}</h2>;
           },
           h3: ({ children }) => {
             const slug = slugify(extractTextFromNode(children));
-            return <h3 id={slug} className="mb-1 mt-2 text-sm font-semibold text-zinc-200">{children}</h3>;
+            return <h3 id={slug} className="mb-1 mt-2 text-sm font-semibold text-content">{children}</h3>;
           },
           h4: ({ children }) => {
             const slug = slugify(extractTextFromNode(children));
-            return <h4 id={slug} className="mb-1 mt-2 text-sm font-medium text-zinc-200">{children}</h4>;
+            return <h4 id={slug} className="mb-1 mt-2 text-sm font-medium text-content">{children}</h4>;
           },
           p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
           blockquote: ({ children }) => (
-            <blockquote className="my-2 border-l-2 border-zinc-600 pl-3 text-zinc-400 italic">{children}</blockquote>
+            <blockquote className="my-2 border-l-2 border-edge-strong pl-3 text-content-secondary italic">{children}</blockquote>
           ),
         }}
       >

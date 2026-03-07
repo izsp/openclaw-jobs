@@ -72,7 +72,7 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
   const isBusy = sending || polling;
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-none border-0 bg-zinc-900/50 md:min-h-[400px] md:rounded-xl md:border md:border-zinc-800">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-none border-0 bg-surface md:min-h-[400px] md:rounded-xl md:border md:border-edge">
       {/* Messages area */}
       <div ref={scrollRef} className="min-w-0 flex-1 space-y-3 overflow-x-hidden overflow-y-auto overscroll-y-contain p-2 md:p-4">
         {messages.length === 0 && !welcomeMessage && (
@@ -96,7 +96,7 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
         ))}
         {isBusy && !["completed", "failed", "expired", "credited"].includes(conversation?.task_status ?? "") && (
           <div className="flex justify-start">
-            <div className="rounded-2xl bg-zinc-800 px-4 py-2.5 text-sm text-zinc-400">
+            <div className="px-2 py-1.5 text-sm text-content-tertiary">
               <span className="animate-pulse">
                 {sending ? "Submitting task..." : "Lobster is working..."}
               </span>
@@ -107,7 +107,7 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
 
       {/* Error banner */}
       {error && (
-        <div className="border-t border-red-900 bg-red-950/50 px-4 py-2 text-xs text-red-400">
+        <div className="border-t border-status-error/20 bg-status-error/5 px-4 py-2 text-xs text-status-error">
           {error}
         </div>
       )}
@@ -122,7 +122,7 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
       />
 
       {/* Input */}
-      <div className="border-t border-zinc-800 p-2 md:p-3">
+      <div className="border-t border-edge p-2 md:p-3">
         <ChatInput onSend={send} disabled={isBusy} />
       </div>
     </div>
@@ -131,7 +131,7 @@ export function ChatPanel({ conversationId, onConversationChange, assignedWorker
 
 function ChatShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-none bg-zinc-900/50 md:min-h-[400px] md:rounded-xl md:border md:border-zinc-800">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-none bg-surface md:min-h-[400px] md:rounded-xl md:border md:border-edge">
       {children}
     </div>
   );
@@ -139,7 +139,7 @@ function ChatShell({ children }: { children: React.ReactNode }) {
 
 function LoadingState() {
   return (
-    <div className="text-sm text-zinc-600 animate-pulse">Loading...</div>
+    <div className="text-sm text-content-tertiary animate-pulse">Loading...</div>
   );
 }
 
@@ -162,16 +162,16 @@ function EmptyState({ balanceCents, onExampleClick }: EmptyStateProps) {
     <div className="flex h-full flex-col items-center justify-center gap-4 px-4">
       {/* Zero-balance onboarding prompt */}
       {!hasBalance && balanceCents !== null && (
-        <div className="w-full max-w-lg rounded-lg border border-orange-800/50 bg-orange-950/20 px-4 py-3 text-center">
-          <p className="text-sm font-medium text-orange-400">
+        <div className="w-full max-w-lg rounded-lg border border-accent/20 bg-accent-subtle-bg px-4 py-3 text-center">
+          <p className="text-sm font-medium text-accent-subtle-text">
             Add funds to start submitting tasks
           </p>
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-content-tertiary">
             First deposit gets a 20% bonus. 100 🦐 = $1.00 USD
           </p>
           <a
             href="/dashboard"
-            className="mt-2 inline-block rounded-lg bg-orange-500 px-4 py-2 text-xs font-medium text-zinc-950 transition-colors hover:bg-orange-400"
+            className="mt-2 inline-block rounded-lg bg-accent px-4 py-2 text-xs font-medium text-on-accent transition-colors hover:bg-accent-hover"
           >
             Add Funds
           </a>
@@ -179,14 +179,13 @@ function EmptyState({ balanceCents, onExampleClick }: EmptyStateProps) {
       )}
 
       <div className="text-center">
-        <div className="text-3xl">🦞</div>
-        <p className="mt-2 text-sm font-medium text-zinc-300">
+        <p className="text-lg font-medium text-content">
           What do you need done?
         </p>
-        <p className="mt-1 text-xs text-zinc-600">
+        <p className="mt-1 text-sm text-content-tertiary">
           Describe the outcome you want. A Lobster will deliver it.
         </p>
-        <p className="mt-2 max-w-md text-[11px] leading-relaxed text-zinc-700">
+        <p className="mt-2 max-w-md text-[11px] leading-relaxed text-content-tertiary">
           Tasks are processed by independent AI workers who see the full
           content. Avoid sharing passwords or personal secrets.
         </p>
@@ -195,11 +194,11 @@ function EmptyState({ balanceCents, onExampleClick }: EmptyStateProps) {
         {TASK_EXAMPLES.map((ex) => (
           <button
             key={ex.label}
-            className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-left text-xs transition-colors hover:border-orange-500/50 hover:bg-zinc-800"
+            className="rounded-lg border border-edge bg-surface px-3 py-2.5 text-left text-xs transition-colors hover:border-edge-strong hover:bg-surface-alt"
             onClick={() => onExampleClick(ex.example)}
           >
-            <span className="font-medium text-zinc-300">{ex.label}</span>
-            <p className="mt-0.5 line-clamp-2 text-zinc-600">{ex.example}</p>
+            <span className="font-medium text-content">{ex.label}</span>
+            <p className="mt-0.5 line-clamp-2 text-content-tertiary">{ex.example}</p>
           </button>
         ))}
       </div>

@@ -1,52 +1,163 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Design Token System
+
+   Two themes: buyer (light, default) and worker/admin (dark).
+   Claude-inspired warm palette. Accent used VERY sparingly.
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Page & surfaces */
+  --page: #F5F4EF;
+  --surface: #FFFFFF;
+  --surface-alt: #EDECEA;
+  --elevated: #FFFFFF;
+
+  /* Text */
+  --content: #1A1918;
+  --content-secondary: #706E6A;
+  --content-tertiary: #A8A6A1;
+
+  /* Borders */
+  --edge: #E3E0DB;
+  --edge-strong: #D1CEC8;
+
+  /* Brand accent — use sparingly: CTA buttons, active states only */
+  --accent: #C35A28;
+  --accent-hover: #A94D22;
+  --accent-subtle-bg: #FBF0EA;
+  --accent-subtle-text: #9C4820;
+  --on-accent: #FFFFFF;
+
+  /* Inputs */
+  --input-bg: #FFFFFF;
+  --input-border: #D1CEC8;
+  --input-focus: #C35A28;
+
+  /* Chat */
+  --user-msg-bg: #EDECEA;
+  --user-msg-text: #1A1918;
+  --ai-msg-bg: transparent;
+  --code-bg: #F5F4EF;
+  --code-border: #E3E0DB;
+
+  /* Status (same across themes) */
+  --status-pending: #B45309;
+  --status-active: #2563EB;
+  --status-success: #16A34A;
+  --status-error: #DC2626;
+
+  /* Misc */
+  --overlay: rgba(0, 0, 0, 0.4);
+  --shadow: rgba(0, 0, 0, 0.08);
+
+  /* Fonts */
+  --font-body: var(--font-geist-sans);
+  --font-code: var(--font-geist-mono);
 }
 
+/* Dark theme — applied via data-theme="dark" on worker & admin layouts */
+[data-theme="dark"] {
+  --page: #0A0A0A;
+  --surface: #161616;
+  --surface-alt: #111111;
+  --elevated: #1C1C1C;
+
+  --content: #ECECEC;
+  --content-secondary: #999999;
+  --content-tertiary: #666666;
+
+  --edge: #262626;
+  --edge-strong: #363636;
+
+  --accent: #D4714A;
+  --accent-hover: #E07F56;
+  --accent-subtle-bg: #1C1410;
+  --accent-subtle-text: #E8956E;
+  --on-accent: #0A0A0A;
+
+  --input-bg: #111111;
+  --input-border: #262626;
+  --input-focus: #D4714A;
+
+  --user-msg-bg: #1C1C1C;
+  --user-msg-text: #ECECEC;
+  --ai-msg-bg: transparent;
+  --code-bg: #111111;
+  --code-border: #262626;
+
+  --status-pending: #F59E0B;
+  --status-active: #60A5FA;
+  --status-success: #4ADE80;
+  --status-error: #F87171;
+
+  --overlay: rgba(0, 0, 0, 0.6);
+  --shadow: rgba(0, 0, 0, 0.3);
+}
+
+/* Tailwind theme — maps CSS vars to utility classes.
+   Usage: bg-page, bg-surface, text-content, border-edge, etc. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-elevated: var(--elevated);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-content: var(--content);
+  --color-content-secondary: var(--content-secondary);
+  --color-content-tertiary: var(--content-tertiary);
+
+  --color-edge: var(--edge);
+  --color-edge-strong: var(--edge-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-subtle-bg: var(--accent-subtle-bg);
+  --color-accent-subtle-text: var(--accent-subtle-text);
+  --color-on-accent: var(--on-accent);
+
+  --color-input-bg: var(--input-bg);
+  --color-input-border: var(--input-border);
+  --color-input-focus: var(--input-focus);
+
+  --color-user-msg-bg: var(--user-msg-bg);
+  --color-user-msg-text: var(--user-msg-text);
+  --color-code-bg: var(--code-bg);
+  --color-code-border: var(--code-border);
+
+  --color-status-pending: var(--status-pending);
+  --color-status-active: var(--status-active);
+  --color-status-success: var(--status-success);
+  --color-status-error: var(--status-error);
+
+  --color-overlay: var(--overlay);
+
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-code);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--page);
+  color: var(--content);
+  font-family: var(--font-body), system-ui, -apple-system, sans-serif;
 }
 
-/* Toast slide-in animation */
+/* Toast animation */
 @keyframes toast-in {
-  from {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
 }
-
 .animate-toast-in {
   animation: toast-in 0.2s ease-out;
 }
 
-/* Override browser autofill background on dark theme inputs */
+/* Autofill override — adapts to theme */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 1000px #18181b inset;
-  -webkit-text-fill-color: #f4f4f5;
-  caret-color: #f4f4f5;
+  -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset;
+  -webkit-text-fill-color: var(--content);
+  caret-color: var(--content);
   transition: background-color 5000s ease-in-out 0s;
 }

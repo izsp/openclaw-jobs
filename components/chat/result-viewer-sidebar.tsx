@@ -27,7 +27,7 @@ export function ResultViewerSidebar({
   };
 
   return (
-    <div className="flex w-48 flex-col gap-4 overflow-y-auto border-r border-zinc-700/50 p-3">
+    <div className="flex w-48 flex-col gap-4 overflow-y-auto border-r border-edge p-3">
       <DocumentOutline
         headings={headings}
         scrollContainerId={scrollContainerId}
@@ -35,7 +35,7 @@ export function ResultViewerSidebar({
 
       {codeFiles.length > 0 && (
         <div>
-          <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+          <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
             Files
           </div>
           <div className="space-y-0.5">
@@ -43,7 +43,7 @@ export function ResultViewerSidebar({
               <button
                 key={f.id}
                 onClick={() => handleClick(f.id)}
-                className="block w-full truncate rounded px-2 py-1 text-left text-xs text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                className="block w-full truncate rounded px-2 py-1 text-left text-xs text-content-secondary hover:bg-surface-alt hover:text-content"
                 title={f.inferredFilename ?? `${f.language} code`}
               >
                 {f.inferredFilename ?? `${f.language} snippet`}
@@ -55,7 +55,7 @@ export function ResultViewerSidebar({
 
       {tables.length > 0 && (
         <div>
-          <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+          <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
             Tables
           </div>
           <div className="space-y-0.5">
@@ -63,7 +63,7 @@ export function ResultViewerSidebar({
               <button
                 key={t.id}
                 onClick={() => handleClick(t.id)}
-                className="block w-full truncate rounded px-2 py-1 text-left text-xs text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                className="block w-full truncate rounded px-2 py-1 text-left text-xs text-content-secondary hover:bg-surface-alt hover:text-content"
                 title={t.headers.join(", ")}
               >
                 Table {i + 1}

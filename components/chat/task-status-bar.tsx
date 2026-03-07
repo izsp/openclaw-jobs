@@ -11,12 +11,12 @@ interface TaskStatusBarProps {
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending: { label: "Queued", color: "text-yellow-500" },
-  assigned: { label: "Lobster working...", color: "text-blue-400" },
-  completed: { label: "Done", color: "text-green-400" },
-  failed: { label: "Failed", color: "text-red-400" },
-  expired: { label: "Expired", color: "text-zinc-500" },
-  credited: { label: "Credited", color: "text-green-400" },
+  pending: { label: "Queued", color: "text-status-pending" },
+  assigned: { label: "Lobster working...", color: "text-status-active" },
+  completed: { label: "Done", color: "text-status-success" },
+  failed: { label: "Failed", color: "text-status-error" },
+  expired: { label: "Expired", color: "text-content-tertiary" },
+  credited: { label: "Credited", color: "text-status-success" },
 };
 
 const CANCELLABLE = new Set(["pending", "assigned"]);
@@ -34,7 +34,7 @@ export function TaskStatusBar({
   const canRetry = taskStatus !== null && RETRYABLE.has(taskStatus);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-y-1 border-t border-zinc-800 px-2 py-1.5 text-xs text-zinc-600 md:px-4 md:py-2">
+    <div className="flex flex-wrap items-center justify-between gap-y-1 border-t border-edge px-2 py-1.5 text-xs text-content-tertiary md:px-4 md:py-2">
       <div className="flex items-center gap-2 md:gap-3">
         {statusInfo && (
           <span className={statusInfo.color}>
@@ -44,13 +44,13 @@ export function TaskStatusBar({
         )}
         {priceCents !== null && (
           <span>
-            Cost: <span className="text-orange-500">{priceCents} 🦐</span>
+            Cost: <span className="text-content-secondary">{priceCents} 🦐</span>
           </span>
         )}
         {canCancel && onCancel && (
           <button
             onClick={onCancel}
-            className="rounded border border-zinc-700 px-2 py-0.5 text-zinc-400 transition-colors hover:border-red-500 hover:text-red-400"
+            className="rounded border border-edge px-2 py-0.5 text-content-tertiary transition-colors hover:border-status-error hover:text-status-error"
           >
             Cancel
           </button>
@@ -58,7 +58,7 @@ export function TaskStatusBar({
         {canRetry && onRetry && (
           <button
             onClick={onRetry}
-            className="rounded border border-zinc-700 px-2 py-0.5 text-zinc-400 transition-colors hover:border-orange-500 hover:text-orange-400"
+            className="rounded border border-edge px-2 py-0.5 text-content-tertiary transition-colors hover:border-edge-strong hover:text-content-secondary"
           >
             Retry
           </button>
@@ -66,7 +66,7 @@ export function TaskStatusBar({
       </div>
       {balanceCents !== null && (
         <span>
-          Balance: <span className="text-zinc-400">{balanceCents} 🦐</span>
+          Balance: <span className="text-content-secondary">{balanceCents} 🦐</span>
         </span>
       )}
     </div>

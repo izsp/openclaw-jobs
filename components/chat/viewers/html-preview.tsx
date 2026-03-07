@@ -24,8 +24,8 @@ export function HtmlPreview({ html, id }: HtmlPreviewProps) {
   }, [html, id]);
 
   return (
-    <div className="my-2 rounded-lg border border-zinc-700/50 bg-zinc-900" data-testid="html-preview">
-      <div className="flex items-center justify-between border-b border-zinc-700/50 px-3 py-1.5">
+    <div className="my-2 rounded-lg border border-edge bg-surface-alt" data-testid="html-preview">
+      <div className="flex items-center justify-between border-b border-edge px-3 py-1.5">
         <div className="flex gap-2">
           <TabButton
             label="Preview"
@@ -40,7 +40,7 @@ export function HtmlPreview({ html, id }: HtmlPreviewProps) {
         </div>
         <button
           onClick={handleDownload}
-          className="rounded px-2 py-0.5 text-[10px] text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+          className="rounded px-2 py-0.5 text-[10px] text-content-tertiary transition-colors hover:bg-surface-alt hover:text-content-secondary"
         >
           Download .html
         </button>
@@ -67,8 +67,8 @@ function TabButton({ label, active, onClick }: TabButtonProps) {
       onClick={onClick}
       className={`rounded px-2 py-0.5 text-[10px] font-medium transition-colors ${
         active
-          ? "bg-zinc-800 text-orange-400"
-          : "text-zinc-500 hover:text-zinc-300"
+          ? "bg-surface-alt text-accent"
+          : "text-content-tertiary hover:text-content-secondary"
       }`}
     >
       {label}

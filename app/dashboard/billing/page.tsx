@@ -27,12 +27,12 @@ export default function BillingPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Billing</h1>
-      <p className="mt-1 text-sm text-zinc-500">
+      <p className="mt-1 text-sm text-content-tertiary">
         Manage your balance and add funds
       </p>
 
       {toast && (
-        <div className="mt-4 rounded-lg border border-green-800 bg-green-950 px-4 py-3 text-sm text-green-400">
+        <div className="mt-4 rounded-lg border border-green-800 bg-green-950 px-4 py-3 text-sm text-status-success">
           {toast}
         </div>
       )}
@@ -62,10 +62,10 @@ export default function BillingPage() {
 
 function BalanceCardSkeleton() {
   return (
-    <div className="animate-pulse rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-      <div className="h-4 w-24 rounded bg-zinc-800" />
-      <div className="mt-3 h-8 w-20 rounded bg-zinc-800" />
-      <div className="mt-4 h-10 w-full rounded bg-zinc-800" />
+    <div className="animate-pulse rounded-xl border border-edge bg-surface-alt p-6">
+      <div className="h-4 w-24 rounded bg-surface-alt" />
+      <div className="mt-3 h-8 w-20 rounded bg-surface-alt" />
+      <div className="mt-4 h-10 w-full rounded bg-surface-alt" />
     </div>
   );
 }

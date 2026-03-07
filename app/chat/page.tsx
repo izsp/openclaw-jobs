@@ -102,14 +102,14 @@ function ChatPageInner() {
   }
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-zinc-950 text-zinc-100">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-page text-content">
       {/* Compact header */}
-      <nav className="flex shrink-0 items-center justify-between overflow-hidden border-b border-zinc-800 px-3 py-2 md:px-4 md:py-3">
+      <nav className="flex shrink-0 items-center justify-between overflow-hidden border-b border-edge px-3 py-2 md:px-4 md:py-3">
         <div className="flex items-center gap-2">
           {/* Mobile sidebar toggle */}
           <button
             onClick={() => setSidebarOpen((o) => !o)}
-            className="rounded p-1.5 text-zinc-500 transition-colors hover:text-zinc-300 lg:hidden"
+            className="rounded p-1.5 text-content-tertiary transition-colors hover:text-content-secondary lg:hidden"
             aria-label="Toggle sidebar"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -119,22 +119,21 @@ function ChatPageInner() {
             </svg>
           </button>
           <Link href="/" className="text-base font-bold tracking-tight md:text-lg">
-            OpenClaw<span className="text-orange-500">.jobs</span>
+            OpenClaw<span className="text-accent">.jobs</span>
           </Link>
         </div>
         <div className="flex items-center gap-2 md:gap-3">
           {balance && (
-            <Link
-              href="/dashboard"
-              className="rounded-full border border-zinc-700 px-2.5 py-0.5 text-xs text-orange-500 transition-colors hover:border-orange-500 md:px-3 md:py-1 md:text-sm"
+            <span
+              className="rounded-full border border-edge px-2.5 py-0.5 text-xs text-content-secondary md:px-3 md:py-1 md:text-sm"
               title={`$${(balance.amount_cents / 100).toFixed(2)} USD`}
             >
               {balance.amount_cents} 🦐
-            </Link>
+            </span>
           )}
           <Link
             href="/dashboard"
-            className="hidden text-sm text-zinc-400 transition-colors hover:text-zinc-200 sm:inline"
+            className="hidden text-sm text-content-secondary transition-colors hover:text-content sm:inline"
           >
             Dashboard
           </Link>
@@ -146,7 +145,7 @@ function ChatPageInner() {
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 z-20 bg-black/60 lg:hidden"
+            className="fixed inset-0 z-20 bg-overlay lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
@@ -178,8 +177,8 @@ function ChatPageInner() {
 
 function PageShell() {
   return (
-    <div className="flex h-screen items-center justify-center bg-zinc-950">
-      <div className="text-sm text-zinc-600 animate-pulse">Loading...</div>
+    <div className="flex h-screen items-center justify-center bg-page">
+      <div className="text-sm text-content-tertiary animate-pulse">Loading...</div>
     </div>
   );
 }

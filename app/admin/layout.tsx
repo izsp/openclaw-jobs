@@ -18,12 +18,12 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex h-screen flex-col bg-zinc-950 text-zinc-100">
+    <div data-theme="dark" className="flex h-screen flex-col bg-page text-content">
       {/* Top bar with hamburger for mobile */}
-      <div className="flex items-center border-b border-zinc-800 md:hidden">
+      <div className="flex items-center border-b border-edge md:hidden">
         <button
           onClick={() => setSidebarOpen((o) => !o)}
-          className="p-4 text-zinc-400 hover:text-zinc-200"
+          className="p-4 text-content-secondary hover:text-content"
           aria-label="Toggle sidebar"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -32,7 +32,7 @@ export default function AdminLayout({
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
-        <span className="text-sm font-semibold text-orange-500">Admin</span>
+        <span className="text-sm font-semibold text-accent">Admin</span>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
@@ -45,7 +45,7 @@ export default function AdminLayout({
         {sidebarOpen && (
           <>
             <div
-              className="fixed inset-0 z-40 bg-black/50 md:hidden"
+              className="fixed inset-0 z-40 bg-overlay md:hidden"
               onClick={() => setSidebarOpen(false)}
             />
             <aside className="fixed inset-y-0 left-0 z-50 md:hidden">

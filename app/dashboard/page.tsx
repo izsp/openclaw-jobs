@@ -27,23 +27,23 @@ export default function DashboardPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Overview</h1>
-      <p className="mt-1 text-sm text-zinc-500">
+      <p className="mt-1 text-sm text-content-secondary">
         Welcome back{session?.user?.name ? `, ${session.user.name}` : ""}
       </p>
 
       {/* Balance summary */}
-      <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+      <div className="mt-6 rounded-xl border border-edge bg-surface p-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-zinc-500">Available Balance</p>
+            <p className="text-sm text-content-secondary">Available Balance</p>
             <div className="mt-1 flex items-baseline gap-1.5">
-              <span className="text-2xl font-bold text-orange-500">
+              <span className="text-2xl font-bold text-content">
                 {balance?.amount_cents ?? "—"}
               </span>
               <span className="text-base">🦐</span>
             </div>
             {balance && (
-              <p className="mt-0.5 text-xs text-zinc-600">
+              <p className="mt-0.5 text-xs text-content-tertiary">
                 = ${(balance.amount_cents / 100).toFixed(2)} USD
               </p>
             )}
@@ -51,13 +51,13 @@ export default function DashboardPage() {
           <div className="flex gap-2">
             <button
               onClick={() => setDepositOpen(true)}
-              className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-zinc-950 transition-colors hover:bg-orange-400"
+              className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-on-accent transition-colors hover:bg-accent-hover"
             >
               Add Funds
             </button>
             <Link
               href="/dashboard/billing"
-              className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-400 transition-colors hover:border-zinc-500 hover:text-zinc-200"
+              className="rounded-lg border border-edge px-4 py-2 text-sm text-content-secondary transition-colors hover:border-edge-strong hover:text-content"
             >
               Details
             </Link>
@@ -68,11 +68,11 @@ export default function DashboardPage() {
       {/* Recent tasks */}
       <div className="mt-6">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-medium text-zinc-400">Recent Tasks</h2>
+          <h2 className="text-sm font-medium text-content-secondary">Recent Tasks</h2>
           {conversations.length > MAX_RECENT_TASKS && (
             <Link
               href="/dashboard/tasks"
-              className="text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+              className="text-xs text-content-tertiary transition-colors hover:text-content-secondary"
             >
               View all ({conversations.length})
             </Link>

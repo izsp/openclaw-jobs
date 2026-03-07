@@ -57,12 +57,12 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           placeholder="Describe your task..."
           disabled={disabled}
           rows={1}
-          className="flex-1 resize-none rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-zinc-100 placeholder-zinc-600 outline-none transition-colors focus:border-orange-500 md:px-4 md:py-3"
+          className="flex-1 resize-none rounded-xl border border-input-border bg-input-bg px-3 py-2.5 text-sm leading-relaxed text-content placeholder-content-tertiary outline-none transition-colors focus:border-input-focus md:px-4 md:py-3"
         />
         <button
           type="submit"
           disabled={disabled || !value.trim()}
-          className="shrink-0 rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-medium text-zinc-950 transition-colors hover:bg-orange-400 disabled:opacity-40 disabled:hover:bg-orange-500 md:px-5 md:py-3"
+          className="shrink-0 rounded-xl bg-content px-4 py-2.5 text-sm font-medium text-page transition-opacity hover:opacity-90 disabled:opacity-30 md:px-5 md:py-3"
         >
           Send
         </button>

@@ -25,22 +25,22 @@ export function JsonViewer({ data, rawJson, id }: JsonViewerProps) {
   }, [rawJson]);
 
   return (
-    <div className="my-2 rounded-lg border border-zinc-700/50 bg-zinc-900" data-testid="json-viewer">
-      <div className="flex items-center justify-between border-b border-zinc-700/50 px-3 py-1.5">
+    <div className="my-2 rounded-lg border border-edge bg-surface-alt" data-testid="json-viewer">
+      <div className="flex items-center justify-between border-b border-edge px-3 py-1.5">
         <div className="flex gap-2">
           <TabToggle label="Tree" active={!showRaw} onClick={() => setShowRaw(false)} />
           <TabToggle label="Raw" active={showRaw} onClick={() => setShowRaw(true)} />
         </div>
         <button
           onClick={handleCopy}
-          className="rounded px-2 py-0.5 text-[10px] text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+          className="rounded px-2 py-0.5 text-[10px] text-content-tertiary transition-colors hover:bg-surface-alt hover:text-content-secondary"
         >
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
       <div className="max-h-[500px] overflow-auto p-3 font-mono text-xs">
         {showRaw ? (
-          <pre className="whitespace-pre-wrap break-all text-zinc-300">{rawJson}</pre>
+          <pre className="whitespace-pre-wrap break-all text-content-secondary">{rawJson}</pre>
         ) : (
           <JsonNode value={data} depth={0} keyName={null} />
         )}
@@ -62,8 +62,8 @@ function TabToggle({ label, active, onClick }: TabToggleProps) {
       onClick={onClick}
       className={`rounded px-2 py-0.5 text-[10px] font-medium transition-colors ${
         active
-          ? "bg-zinc-800 text-orange-400"
-          : "text-zinc-500 hover:text-zinc-300"
+          ? "bg-surface-alt text-accent"
+          : "text-content-tertiary hover:text-content-secondary"
       }`}
     >
       {label}

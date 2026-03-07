@@ -18,7 +18,7 @@ if (!MONGODB_URI) {
 }
 
 async function seed() {
-  const client = new MongoClient(MONGODB_URI);
+  const client = new MongoClient(MONGODB_URI as string);
   await client.connect();
   const db = client.db();
   console.log("Connected to MongoDB");

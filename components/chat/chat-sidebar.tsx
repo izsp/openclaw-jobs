@@ -7,12 +7,12 @@
 import type { ConversationSummary } from "@/lib/chat/chat-types";
 
 const STATUS_LABEL: Record<string, { color: string; text: string }> = {
-  pending: { color: "text-yellow-500", text: "Pending" },
-  assigned: { color: "text-blue-400", text: "Working" },
-  completed: { color: "text-green-400", text: "Done" },
-  failed: { color: "text-red-400", text: "Failed" },
-  expired: { color: "text-zinc-500", text: "Expired" },
-  credited: { color: "text-green-400", text: "Credited" },
+  pending: { color: "text-status-pending", text: "Pending" },
+  assigned: { color: "text-status-active", text: "Working" },
+  completed: { color: "text-status-success", text: "Done" },
+  failed: { color: "text-status-error", text: "Failed" },
+  expired: { color: "text-content-tertiary", text: "Expired" },
+  credited: { color: "text-status-success", text: "Credited" },
 };
 
 interface ChatSidebarProps {
@@ -31,12 +31,12 @@ export function ChatSidebar({
   onDelete,
 }: ChatSidebarProps) {
   return (
-    <div className="flex h-full w-[280px] flex-col border-r border-zinc-800 bg-zinc-950 md:w-64">
+    <div className="flex h-full w-[280px] flex-col border-r border-edge bg-surface-alt md:w-64">
       {/* New chat button */}
       <div className="p-3">
         <button
           onClick={onNewChat}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-700 px-3 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:border-orange-500 hover:text-orange-500"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-edge-strong px-3 py-2.5 text-sm font-medium text-content-secondary transition-colors hover:bg-surface hover:text-content"
         >
           <PlusIcon />
           New Chat
@@ -46,7 +46,7 @@ export function ChatSidebar({
       {/* Conversation list */}
       <div className="flex-1 overflow-y-auto">
         {conversations.length === 0 ? (
-          <p className="px-4 py-6 text-center text-xs text-zinc-600">
+          <p className="px-4 py-6 text-center text-xs text-content-tertiary">
             No conversations yet
           </p>
         ) : (
@@ -59,8 +59,8 @@ export function ChatSidebar({
                   key={conv.id}
                   className={`group relative rounded-lg transition-colors ${
                     isActive
-                      ? "bg-zinc-800 text-zinc-100"
-                      : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+                      ? "bg-surface text-content"
+                      : "text-content-secondary hover:bg-surface hover:text-content"
                   }`}
                 >
                   <button
@@ -70,7 +70,7 @@ export function ChatSidebar({
                     <p className="truncate pr-6 text-sm">
                       {conv.preview || "Empty conversation"}
                     </p>
-                    <div className="mt-1 flex items-center gap-2 text-xs text-zinc-600">
+                    <div className="mt-1 flex items-center gap-2 text-xs text-content-tertiary">
                       <span>{conv.message_count} {conv.message_count === 1 ? "msg" : "msgs"}</span>
                       {status && (
                         <span className={status.color}>{status.text}</span>
@@ -83,7 +83,7 @@ export function ChatSidebar({
                         e.stopPropagation();
                         onDelete(conv.id);
                       }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-zinc-600 opacity-0 transition-opacity hover:text-red-400 group-hover:opacity-100"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-content-tertiary opacity-0 transition-opacity hover:text-status-error group-hover:opacity-100"
                       title="Delete conversation"
                     >
                       <TrashIcon />

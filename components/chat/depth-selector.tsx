@@ -55,7 +55,7 @@ export function DepthSelector({ settings, onChange, disabled }: DepthSelectorPro
     <div className="space-y-1.5">
       {/* Level pills */}
       <div className="flex flex-wrap items-center gap-1">
-        <span className="mr-1 text-[10px] uppercase tracking-wider text-zinc-600">
+        <span className="mr-1 text-[10px] uppercase tracking-wider text-content-tertiary">
           Depth
         </span>
         {LEVELS.map((level) => {
@@ -71,11 +71,11 @@ export function DepthSelector({ settings, onChange, disabled }: DepthSelectorPro
               className={`rounded px-2.5 py-1 text-[11px] font-medium transition-colors ${
                 active
                   ? level === "deep"
-                    ? "bg-orange-500/20 text-orange-400 ring-1 ring-orange-500/40"
+                    ? "bg-accent-subtle-bg text-accent ring-1 ring-accent/40"
                     : level === "standard"
                       ? "bg-sky-500/15 text-sky-400 ring-1 ring-sky-500/30"
                       : "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30"
-                  : "text-zinc-500 hover:text-zinc-300"
+                  : "text-content-tertiary hover:text-content-secondary"
               } disabled:opacity-40`}
             >
               <span className="mr-0.5 font-mono text-[10px]">{LEVEL_ICONS[level]}</span>
@@ -90,7 +90,7 @@ export function DepthSelector({ settings, onChange, disabled }: DepthSelectorPro
             type="button"
             disabled={disabled}
             onClick={() => setExpanded((v) => !v)}
-            className="ml-1.5 rounded px-1.5 py-0.5 text-[11px] text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-orange-400 disabled:opacity-40"
+            className="ml-1.5 rounded px-1.5 py-0.5 text-[11px] text-content-tertiary transition-colors hover:bg-surface-alt hover:text-accent disabled:opacity-40"
           >
             {expanded ? "- options" : "+ options"}
           </button>
@@ -117,7 +117,7 @@ interface DeepOptionsProps {
 
 function DeepOptions({ options, onChange, disabled }: DeepOptionsProps) {
   return (
-    <div className="flex min-w-0 max-w-full flex-col gap-2 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/80 px-2.5 py-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 sm:px-3">
+    <div className="flex min-w-0 max-w-full flex-col gap-2 overflow-hidden rounded-lg border border-edge bg-surface px-2.5 py-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 sm:px-3">
       <div className="flex items-center gap-3">
         {/* Format */}
         <OptionGroup label="Format">
@@ -125,7 +125,7 @@ function DeepOptions({ options, onChange, disabled }: DeepOptionsProps) {
             value={options.format}
             onChange={(e) => onChange({ format: e.target.value as OutputFormat })}
             disabled={disabled}
-            className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-[11px] text-zinc-300 outline-none focus:border-orange-500 disabled:opacity-40 sm:py-0.5"
+            className="rounded border border-edge-strong bg-surface-alt px-2 py-1 text-[11px] text-content-secondary outline-none focus:border-input-focus disabled:opacity-40 sm:py-0.5"
           >
             {FORMAT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -139,7 +139,7 @@ function DeepOptions({ options, onChange, disabled }: DeepOptionsProps) {
             value={options.length}
             onChange={(e) => onChange({ length: e.target.value as OutputLength })}
             disabled={disabled}
-            className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-[11px] text-zinc-300 outline-none focus:border-orange-500 disabled:opacity-40 sm:py-0.5"
+            className="rounded border border-edge-strong bg-surface-alt px-2 py-1 text-[11px] text-content-secondary outline-none focus:border-input-focus disabled:opacity-40 sm:py-0.5"
           >
             {LENGTH_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -157,7 +157,7 @@ function DeepOptions({ options, onChange, disabled }: DeepOptionsProps) {
           disabled={disabled}
           placeholder="e.g. Include data sources, use formal tone..."
           maxLength={200}
-          className="w-full min-w-0 flex-1 rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-[11px] text-zinc-300 placeholder-zinc-600 outline-none focus:border-orange-500 disabled:opacity-40 sm:w-64 sm:flex-none sm:py-0.5"
+          className="w-full min-w-0 flex-1 rounded border border-edge-strong bg-surface-alt px-2 py-1 text-[11px] text-content-secondary placeholder-content-tertiary outline-none focus:border-input-focus disabled:opacity-40 sm:w-64 sm:flex-none sm:py-0.5"
         />
       </OptionGroup>
     </div>
@@ -167,7 +167,7 @@ function DeepOptions({ options, onChange, disabled }: DeepOptionsProps) {
 function OptionGroup({ label, children, grow }: { label: string; children: React.ReactNode; grow?: boolean }) {
   return (
     <div className={`flex items-center gap-1.5 ${grow ? "min-w-0 flex-1" : ""}`}>
-      <span className="shrink-0 text-[10px] uppercase tracking-wider text-zinc-600">{label}</span>
+      <span className="shrink-0 text-[10px] uppercase tracking-wider text-content-tertiary">{label}</span>
       {children}
     </div>
   );

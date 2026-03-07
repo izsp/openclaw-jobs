@@ -29,7 +29,7 @@ function badgeColor(taskType: string): string {
     writing: "bg-purple-900/50 text-purple-300",
     analysis: "bg-amber-900/50 text-amber-300",
   };
-  return colors[taskType] ?? "bg-zinc-700/50 text-zinc-300";
+  return colors[taskType] ?? "bg-edge-strong/50 text-content-secondary";
 }
 
 /** Card header showing worker info, task type badge, artifact badges, duration, and word count. */
@@ -37,7 +37,7 @@ export function ResultHeader({ meta, summary }: ResultHeaderProps) {
   const displayName = meta.worker_display_name ?? "Anonymous Lobster";
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 border-b border-zinc-700/50 px-2.5 py-2 md:gap-2 md:px-4 md:py-2.5">
+    <div className="flex flex-wrap items-center gap-1.5 border-b border-edge px-2.5 py-2 md:gap-2 md:px-4 md:py-2.5">
       {/* Worker avatar */}
       {meta.worker_avatar_url ? (
         <Image
@@ -48,13 +48,13 @@ export function ResultHeader({ meta, summary }: ResultHeaderProps) {
           className="rounded-full object-cover"
         />
       ) : (
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-700 text-xs">
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-edge-strong text-xs">
           🦞
         </span>
       )}
 
       {/* Worker name */}
-      <span className="text-xs font-medium text-zinc-300">{displayName}</span>
+      <span className="text-xs font-medium text-content-secondary">{displayName}</span>
 
       {/* Task type badge */}
       <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${badgeColor(meta.task_type)}`}>
@@ -70,10 +70,10 @@ export function ResultHeader({ meta, summary }: ResultHeaderProps) {
       <div className="flex-1" />
 
       {/* Stats */}
-      <span className="text-[11px] text-zinc-500">
+      <span className="text-[11px] text-content-tertiary">
         {formatDuration(meta.duration_seconds)}
       </span>
-      <span className="text-[11px] text-zinc-500">
+      <span className="text-[11px] text-content-tertiary">
         {formatCount(meta.word_count)} words
       </span>
     </div>

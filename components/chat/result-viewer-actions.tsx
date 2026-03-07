@@ -55,10 +55,10 @@ export function ResultViewerActions({
   }, [onCredit, taskId]);
 
   const btn =
-    "rounded px-3 py-1.5 text-xs font-medium transition-colors text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200";
+    "rounded px-3 py-1.5 text-xs font-medium transition-colors text-content-secondary hover:bg-edge-strong/50 hover:text-content";
 
   return (
-    <div className="flex items-center gap-2 border-t border-zinc-700/50 px-5 py-3">
+    <div className="flex items-center gap-2 border-t border-edge px-5 py-3">
       <button onClick={handleCopy} className={btn}>
         {copied ? "Copied!" : "Copy All"}
       </button>
@@ -80,8 +80,8 @@ export function ResultViewerActions({
         disabled={creditState !== "idle"}
         className={`rounded px-3 py-1.5 text-xs font-medium transition-colors ${
           creditState === "done"
-            ? "text-green-400"
-            : "text-red-400 hover:bg-red-900/30 hover:text-red-300"
+            ? "text-status-success"
+            : "text-status-error hover:bg-status-error/10/30 hover:text-red-300"
         } disabled:opacity-50`}
       >
         {creditState === "done"

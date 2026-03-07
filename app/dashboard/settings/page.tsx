@@ -9,10 +9,10 @@ export default function SettingsPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Settings</h1>
-      <p className="mt-1 text-sm text-zinc-500">Account information</p>
+      <p className="mt-1 text-sm text-content-tertiary">Account information</p>
 
-      <div className="mt-6 max-w-lg rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-        <h2 className="text-sm font-medium text-zinc-400">Profile</h2>
+      <div className="mt-6 max-w-lg rounded-xl border border-edge bg-surface-alt p-6">
+        <h2 className="text-sm font-medium text-content-secondary">Profile</h2>
         <dl className="mt-4 space-y-4">
           <InfoRow label="Name" value={user?.name ?? "—"} />
           <InfoRow label="Email" value={user?.email ?? "—"} />
@@ -20,9 +20,9 @@ export default function SettingsPage() {
         </dl>
       </div>
 
-      <div className="mt-6 max-w-lg rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-        <h2 className="text-sm font-medium text-zinc-400">Preferences</h2>
-        <p className="mt-3 text-sm text-zinc-500">
+      <div className="mt-6 max-w-lg rounded-xl border border-edge bg-surface-alt p-6">
+        <h2 className="text-sm font-medium text-content-secondary">Preferences</h2>
+        <p className="mt-3 text-sm text-content-tertiary">
           More settings will be available in a future update.
         </p>
       </div>
@@ -40,10 +40,10 @@ function InfoRow({
   mono?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-zinc-800 pb-3 last:border-0 last:pb-0">
-      <dt className="text-sm text-zinc-500">{label}</dt>
+    <div className="flex items-center justify-between border-b border-edge pb-3 last:border-0 last:pb-0">
+      <dt className="text-sm text-content-tertiary">{label}</dt>
       <dd
-        className={`text-sm text-zinc-200 ${mono ? "font-mono text-xs" : ""}`}
+        className={`text-sm text-content ${mono ? "font-mono text-xs" : ""}`}
       >
         {value}
       </dd>

@@ -27,7 +27,7 @@ export function ArtifactBadge({ summary }: ArtifactBadgeProps) {
     items.push({
       count: summary.tables,
       label: summary.tables === 1 ? "table" : "tables",
-      color: "bg-blue-900/50 text-blue-400",
+      color: "bg-blue-900/50 text-status-active",
     });
   }
   if (summary.jsonBlocks > 0) {

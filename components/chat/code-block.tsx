@@ -58,14 +58,14 @@ export function CodeBlock({ language, code }: CodeBlockProps) {
   }, [code]);
 
   return (
-    <div className="group relative my-2 rounded-lg bg-zinc-950 text-xs">
-      <div className="flex items-center justify-between px-3 py-1.5 text-zinc-500">
+    <div className="group relative my-2 rounded-lg bg-code-bg text-xs">
+      <div className="flex items-center justify-between px-3 py-1.5 text-content-tertiary">
         <span className="font-mono text-[10px] uppercase tracking-wider">
           {language}
         </span>
         <button
           onClick={handleCopy}
-          className="rounded px-2 py-0.5 text-[10px] text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+          className="rounded px-2 py-0.5 text-[10px] text-content-tertiary transition-colors hover:bg-surface-alt hover:text-content-secondary"
         >
           {copied ? "Copied" : "Copy"}
         </button>
@@ -76,7 +76,7 @@ export function CodeBlock({ language, code }: CodeBlockProps) {
           dangerouslySetInnerHTML={{ __html: highlightedHtml }}
         />
       ) : (
-        <pre className="overflow-x-auto px-3 pb-3 leading-relaxed text-zinc-300">
+        <pre className="overflow-x-auto px-3 pb-3 leading-relaxed text-content-secondary">
           <code>{code}</code>
         </pre>
       )}

@@ -59,14 +59,14 @@ export function TableViewer({ headers, rows, id }: TableViewerProps) {
   }, [headers, sortedRows, id]);
 
   return (
-    <div className="my-2 rounded-lg border border-zinc-700/50 bg-zinc-900">
+    <div className="my-2 rounded-lg border border-edge bg-surface-alt">
       <div className="flex items-center justify-between px-3 py-1.5">
-        <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+        <span className="text-[10px] font-medium uppercase tracking-wider text-content-tertiary">
           {rows.length} row{rows.length !== 1 ? "s" : ""}
         </span>
         <button
           onClick={handleDownloadCsv}
-          className="rounded px-2 py-0.5 text-[10px] text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+          className="rounded px-2 py-0.5 text-[10px] text-content-tertiary transition-colors hover:bg-surface-alt hover:text-content-secondary"
         >
           Download CSV
         </button>
@@ -89,12 +89,12 @@ export function TableViewer({ headers, rows, id }: TableViewerProps) {
             {sortedRows.map((row, rowIdx) => (
               <tr
                 key={rowIdx}
-                className={rowIdx % 2 === 0 ? "bg-zinc-950/50" : "bg-zinc-900"}
+                className={rowIdx % 2 === 0 ? "bg-page/50" : "bg-surface-alt"}
               >
                 {row.map((cell, cellIdx) => (
                   <td
                     key={cellIdx}
-                    className="px-2 py-1 text-zinc-400 whitespace-nowrap"
+                    className="px-2 py-1 text-content-secondary whitespace-nowrap"
                   >
                     {cell}
                   </td>
@@ -121,11 +121,11 @@ function HeaderCell({ label, sortDirection, onClick }: HeaderCellProps) {
   return (
     <th
       onClick={onClick}
-      className="cursor-pointer select-none border-b border-zinc-700/50 bg-zinc-900 px-2 py-1.5 text-left font-medium text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-orange-400"
+      className="cursor-pointer select-none border-b border-edge bg-surface-alt px-2 py-1.5 text-left font-medium text-content-secondary transition-colors hover:bg-surface-alt hover:text-accent"
     >
       {label}
       {indicator && (
-        <span className="ml-1 text-orange-400">{indicator}</span>
+        <span className="ml-1 text-accent">{indicator}</span>
       )}
     </th>
   );

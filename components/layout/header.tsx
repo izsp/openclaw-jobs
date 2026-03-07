@@ -16,16 +16,16 @@ export function Header() {
   const onChat = pathname === "/chat";
 
   return (
-    <nav className="flex items-center justify-between border-b border-zinc-800 px-4 py-3 sm:px-6 sm:py-4">
-      <Link href="/" className="text-lg font-bold tracking-tight">
-        OpenClaw<span className="text-orange-500">.jobs</span>
+    <nav className="flex items-center justify-between border-b border-edge px-4 py-3 sm:px-6 sm:py-4">
+      <Link href="/" className="text-lg font-bold tracking-tight text-content">
+        OpenClaw<span className="text-accent">.jobs</span>
       </Link>
 
       <div className="flex items-center gap-2 sm:gap-3">
         {isAuthenticated && !onChat && (
           <Link
             href="/chat"
-            className="text-sm text-zinc-400 transition-colors hover:text-zinc-200"
+            className="text-sm text-content-secondary transition-colors hover:text-content"
           >
             Chat
           </Link>
@@ -34,7 +34,7 @@ export function Header() {
         {isAuthenticated && !onDashboard && (
           <Link
             href="/dashboard"
-            className="text-sm text-zinc-400 transition-colors hover:text-zinc-200"
+            className="text-sm text-content-secondary transition-colors hover:text-content"
           >
             Dashboard
           </Link>
@@ -43,7 +43,7 @@ export function Header() {
         {isAuthenticated && balance && (
           <Link
             href="/dashboard"
-            className="rounded-full border border-zinc-700 px-3 py-1 text-sm text-orange-500 transition-colors hover:border-orange-500"
+            className="rounded-full border border-edge px-3 py-1 text-sm text-content-secondary transition-colors hover:border-edge-strong"
             title={`$${(balance.amount_cents / 100).toFixed(2)} USD`}
           >
             {balance.amount_cents} 🦐
@@ -58,7 +58,7 @@ export function Header() {
         ) : (
           <Link
             href="/login"
-            className="rounded-full border border-zinc-700 px-3 py-1.5 text-sm font-medium text-zinc-300 transition-colors hover:border-orange-500 hover:text-orange-500 sm:px-4"
+            className="rounded-full bg-content px-4 py-1.5 text-sm font-medium text-page transition-opacity hover:opacity-90"
           >
             Sign in
           </Link>
@@ -88,7 +88,7 @@ function UserDropdown({ email, name }: { email: string; name: string }) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 rounded-full border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition-colors hover:border-zinc-500"
+        className="flex items-center gap-1.5 rounded-full border border-edge px-3 py-1.5 text-sm text-content-secondary transition-colors hover:border-edge-strong"
       >
         <span className="max-w-[120px] truncate">{display}</span>
         <svg
@@ -106,15 +106,15 @@ function UserDropdown({ email, name }: { email: string; name: string }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-1 min-w-[180px] rounded-lg border border-zinc-700 bg-zinc-900 py-1 shadow-xl">
+        <div className="absolute right-0 top-full z-50 mt-1 min-w-[180px] rounded-lg border border-edge bg-elevated py-1 shadow-lg">
           {email && (
-            <div className="border-b border-zinc-800 px-3 py-2 text-xs text-zinc-500 truncate">
+            <div className="border-b border-edge px-3 py-2 text-xs text-content-tertiary truncate">
               {email}
             </div>
           )}
           <button
             onClick={() => { setOpen(false); signOut(); }}
-            className="w-full px-3 py-2 text-left text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+            className="w-full px-3 py-2 text-left text-sm text-content-secondary transition-colors hover:bg-surface-alt hover:text-content"
           >
             Sign out
           </button>

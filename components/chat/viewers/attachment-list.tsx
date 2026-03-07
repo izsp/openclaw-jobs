@@ -42,8 +42,8 @@ export function AttachmentList({ attachments, taskId }: AttachmentListProps) {
   if (attachments.length === 0) return null;
 
   return (
-    <div className="border-t border-zinc-700/50 px-4 py-3">
-      <p className="mb-2 text-xs font-medium text-zinc-400">
+    <div className="border-t border-edge px-4 py-3">
+      <p className="mb-2 text-xs font-medium text-content-secondary">
         Attachments ({attachments.length})
       </p>
       <div className="space-y-1.5">
@@ -62,19 +62,19 @@ function AttachmentItem({ attachment, taskId }: { attachment: Attachment; taskId
 
   return (
     <div>
-      <div className="flex items-center gap-2 rounded-lg bg-zinc-900/50 px-3 py-2">
+      <div className="flex items-center gap-2 rounded-lg bg-surface px-3 py-2">
         <span className="text-sm">{mimeIcon(attachment.content_type)}</span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-xs font-medium text-zinc-200">
+          <p className="truncate text-xs font-medium text-content">
             {attachment.filename}
           </p>
-          <p className="text-[10px] text-zinc-500">{formatSize(attachment.size_bytes)}</p>
+          <p className="text-[10px] text-content-tertiary">{formatSize(attachment.size_bytes)}</p>
         </div>
         <div className="flex items-center gap-1">
           {isImage && (
             <button
               onClick={() => setPreviewUrl(previewUrl ? null : url)}
-              className="rounded px-2 py-1 text-[10px] text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200"
+              className="rounded px-2 py-1 text-[10px] text-content-secondary hover:bg-edge-strong/50 hover:text-content"
             >
               {previewUrl ? "Hide" : "Preview"}
             </button>
@@ -83,14 +83,14 @@ function AttachmentItem({ attachment, taskId }: { attachment: Attachment; taskId
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded px-2 py-1 text-[10px] text-orange-400 hover:bg-zinc-700/50 hover:text-orange-300"
+            className="rounded px-2 py-1 text-[10px] text-accent hover:bg-edge-strong/50 hover:text-accent"
           >
             Download
           </a>
         </div>
       </div>
       {previewUrl && (
-        <div className="mt-1 overflow-hidden rounded-lg border border-zinc-700/50">
+        <div className="mt-1 overflow-hidden rounded-lg border border-edge">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={previewUrl}
