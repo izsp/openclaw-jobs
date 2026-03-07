@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import type { ResultMetadata } from "@/lib/chat/chat-types";
 import { ResultContent } from "./result-content";
 import { AttachmentList } from "./viewers/attachment-list";
@@ -23,8 +23,8 @@ function formatDuration(seconds: number): string {
 
 /**
  * Full-screen mobile reader for task results.
- * Covers the entire viewport — professional document reading experience.
- * Used on screens < lg breakpoint.
+ * Minimal chrome — just content with a thin header.
+ * Three-dot menu holds metadata and actions.
  */
 export function ResultSheet({
   content,
@@ -33,38 +33,46 @@ export function ResultSheet({
   onCredit,
   credited,
 }: ResultSheetProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [creditState, setCreditState] = useState<"idle" | "loading" | "done">(
     credited ? "done" : "idle",
   );
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, []);
 
-  const handleEscape = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    },
-    [onClose],
-  );
-
   useEffect(() => {
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [handleEscape]);
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [menuOpen]);
 
   const handleCopy = useCallback(async () => {
     await navigator.clipboard.writeText(content);
     setCopied(true);
+    setMenuOpen(false);
     setTimeout(() => setCopied(false), 2000);
   }, [content]);
 
   const handleCredit = useCallback(async () => {
     setCreditState("loading");
+    setMenuOpen(false);
     const ok = await onCredit(meta.task_id);
     setCreditState(ok ? "done" : "idle");
   }, [onCredit, meta.task_id]);
@@ -73,41 +81,62 @@ export function ResultSheet({
 
   return (
     <div className="fixed inset-0 z-50 flex animate-slide-up flex-col bg-page">
-      {/* Top bar */}
-      <div className="flex shrink-0 items-center justify-between border-b border-edge px-3 py-2.5">
+      {/* Header — Back + three-dot menu */}
+      <div className="flex shrink-0 items-center justify-between px-3 py-2.5">
         <button
           onClick={onClose}
-          className="flex items-center gap-1.5 rounded-lg p-1.5 text-sm text-content-secondary transition-colors hover:text-content"
+          className="flex items-center gap-1 rounded-lg p-1.5 text-sm text-content-secondary transition-colors hover:text-content"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
           Back
         </button>
-        <div className="flex items-center gap-2">
+
+        {/* Three-dot menu */}
+        <div ref={menuRef} className="relative">
           <button
-            onClick={handleCopy}
-            className="rounded-lg px-2.5 py-1.5 text-xs text-content-secondary transition-colors hover:bg-surface-alt"
+            onClick={() => setMenuOpen((v) => !v)}
+            className="rounded-lg p-2 text-content-secondary transition-colors hover:bg-surface-alt hover:text-content"
           >
-            {copied ? "Copied" : "Copy"}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="5" r="1.5" />
+              <circle cx="12" cy="12" r="1.5" />
+              <circle cx="12" cy="19" r="1.5" />
+            </svg>
           </button>
+
+          {menuOpen && (
+            <div className="absolute right-0 top-full z-50 mt-1 w-52 rounded-xl border border-edge bg-elevated py-1 shadow-lg">
+              {/* Info section */}
+              <div className="border-b border-edge px-3 py-2 space-y-0.5">
+                <p className="text-xs text-content-secondary">{displayName}</p>
+                <p className="text-[11px] text-content-tertiary">
+                  {formatDuration(meta.duration_seconds)} · {meta.word_count.toLocaleString()} words · {meta.price_cents} shrimp
+                </p>
+              </div>
+              {/* Actions */}
+              <button
+                onClick={handleCopy}
+                className="w-full px-3 py-2.5 text-left text-sm text-content-secondary transition-colors hover:bg-surface-alt hover:text-content"
+              >
+                {copied ? "Copied!" : "Copy text"}
+              </button>
+              <button
+                onClick={handleCredit}
+                disabled={creditState !== "idle"}
+                className={`w-full px-3 py-2.5 text-left text-sm transition-colors hover:bg-surface-alt disabled:opacity-50 ${
+                  creditState === "done" ? "text-status-success" : "text-content-secondary hover:text-content"
+                }`}
+              >
+                {creditState === "done" ? "Credited" : creditState === "loading" ? "Crediting..." : "Request credit"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Worker info bar */}
-      <div className="flex shrink-0 items-center gap-2 border-b border-edge px-4 py-2">
-        <span className="text-xs text-content-secondary">{displayName}</span>
-        <span className="text-xs text-content-tertiary">·</span>
-        <span className="text-xs text-content-tertiary">
-          {formatDuration(meta.duration_seconds)}
-        </span>
-        <span className="text-xs text-content-tertiary">·</span>
-        <span className="text-xs text-content-tertiary">
-          {meta.word_count.toLocaleString()} words
-        </span>
-      </div>
-
-      {/* Content — full screen scroll */}
+      {/* Content — full screen scroll, no other chrome */}
       <div className="flex-1 overflow-y-auto overscroll-contain">
         <div className="mx-auto max-w-2xl">
           <ResultContent content={content} format={meta.format} />
@@ -115,28 +144,6 @@ export function ResultSheet({
             <AttachmentList attachments={meta.attachments} taskId={meta.task_id} />
           )}
         </div>
-      </div>
-
-      {/* Bottom bar — credit */}
-      <div className="flex shrink-0 items-center justify-between border-t border-edge px-4 py-2.5">
-        <span className="text-xs text-content-tertiary">
-          {meta.price_cents} 🦐
-        </span>
-        <button
-          onClick={handleCredit}
-          disabled={creditState !== "idle"}
-          className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-            creditState === "done"
-              ? "text-status-success"
-              : "text-content-secondary hover:bg-surface-alt hover:text-content"
-          } disabled:opacity-50`}
-        >
-          {creditState === "done"
-            ? "Credited"
-            : creditState === "loading"
-              ? "Crediting..."
-              : "Request Credit"}
-        </button>
       </div>
     </div>
   );
