@@ -81,9 +81,6 @@ export function ResultPanel({
 
         {/* Worker info */}
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-alt text-[10px]">
-            🦞
-          </span>
           <span className="truncate text-xs text-content-secondary">{displayName}</span>
           <span className="text-xs text-content-tertiary">
             {formatDuration(meta.duration_seconds)}

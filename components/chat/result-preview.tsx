@@ -86,9 +86,6 @@ export function ResultPreview({ content, meta, onOpen }: ResultPreviewProps) {
 
         {/* Footer: metadata + open CTA */}
         <div className="flex items-center gap-2 border-t border-edge px-4 py-2.5">
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-surface-alt text-[10px]">
-            🦞
-          </span>
           <span className="text-xs text-content-tertiary">
             {displayName}
           </span>

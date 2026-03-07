@@ -43,8 +43,9 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   }
 
   return (
-    <div className="flex items-end gap-2">
-      <div className="relative min-w-0 flex-1">
+    <div className="space-y-1.5">
+      {/* Textarea + Send */}
+      <div className="flex items-end gap-2">
         <textarea
           ref={textareaRef}
           value={value}
@@ -53,21 +54,19 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           placeholder="Describe your task..."
           disabled={disabled}
           rows={1}
-          className="w-full resize-none rounded-xl border border-input-border bg-input-bg px-3 pb-2.5 pt-8 text-sm leading-relaxed text-content placeholder-content-tertiary outline-none transition-colors focus:border-input-focus md:px-4 md:pb-3 md:pt-9"
+          className="min-w-0 flex-1 resize-none rounded-xl border border-input-border bg-input-bg px-3 py-2.5 text-sm leading-relaxed text-content placeholder-content-tertiary outline-none transition-colors focus:border-input-focus md:px-4 md:py-3"
         />
-        {/* Depth selector pinned to top-left of textarea */}
-        <div className="absolute left-1.5 top-1.5 md:left-2 md:top-2">
-          <DepthSelector settings={depth} onChange={setDepth} disabled={disabled} />
-        </div>
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={disabled || !value.trim()}
+          className="shrink-0 rounded-xl bg-content px-4 py-2.5 text-sm font-medium text-page transition-opacity hover:opacity-90 disabled:opacity-30 md:px-5 md:py-3"
+        >
+          Send
+        </button>
       </div>
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={disabled || !value.trim()}
-        className="shrink-0 rounded-xl bg-content px-4 py-2.5 text-sm font-medium text-page transition-opacity hover:opacity-90 disabled:opacity-30 md:px-5 md:py-3"
-      >
-        Send
-      </button>
+      {/* Depth selector below input */}
+      <DepthSelector settings={depth} onChange={setDepth} disabled={disabled} />
     </div>
   );
 }

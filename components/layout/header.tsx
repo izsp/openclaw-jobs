@@ -18,7 +18,7 @@ export function Header() {
   return (
     <nav className="flex items-center justify-between border-b border-edge px-4 py-3 sm:px-6 sm:py-4">
       <Link href="/" className="text-lg font-bold tracking-tight text-content">
-        OpenClaw<span className="text-accent">.jobs</span>
+        OpenClaw<span className="text-content-tertiary">.jobs</span>
       </Link>
 
       <div className="flex items-center gap-2 sm:gap-3">

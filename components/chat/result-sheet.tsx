@@ -96,9 +96,6 @@ export function ResultSheet({
 
       {/* Worker info bar */}
       <div className="flex shrink-0 items-center gap-2 border-b border-edge px-4 py-2">
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-surface-alt text-[10px]">
-          🦞
-        </span>
         <span className="text-xs text-content-secondary">{displayName}</span>
         <span className="text-xs text-content-tertiary">·</span>
         <span className="text-xs text-content-tertiary">

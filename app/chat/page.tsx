@@ -158,7 +158,7 @@ function ChatPageInner() {
             </svg>
           </button>
           <Link href="/" className="text-base font-bold tracking-tight md:text-lg">
-            OpenClaw<span className="text-accent">.jobs</span>
+            OpenClaw<span className="text-content-tertiary">.jobs</span>
           </Link>
         </div>
         <div className="flex items-center gap-2 md:gap-3">
