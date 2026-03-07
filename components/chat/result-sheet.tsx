@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import type { ResultMetadata } from "@/lib/chat/chat-types";
 import { ResultContent } from "./result-content";
 import { AttachmentList } from "./viewers/attachment-list";
@@ -20,13 +21,12 @@ function formatDuration(seconds: number): string {
   return `${mins}m ${secs}s`;
 }
 
-/** Scroll-direction threshold to avoid flicker on tiny movements. */
 const SCROLL_THRESHOLD = 12;
 
 /**
  * Full-screen mobile reader — Medium-style immersive reading.
- * Header hides on scroll down, reappears on scroll up.
- * Reading progress bar at top.
+ * Portals to body for native document scrolling so iOS Safari
+ * collapses the address bar automatically.
  */
 export function ResultSheet({
   content,
@@ -42,16 +42,28 @@ export function ResultSheet({
   );
   const [headerVisible, setHeaderVisible] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   const menuRef = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
+  const savedScrollY = useRef(0);
 
+  // WHY: Portal to body and hide app content so the document itself scrolls.
+  // iOS Safari only collapses the address bar on native document scroll.
   useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
+    setMounted(true);
+    savedScrollY.current = window.scrollY;
+    const appRoot = document.getElementById("__next");
+    if (appRoot) appRoot.style.display = "none";
+    window.scrollTo(0, 0);
+
+    return () => {
+      if (appRoot) appRoot.style.display = "";
+      window.scrollTo(0, savedScrollY.current);
+    };
   }, []);
 
+  // Escape key
   useEffect(() => {
     function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
     document.addEventListener("keydown", onKey);
@@ -70,37 +82,33 @@ export function ResultSheet({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [menuOpen]);
 
-  // WHY: Medium-style scroll handler — hide header on scroll down,
-  // show on scroll up, update reading progress bar.
-  const handleScroll = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
+  // WHY: Native window scroll handler — Medium-style header hide/show + progress.
+  useEffect(() => {
+    function handleScroll() {
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollY.current;
 
-    const currentY = el.scrollTop;
-    const delta = currentY - lastScrollY.current;
+      // Progress
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight > 0) {
+        setProgress(Math.min(currentY / docHeight, 1));
+      }
 
-    // Update progress
-    const maxScroll = el.scrollHeight - el.clientHeight;
-    if (maxScroll > 0) {
-      setProgress(Math.min(currentY / maxScroll, 1));
+      // Header
+      if (delta > SCROLL_THRESHOLD) {
+        setHeaderVisible(false);
+        setMenuOpen(false);
+      } else if (delta < -SCROLL_THRESHOLD) {
+        setHeaderVisible(true);
+      }
+
+      if (currentY < 10) setHeaderVisible(true);
+
+      lastScrollY.current = currentY;
     }
 
-    // Header show/hide with threshold
-    if (delta > SCROLL_THRESHOLD) {
-      // Scrolling down — hide header, close menu
-      setHeaderVisible(false);
-      setMenuOpen(false);
-    } else if (delta < -SCROLL_THRESHOLD) {
-      // Scrolling up — show header
-      setHeaderVisible(true);
-    }
-
-    // Always show header at top of page
-    if (currentY < 10) {
-      setHeaderVisible(true);
-    }
-
-    lastScrollY.current = currentY;
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleCopy = useCallback(async () => {
@@ -119,19 +127,21 @@ export function ResultSheet({
 
   const displayName = meta.worker_display_name ?? "Lobster";
 
-  return (
-    <div className="fixed inset-0 z-50 flex animate-slide-up flex-col bg-page">
-      {/* Reading progress bar — always visible at very top */}
-      <div className="absolute inset-x-0 top-0 z-50 h-[2px] bg-transparent">
+  if (!mounted) return null;
+
+  return createPortal(
+    <>
+      {/* Reading progress bar — fixed at very top */}
+      <div className="fixed inset-x-0 top-0 z-[60] h-[2px] bg-transparent pointer-events-none">
         <div
           className="h-full bg-content-tertiary transition-[width] duration-150 ease-out"
           style={{ width: `${progress * 100}%` }}
         />
       </div>
 
-      {/* Header — slides up/down based on scroll direction */}
+      {/* Header — fixed, slides up/down */}
       <div
-        className={`absolute inset-x-0 top-0 z-40 bg-page/95 backdrop-blur-sm transition-transform duration-250 ease-out ${
+        className={`fixed inset-x-0 top-0 z-50 bg-page/95 backdrop-blur-sm transition-transform duration-250 ease-out ${
           headerVisible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
@@ -146,7 +156,6 @@ export function ResultSheet({
             Back
           </button>
 
-          {/* Three-dot menu */}
           <div ref={menuRef} className="relative">
             <button
               onClick={() => setMenuOpen((v) => !v)}
@@ -188,23 +197,18 @@ export function ResultSheet({
         </div>
       </div>
 
-      {/* Content — full screen scroll, overlaps header area for immersive feel */}
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto overscroll-contain"
-      >
-        {/* Top padding so content starts below header initially */}
-        <div className="h-12" />
-        <div className="mx-auto max-w-2xl">
+      {/* Content — normal document flow, native scroll */}
+      <div className="min-h-dvh bg-page animate-slide-up">
+        <div className="pt-12" />
+        <div className="mx-auto max-w-2xl px-4">
           <ResultContent content={content} format={meta.format} />
           {meta.attachments && meta.attachments.length > 0 && (
             <AttachmentList attachments={meta.attachments} taskId={meta.task_id} />
           )}
-          {/* Bottom breathing room */}
-          <div className="h-20" />
         </div>
+        <div className="h-24" />
       </div>
-    </div>
+    </>,
+    document.body,
   );
 }
