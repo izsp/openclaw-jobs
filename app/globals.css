@@ -69,10 +69,10 @@
 
 @media (min-width: 1024px) {
   .chat-layout {
-    --page: #2F2F2F;
-    --surface: #343434;
-    --surface-alt: #2A2A2A;
-    --elevated: #3A3A3A;
+    --page: #292929;
+    --surface: #333333;
+    --surface-alt: #252525;
+    --elevated: #3D3D3D;
 
     --content: #ECECEC;
     --content-secondary: #A0A0A0;

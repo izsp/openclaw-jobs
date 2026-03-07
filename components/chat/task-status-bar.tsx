@@ -44,7 +44,7 @@ export function TaskStatusBar({
         {statusInfo.label}
       </span>
       {priceCents !== null && (
-        <span>{priceCents} 🦐</span>
+        <span>{priceCents} shrimp</span>
       )}
       {canCancel && onCancel && (
         <button

@@ -76,7 +76,7 @@ export function ChatPanel({
   const isBusy = sending || polling;
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-none border-0 bg-surface md:min-h-[400px] md:rounded-xl md:border md:border-edge">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-none border-0 bg-surface md:min-h-[400px] md:rounded-xl md:border md:border-edge md:bg-elevated">
       {/* Messages area */}
       <div ref={scrollRef} className="min-w-0 flex-1 space-y-3 overflow-x-hidden overflow-y-auto overscroll-y-contain p-2 md:p-4">
         {messages.length === 0 && !welcomeMessage && (
@@ -133,7 +133,7 @@ export function ChatPanel({
 
 function ChatShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-none bg-surface md:min-h-[400px] md:rounded-xl md:border md:border-edge">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-none bg-surface md:min-h-[400px] md:rounded-xl md:border md:border-edge md:bg-elevated">
       {children}
     </div>
   );

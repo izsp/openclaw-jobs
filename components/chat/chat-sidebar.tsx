@@ -31,7 +31,7 @@ export function ChatSidebar({
   onDelete,
 }: ChatSidebarProps) {
   return (
-    <div className="flex h-full w-[280px] flex-col border-r border-edge bg-surface-alt md:w-64">
+    <div className="flex h-full w-[280px] flex-col border-r border-edge bg-elevated md:w-64">
       {/* New chat button */}
       <div className="p-3">
         <button

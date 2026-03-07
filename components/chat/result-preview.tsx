@@ -98,7 +98,7 @@ export function ResultPreview({ content, meta, onOpen }: ResultPreviewProps) {
             {meta.word_count.toLocaleString()} words
           </span>
           <div className="flex-1" />
-          <span className="text-xs font-medium text-content-secondary transition-colors group-hover:text-accent">
+          <span className="text-xs font-medium text-content transition-colors group-hover:text-accent">
             Open →
           </span>
         </div>
