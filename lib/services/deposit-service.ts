@@ -94,8 +94,8 @@ export async function createCheckoutSession(
     payment_method_types: ["card"],
     line_items: lineItems,
     metadata: { user_id: userId, amount_cents: String(amountCents) },
-    success_url: `${baseUrl}/?deposit=success`,
-    cancel_url: `${baseUrl}/?deposit=cancel`,
+    success_url: `${baseUrl}/dashboard/billing?deposit=success`,
+    cancel_url: `${baseUrl}/dashboard/billing?deposit=cancel`,
   });
 
   if (!session.url) {

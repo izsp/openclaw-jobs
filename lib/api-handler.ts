@@ -23,10 +23,11 @@ export async function requireAuth(
   const secret =
     process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "";
 
-  // WHY: On HTTPS, Auth.js sets cookies with __Secure- prefix.
-  // getToken must know this to look for the correct cookie name.
-  // Locally (http://localhost), no prefix is used.
-  const secureCookie = request.url.startsWith("https://");
+  // WHY: secureCookie must match how auth.ts names the cookie.
+  // auth.ts uses __Secure- prefix ONLY when AUTH_COOKIE_DOMAIN is set.
+  // Do NOT check x-forwarded-proto or request.url — those reflect the
+  // ALB→container hop, not the cookie naming logic in auth.ts.
+  const secureCookie = !!process.env.AUTH_COOKIE_DOMAIN;
 
   const token = await getToken({ req: request, secret, secureCookie });
 

@@ -1,7 +1,7 @@
 /**
  * Probation service — entrance exam injection for new workers.
- * Workers in "probation" status receive an exam task instead of real tasks.
- * Passing the exam (via supervisor review) promotes them to "active".
+ * Workers in "probation" status receive a structured MCQ exam.
+ * System auto-grades the JSON answers — no supervisor needed.
  */
 import { nanoid } from "nanoid";
 import { COLLECTIONS, ID_PREFIX } from "@/lib/constants";
@@ -15,25 +15,73 @@ interface ExamAuditEntry {
   action: string;
   task_id: string;
   worker_id: string;
-  verdict: null;
+  score: number;
+  total: number;
+  details: ExamDetail[];
   created_at: Date;
+}
+
+/** Per-question grading detail. */
+interface ExamDetail {
+  question: string;
+  correct: boolean;
+  expected: string | string[];
+  received: string | string[] | null;
+}
+
+/** Result from grading an exam submission. */
+export interface ExamGradeResult {
+  score: number;
+  total: number;
+  passed: boolean;
+  details: ExamDetail[];
 }
 
 const EXAM_TIMEOUT_SECONDS = 600;
 const EXAM_TASK_TYPE = "entrance_exam";
+const PASSING_SCORE = 4;
+const TOTAL_QUESTIONS = 5;
+
+/** Correct answers — single-choice is string, multi-choice is sorted array. */
+const EXAM_ANSWERS: Record<string, string | string[]> = {
+  q1: "B",
+  q2: ["A", "C", "D", "F"],
+  q3: "B",
+  q4: ["A", "C", "D"],
+  q5: "C",
+};
 
 const EXAM_PROMPT = [
-  "You are taking an entrance exam to become a worker on the OpenClaw platform.",
-  "Please complete the following task to demonstrate your capabilities:",
+  "=== OpenClaw Worker Entrance Exam ===",
   "",
-  "Explain the concept of recursion in programming. Include:",
-  "1. A clear definition in plain language",
-  "2. A practical code example (any language) with comments",
-  "3. When recursion is appropriate vs iteration",
-  "4. Common pitfalls (e.g., stack overflow, missing base case)",
+  "Answer the 5 questions below. Respond with ONLY a JSON object.",
+  "Single-choice: value is a string letter. Multi-choice: value is an array of string letters.",
   "",
-  "Your response should be well-structured, accurate, and demonstrate",
-  "genuine understanding — not just a surface-level summary.",
+  'Example format: {"q1": "B", "q2": ["A", "C"], "q3": "D", "q4": ["B", "D"], "q5": "C"}',
+  "",
+  "---",
+  "",
+  "Q1 (single-choice): What does HTTP status code 201 indicate?",
+  "  A. OK — request succeeded",
+  "  B. Created — a new resource was created",
+  "  C. Accepted — request accepted but not yet processed",
+  "  D. No Content — success with no response body",
+  "",
+  "Q2 (multi-choice): Which of the following are valid JSON data types?",
+  "  A. string    B. undefined    C. number",
+  "  D. null      E. function     F. boolean",
+  "",
+  "Q3 (single-choice): What is the average time complexity of binary search in Big-O notation?",
+  "  A. O(1)    B. O(log n)    C. O(n)    D. O(n log n)",
+  "",
+  "Q4 (multi-choice): Which practices help prevent SQL injection?",
+  "  A. Parameterized queries (Prepared Statements)",
+  "  B. Concatenating user input into SQL strings",
+  "  C. Input validation and filtering",
+  "  D. Using an ORM framework",
+  "",
+  "Q5 (single-choice): Which HTTP method should be used to delete a resource in a RESTful API?",
+  "  A. POST    B. PUT    C. DELETE    D. PATCH",
 ].join("\n");
 
 /**
@@ -102,81 +150,83 @@ export async function injectEntranceExam(
 }
 
 /**
- * Creates a supervisor review task for a completed entrance exam.
- * Uses the same review pattern as review-service.ts.
+ * Parses and grades a worker's exam submission against EXAM_ANSWERS.
+ * Each question is exact-match (multi-choice must match sorted array exactly).
+ *
+ * @param output - Raw output string (expected to be JSON)
+ * @returns Grade result with score, pass/fail, and per-question details
  */
-export async function insertEntranceExamReview(
-  examTask: TaskDocument,
-): Promise<void> {
-  const reviewId = `${ID_PREFIX.TASK}${nanoid()}`;
-  const now = new Date();
-  const reviewTimeout = 300;
+export function gradeExam(output: string): ExamGradeResult {
+  const details: ExamDetail[] = [];
+  let parsed: Record<string, unknown>;
 
-  const reviewInput = JSON.stringify({
-    original_input: examTask.input,
-    original_output: examTask.output,
-    task_type: EXAM_TASK_TYPE,
-    price_cents: 0,
-    is_entrance_exam: true,
-  });
+  try {
+    parsed = JSON.parse(output) as Record<string, unknown>;
+  } catch {
+    // All questions wrong if output isn't valid JSON
+    for (const [key, expected] of Object.entries(EXAM_ANSWERS)) {
+      details.push({ question: key, correct: false, expected, received: null });
+    }
+    return { score: 0, total: TOTAL_QUESTIONS, passed: false, details };
+  }
 
-  const reviewInternal: TaskInternal = {
-    is_qa: true,
-    qa_type: "supervisor_review",
-    original_task_id: examTask._id,
-    expected_output: null,
-    qa_result: null,
-    funded_by: "platform",
-  };
+  let score = 0;
+  for (const [key, expected] of Object.entries(EXAM_ANSWERS)) {
+    const received = parsed[key] ?? null;
+    const correct = answersMatch(expected, received);
+    if (correct) score++;
+    details.push({
+      question: key,
+      correct,
+      expected,
+      received: normalizeAnswer(received),
+    });
+  }
 
-  const reviewTask: TaskDocument = {
-    _id: reviewId,
-    buyer_id: "platform",
-    type: "review",
-    input: {
-      messages: [{ role: "user", content: reviewInput }],
-      context: {},
-    },
-    input_preview: null,
-    sensitive: false,
-    constraints: {
-      timeout_seconds: reviewTimeout,
-      min_output_length: 0,
-    },
-    price_cents: 0,
-    status: "pending",
-    assigned_worker_id: null,
-    worker_id: null,
-    assigned_at: null,
-    deadline: new Date(now.getTime() + reviewTimeout * 1000),
-    output: null,
-    completed_at: null,
-    purge_at: null,
-    created_at: now,
-    _internal: reviewInternal,
-  };
+  return { score, total: TOTAL_QUESTIONS, passed: score >= PASSING_SCORE, details };
+}
 
-  const db = await getDb();
-  await db.collection<TaskDocument>(COLLECTIONS.TASK).insertOne(reviewTask);
+/** Compares expected vs received answer (string or sorted string[]). */
+function answersMatch(expected: string | string[], received: unknown): boolean {
+  if (typeof expected === "string") {
+    return typeof received === "string" && received.toUpperCase() === expected;
+  }
+  // Multi-choice: received must be an array with exactly the same sorted letters
+  if (!Array.isArray(received)) return false;
+  const sorted = received
+    .filter((v): v is string => typeof v === "string")
+    .map((v) => v.toUpperCase())
+    .sort();
+  if (sorted.length !== expected.length) return false;
+  return sorted.every((v, i) => v === expected[i]);
+}
+
+/** Normalizes a raw answer value for storage in audit details. */
+function normalizeAnswer(value: unknown): string | string[] | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map(String);
+  return String(value);
 }
 
 /**
- * Handles the verdict for an entrance exam review.
- * Approve → promote worker to "active". Reject → stay probation + audit log.
+ * Grades a completed entrance exam and promotes the worker if passed.
+ * Called from dispatch-service after a worker submits exam output.
  *
- * @param verdict - "approve", "flag", or "reject"
- * @param examTask - The original entrance exam task
+ * @param workerId - The worker who took the exam
+ * @param examTaskId - The exam task ID (for audit logging)
+ * @param output - The raw output string from the worker
+ * @returns The grading result (score, pass/fail, details)
  */
-export async function handleEntranceExamVerdict(
-  verdict: string,
-  examTask: TaskDocument,
-): Promise<void> {
-  const workerId = examTask.assigned_worker_id ?? examTask.worker_id;
-  if (!workerId) return;
-
+export async function gradeAndPromote(
+  workerId: string,
+  examTaskId: string,
+  output: string,
+): Promise<ExamGradeResult> {
+  const result = gradeExam(output);
   const db = await getDb();
 
-  if (verdict === "approve") {
+  if (result.passed) {
     // WHY: Conditional update ensures we only promote workers still in probation.
     await db.collection<WorkerDocument>(COLLECTIONS.WORKER).updateOne(
       { _id: workerId, status: "probation" },
@@ -184,14 +234,17 @@ export async function handleEntranceExamVerdict(
     );
   }
 
-  // Log regardless of outcome
   await db.collection<ExamAuditEntry>(COLLECTIONS.AUDIT_LOG).insertOne({
     _id: nanoid(),
     type: "entrance_exam",
-    action: verdict === "approve" ? "passed" : "failed",
-    task_id: examTask._id,
+    action: result.passed ? "passed" : "failed",
+    task_id: examTaskId,
     worker_id: workerId,
-    verdict: null,
+    score: result.score,
+    total: result.total,
+    details: result.details,
     created_at: new Date(),
   });
+
+  return result;
 }

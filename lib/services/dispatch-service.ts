@@ -14,7 +14,8 @@ import { settleTaskPayment, maybeInjectSpotCheck } from "./settlement-service";
 import { buildWorkerStats } from "./worker-stats";
 import { compareQaResult } from "./qa-compare";
 import { maybeInjectReview, handleReviewCompletion } from "./review-service";
-import { injectEntranceExam, insertEntranceExamReview } from "./probation-service";
+import { injectEntranceExam, gradeAndPromote } from "./probation-service";
+import type { ExamGradeResult } from "./probation-service";
 
 /** Result returned when a task is claimed. */
 export interface ClaimResult {
@@ -22,11 +23,19 @@ export interface ClaimResult {
   stats: WorkerStats;
 }
 
+/** Exam feedback included when a worker submits an entrance exam. */
+export interface ExamFeedback {
+  passed: boolean;
+  score: number;
+  total: number;
+}
+
 /** Result returned after submitting task output. */
 export interface SubmitResult {
   taskId: string;
   earnedCents: number;
   stats: WorkerStats;
+  exam?: ExamFeedback;
 }
 
 /**
@@ -109,14 +118,18 @@ export async function submitTaskResult(
     return throwSubmitError(db, taskId, worker._id);
   }
 
-  // WHY: Entrance exam tasks are free — skip settlement, inject review instead.
+  // WHY: Entrance exam tasks are free — auto-grade and maybe promote worker.
   if (task._internal.qa_type === "entrance_exam") {
-    const completedExam = { ...task, output, status: "completed" as const };
-    await insertEntranceExamReview(completedExam as TaskDocument);
+    const grade = await gradeAndPromote(worker._id, taskId, output.content ?? "");
+    // WHY: Re-read worker to reflect status change (probation → active) in stats.
+    const freshWorker = await db
+      .collection<WorkerDocument>(COLLECTIONS.WORKER)
+      .findOne({ _id: worker._id });
     return {
       taskId,
       earnedCents: 0,
-      stats: await buildWorkerStats(worker, false),
+      stats: await buildWorkerStats(freshWorker ?? worker, false),
+      exam: { passed: grade.passed, score: grade.score, total: grade.total },
     };
   }
 

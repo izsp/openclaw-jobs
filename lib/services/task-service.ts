@@ -168,6 +168,51 @@ export async function creditTask(
 }
 
 /**
+ * Cancels a pending or assigned task for the buyer.
+ * Atomically updates status and refunds the task price.
+ *
+ * @throws NotFoundError if task doesn't exist or doesn't belong to buyer
+ * @throws ConflictError if task is not in a cancellable state
+ */
+export async function cancelTask(
+  taskId: string,
+  buyerId: string,
+): Promise<number> {
+  const db = await getDb();
+  const collection = db.collection<TaskDocument>(COLLECTIONS.TASK);
+
+  const task = await collection.findOneAndUpdate(
+    {
+      _id: taskId,
+      buyer_id: buyerId,
+      status: { $in: ["pending", "assigned"] as TaskStatus[] },
+    },
+    { $set: { status: "failed" as TaskStatus } },
+    { returnDocument: "before" },
+  );
+
+  if (!task) {
+    const exists = await collection.findOne({ _id: taskId, buyer_id: buyerId });
+    if (!exists) {
+      throw new NotFoundError("Task");
+    }
+    throw new ConflictError(
+      `Task cannot be cancelled (current status: ${exists.status})`,
+    );
+  }
+
+  // Refund buyer with the full task price
+  const balanceAfter = await creditBalance(
+    buyerId,
+    task.price_cents,
+    taskId,
+    "credit",
+  );
+
+  return balanceAfter;
+}
+
+/**
  * Injects a shadow QA task with probability from config.
  * Shadow tasks are identical copies funded by the platform.
  */

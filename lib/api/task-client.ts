@@ -22,9 +22,17 @@ export interface SubmitTaskResult {
   deadline: string;
 }
 
+export interface TaskOutputAttachment {
+  s3_key: string;
+  filename: string;
+  content_type: string;
+  size_bytes: number;
+}
+
 export interface TaskOutput {
   content: string;
   format: string;
+  attachments?: TaskOutputAttachment[];
 }
 
 export interface TaskStatus {
@@ -35,6 +43,7 @@ export interface TaskStatus {
   output: TaskOutput | null;
   completed_at: string | null;
   created_at: string;
+  worker_id?: string | null;
   worker_display_name?: string | null;
   worker_avatar_url?: string | null;
 }
@@ -59,6 +68,13 @@ export async function getTaskStatus(taskId: string): Promise<TaskStatus> {
 /** Requests auto-credit for a completed task. */
 export async function creditTask(taskId: string): Promise<CreditResult> {
   return fetchApi<CreditResult>(`/api/task/${encodeURIComponent(taskId)}/credit`, {
+    method: "POST",
+  });
+}
+
+/** Cancels a pending or assigned task. Returns updated balance. */
+export async function cancelTask(taskId: string): Promise<CreditResult> {
+  return fetchApi<CreditResult>(`/api/task/${encodeURIComponent(taskId)}/cancel`, {
     method: "POST",
   });
 }

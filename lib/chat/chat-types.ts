@@ -13,6 +13,12 @@ export interface ResultMetadata {
   word_count: number;
   duration_seconds: number;
   format: string;
+  attachments?: Array<{
+    s3_key: string;
+    filename: string;
+    content_type: string;
+    size_bytes: number;
+  }>;
 }
 
 /** A single message in a chat conversation. */
@@ -30,6 +36,8 @@ export interface ChatConversation {
   task_id: string | null;
   task_status: string | null;
   price_cents: number | null;
+  /** Worker who completed the last task — used for sticky multi-turn. */
+  last_worker_id: string | null;
   messages: ChatMessage[];
   created_at: number;
   updated_at: number;

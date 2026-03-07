@@ -45,6 +45,7 @@ export async function GET(request: Request, context: RouteContext) {
           output: task.output,
           completed_at: task.completed_at?.toISOString() ?? null,
           created_at: task.created_at.toISOString(),
+          worker_id: task.worker_id ?? null,
           worker_display_name: workerInfo?.display_name ?? null,
           worker_avatar_url: workerInfo?.avatar_url ?? null,
         },

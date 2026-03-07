@@ -25,7 +25,7 @@ const DEFAULTS: Record<string, RateLimitRule> = {
   deposit: { per_ip_per_min: 10 },
   withdrawal: { per_ip_per_min: 5 },
   balance_check: { per_ip_per_min: 30 },
-  task_check: { per_ip_per_min: 30 },
+  task_check: { per_ip_per_min: 60 },
   worker_me: { per_ip_per_min: 20 },
   worker_profile: { per_ip_per_min: 30 },
 };

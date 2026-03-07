@@ -63,10 +63,19 @@ export interface TaskInput {
   context: Record<string, unknown>;
 }
 
+/** A binary attachment stored in S3. */
+export interface TaskAttachment {
+  s3_key: string;
+  filename: string;
+  content_type: string;
+  size_bytes: number;
+}
+
 /** Task output payload from worker. */
 export interface TaskOutput {
   content: string;
   format: string;
+  attachments?: TaskAttachment[];
 }
 
 /**

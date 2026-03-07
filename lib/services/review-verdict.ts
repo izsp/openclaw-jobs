@@ -8,7 +8,6 @@ import type { TaskDocument, WorkerDocument, ReviewVerdict } from "@/lib/types";
 import { getDb } from "@/lib/db";
 import { getConfig } from "@/lib/config";
 import { creditBalance } from "./balance-service";
-import { handleEntranceExamVerdict } from "./probation-service";
 
 /** Audit log entry shape (audit_log is a flexible collection). */
 interface AuditLogEntry {
@@ -43,12 +42,6 @@ export async function processReviewVerdict(
   if (!originalTask) return;
 
   await storeVerdictResult(db, reviewTask._id, verdict);
-
-  // WHY: Entrance exam reviews follow a different flow — promote or keep probation.
-  if (originalTask._internal.qa_type === "entrance_exam") {
-    await handleEntranceExamVerdict(verdict.verdict, originalTask);
-    return;
-  }
 
   if (verdict.verdict === "approve") return;
 

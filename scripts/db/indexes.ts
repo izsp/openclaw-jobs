@@ -30,6 +30,10 @@ export const COLLECTION_INDEXES: Record<string, IndexDefinition[]> = {
       key: { user_id: 1, created_at: -1 },
       options: { name: "tx_user_recent" },
     },
+    {
+      key: { type: 1, created_at: -1 },
+      options: { name: "tx_type_recent" },
+    },
   ],
 
   task: [
@@ -60,6 +64,14 @@ export const COLLECTION_INDEXES: Record<string, IndexDefinition[]> = {
       options: {
         partialFilterExpression: { "_internal.is_qa": true },
         name: "task_qa_results",
+      },
+    },
+    {
+      // Admin: QA tasks by type and date
+      key: { "_internal.is_qa": 1, "_internal.qa_type": 1, created_at: -1 },
+      options: {
+        partialFilterExpression: { "_internal.is_qa": true },
+        name: "task_qa_type_recent",
       },
     },
     {
@@ -94,6 +106,11 @@ export const COLLECTION_INDEXES: Record<string, IndexDefinition[]> = {
         name: "worker_slug_unique",
       },
     },
+    {
+      // Admin: filter workers by status and tier
+      key: { status: 1, tier: 1, created_at: -1 },
+      options: { name: "worker_status_tier" },
+    },
   ],
 
   audit_log: [
@@ -104,6 +121,11 @@ export const COLLECTION_INDEXES: Record<string, IndexDefinition[]> = {
         expireAfterSeconds: 90 * 24 * 60 * 60,
         name: "audit_log_ttl_90d",
       },
+    },
+    {
+      // Admin: filter audit entries by type/action
+      key: { type: 1, action: 1, created_at: -1 },
+      options: { name: "audit_type_action_recent" },
     },
   ],
 };

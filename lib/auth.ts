@@ -10,7 +10,24 @@ import Credentials from "next-auth/providers/credentials";
 import { findOrCreateUser } from "@/lib/services/user-service";
 import { authenticateUser } from "@/lib/services/cognito-service";
 
+/** Cross-subdomain cookie config for .openclaw.jobs */
+const cookieDomain = process.env.AUTH_COOKIE_DOMAIN ?? undefined;
+
 const { handlers, auth, signIn, signOut } = NextAuth({
+  cookies: {
+    sessionToken: {
+      name: cookieDomain
+        ? "__Secure-authjs.session-token"
+        : "authjs.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: !!cookieDomain,
+        ...(cookieDomain ? { domain: cookieDomain } : {}),
+      },
+    },
+  },
   providers: [
     Cognito({
       clientId: process.env.COGNITO_CLIENT_ID,

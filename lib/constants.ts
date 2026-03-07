@@ -41,6 +41,8 @@ export const TRANSACTION_TYPES = [
   "freeze",
   "unfreeze",
   "credit",
+  "admin_credit",
+  "admin_debit",
 ] as const;
 
 // ─── Auth Providers ──────────────────────────────────────────────────────────
@@ -85,8 +87,23 @@ export const HTTP_STATUS = {
   SERVICE_UNAVAILABLE: 503,
 } as const;
 
+// ─── Worker Protocol ──────────────────────────────────────────────────────────
+export const WORKER_PROTOCOL_VERSION = "1.0.0";
+
 // ─── Token ───────────────────────────────────────────────────────────────────
 export const TOKEN_BYTE_LENGTH = 32;
+
+// ─── Attachments ────────────────────────────────────────────────────────────
+export const ATTACHMENT_LIMITS = {
+  /** Maximum number of attachments per task. */
+  MAX_PER_TASK: 10,
+  /** Maximum single file size in bytes (100 MB). */
+  MAX_FILE_BYTES: 100 * 1024 * 1024,
+  /** Presigned upload URL validity in seconds. */
+  UPLOAD_URL_EXPIRES_SECONDS: 900,
+  /** Presigned download URL validity in seconds. */
+  DOWNLOAD_URL_EXPIRES_SECONDS: 3600,
+} as const;
 
 // ─── Payload Limits (bytes) ──────────────────────────────────────────────────
 export const PAYLOAD_LIMITS = {
@@ -96,4 +113,6 @@ export const PAYLOAD_LIMITS = {
   WORKER_PROFILE: 8 * 1024,
   /** Small payloads: deposit, bind-email, bind-payout, withdrawal */
   SMALL_BODY: 4 * 1024,
+  /** Admin panel payloads: balance adjust, worker update, etc. */
+  ADMIN_BODY: 8 * 1024,
 } as const;

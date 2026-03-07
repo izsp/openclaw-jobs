@@ -52,3 +52,9 @@ next-env.d.ts
 
 # claude code local settings
 .claude/settings.local.json
+
+# playwright e2e
+test/e2e/test-results/
+test/e2e/html-report/
+test/e2e/runs/
+!test/e2e/runs/.gitkeep

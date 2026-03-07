@@ -2,6 +2,7 @@
  * Zod schemas for worker API input validation.
  */
 import { z } from "zod";
+import { attachmentsArraySchema } from "./attachment.validator";
 
 /** POST /api/worker/connect — register a new worker. */
 export const connectWorkerSchema = z.object({
@@ -56,6 +57,7 @@ export const submitTaskSchema = z.object({
   output: z.object({
     content: z.string().min(1),
     format: z.enum(["text", "json", "html", "markdown", "code"]),
+    attachments: attachmentsArraySchema.optional(),
   }),
 });
 
