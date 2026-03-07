@@ -46,7 +46,7 @@ resource "aws_iam_role_policy" "ecs_execution_ssm" {
 }
 
 # ─── ECS Task Role ────────────────────────────────────────────────────────────
-# Used by the application code at runtime. Currently no AWS SDK calls needed.
+# Used by the application code at runtime for S3 attachment operations.
 
 resource "aws_iam_role" "ecs_task" {
   name = "${var.app_name}-${var.environment}-ecs-task"
@@ -64,4 +64,24 @@ resource "aws_iam_role" "ecs_task" {
     Project     = var.app_name
     Environment = var.environment
   }
+}
+
+# Allow ECS task to manage S3 attachment objects.
+resource "aws_iam_role_policy" "ecs_task_s3" {
+  name = "s3-attachments"
+  role = aws_iam_role.ecs_task.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:HeadObject",
+        "s3:DeleteObject",
+      ]
+      Resource = "${aws_s3_bucket.attachments.arn}/*"
+    }]
+  })
 }

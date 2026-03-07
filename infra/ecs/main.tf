@@ -51,7 +51,8 @@ resource "aws_ecs_task_definition" "app" {
       { name = "NODE_ENV", value = "production" },
       { name = "PORT", value = tostring(var.container_port) },
       { name = "HOSTNAME", value = "0.0.0.0" },
-      { name = "NEXTAUTH_URL", value = var.domain_name != "" ? "https://staging.${var.domain_name}" : "http://${aws_lb.app.dns_name}" },
+      { name = "NEXTAUTH_URL", value = var.domain_name != "" ? "https://human.${var.domain_name}" : "http://${aws_lb.app.dns_name}" },
+      { name = "AUTH_COOKIE_DOMAIN", value = var.domain_name != "" ? ".${var.domain_name}" : "" },
       { name = "AUTH_TRUST_HOST", value = "true" },
       { name = "COGNITO_CLIENT_ID", value = "26hg9s9vp9gm7gjqjdc1hg432q" },
       { name = "COGNITO_ISSUER", value = "https://cognito-idp.us-west-2.amazonaws.com/us-west-2_dIkBX958X" },
@@ -60,6 +61,7 @@ resource "aws_ecs_task_definition" "app" {
       { name = "STRIPE_PRICE_2000", value = "price_1T5PCvAjqXvWRKMDbE68Pe2B" },
       { name = "STRIPE_PRICE_10000", value = "price_1T5PCvAjqXvWRKMDeWdBAgZN" },
       { name = "STRIPE_PRICE_50000", value = "price_1T5PCwAjqXvWRKMD8YHLc2To" },
+      { name = "S3_ATTACHMENTS_BUCKET", value = aws_s3_bucket.attachments.bucket },
     ]
 
     secrets = [

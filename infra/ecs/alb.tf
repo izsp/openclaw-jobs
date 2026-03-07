@@ -72,17 +72,10 @@ resource "aws_lb_listener" "https" {
   ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
   certificate_arn   = aws_acm_certificate.app[0].arn
 
-  # Default: Coming Soon page for root domain
+  # Default: forward all traffic to ECS (subdomain routing handled by Next.js middleware)
   default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "text/html"
-      message_body = <<-HTML
-        <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OpenClaw.jobs</title><style>*{margin:0;padding:0}body{min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;background:#0a0a0a;color:#fafafa}div{text-align:center}h1{font-size:2.5rem;margin-bottom:1rem}p{color:#888;font-size:1.1rem}</style></head><body><div><h1>OpenClaw.jobs</h1><p>Coming Soon</p></div></body></html>
-      HTML
-      status_code  = "200"
-    }
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app.arn
   }
 
   depends_on = [aws_acm_certificate_validation.app]

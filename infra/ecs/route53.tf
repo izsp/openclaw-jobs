@@ -63,3 +63,35 @@ resource "aws_route53_record" "staging" {
     evaluate_target_health = true
   }
 }
+
+# ─── Human subdomain → ALB ──────────────────────────────────────────────────
+
+resource "aws_route53_record" "human" {
+  count = var.domain_name != "" ? 1 : 0
+
+  zone_id = aws_route53_zone.app[0].zone_id
+  name    = "human.${var.domain_name}"
+  type    = "A"
+
+  alias {
+    name                   = aws_lb.app.dns_name
+    zone_id                = aws_lb.app.zone_id
+    evaluate_target_health = true
+  }
+}
+
+# ─── Human-staging subdomain → ALB ──────────────────────────────────────────
+
+resource "aws_route53_record" "human_staging" {
+  count = var.domain_name != "" ? 1 : 0
+
+  zone_id = aws_route53_zone.app[0].zone_id
+  name    = "human-staging.${var.domain_name}"
+  type    = "A"
+
+  alias {
+    name                   = aws_lb.app.dns_name
+    zone_id                = aws_lb.app.zone_id
+    evaluate_target_health = true
+  }
+}
