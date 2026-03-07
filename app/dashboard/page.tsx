@@ -2,105 +2,96 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Header } from "@/components/layout/header";
-import { BalanceCard } from "@/components/dashboard/balance-card";
 import { DepositModal } from "@/components/dashboard/deposit-modal";
 import { ConversationList } from "@/components/dashboard/conversation-list";
 import { useBalance } from "@/lib/hooks/use-balance";
 import { listConversations } from "@/lib/chat/chat-storage";
 
+const MAX_RECENT_TASKS = 5;
+
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const userId = session?.user?.id ?? null;
   const isAuthenticated = status === "authenticated";
-
   const { balance, refresh } = useBalance(isAuthenticated);
   const [depositOpen, setDepositOpen] = useState(false);
 
-  if (status === "loading") {
-    return <PageShell><LoadingState /></PageShell>;
-  }
-  if (!isAuthenticated) {
-    redirect("/login");
-  }
-
   const conversations = userId ? listConversations(userId) : [];
+  const recentConversations = conversations.slice(0, MAX_RECENT_TASKS);
 
   function handleConversationSelect(id: string) {
-    // Navigate to the dedicated chat page with the conversation ID.
     window.location.href = `/chat?id=${encodeURIComponent(id)}`;
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
-      <Header />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-8">
+    <div>
+      <h1 className="text-2xl font-bold">Overview</h1>
+      <p className="mt-1 text-sm text-zinc-500">
+        Welcome back{session?.user?.name ? `, ${session.user.name}` : ""}
+      </p>
+
+      {/* Balance summary */}
+      <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-900 p-5">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Dashboard</h1>
-            <p className="mt-1 text-sm text-zinc-500">
-              Manage your balance and view task history
-            </p>
-          </div>
-          <Link
-            href="/chat"
-            className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-zinc-950 transition-colors hover:bg-orange-400"
-          >
-            New Task
-          </Link>
-        </div>
-
-        <div className="mt-6 grid gap-6 sm:grid-cols-2">
-          <div>
-            {balance ? (
-              <BalanceCard balance={balance} onDeposit={() => setDepositOpen(true)} />
-            ) : (
-              <BalanceCardSkeleton />
+            <p className="text-sm text-zinc-500">Available Balance</p>
+            <div className="mt-1 flex items-baseline gap-1.5">
+              <span className="text-2xl font-bold text-orange-500">
+                {balance?.amount_cents ?? "—"}
+              </span>
+              <span className="text-base">🦐</span>
+            </div>
+            {balance && (
+              <p className="mt-0.5 text-xs text-zinc-600">
+                = ${(balance.amount_cents / 100).toFixed(2)} USD
+              </p>
             )}
           </div>
-          <div>
-            <ConversationList
-              conversations={conversations}
-              onSelect={handleConversationSelect}
-            />
+          <div className="flex gap-2">
+            <button
+              onClick={() => setDepositOpen(true)}
+              className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-zinc-950 transition-colors hover:bg-orange-400"
+            >
+              Add Funds
+            </button>
+            <Link
+              href="/dashboard/billing"
+              className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-400 transition-colors hover:border-zinc-500 hover:text-zinc-200"
+            >
+              Details
+            </Link>
           </div>
         </div>
-      </main>
+      </div>
 
-      <footer className="px-6 py-3 text-right text-[10px] text-zinc-700">
-        {process.env.NEXT_PUBLIC_BUILD_VERSION ?? "dev"}
-      </footer>
+      {/* Recent tasks */}
+      <div className="mt-6">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-medium text-zinc-400">Recent Tasks</h2>
+          {conversations.length > MAX_RECENT_TASKS && (
+            <Link
+              href="/dashboard/tasks"
+              className="text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+            >
+              View all ({conversations.length})
+            </Link>
+          )}
+        </div>
+        <ConversationList
+          conversations={recentConversations}
+          onSelect={handleConversationSelect}
+        />
+      </div>
 
       <DepositModal
         open={depositOpen}
         onClose={() => setDepositOpen(false)}
-        onSuccess={() => { setDepositOpen(false); void refresh(); }}
+        onSuccess={() => {
+          setDepositOpen(false);
+          void refresh();
+        }}
       />
-    </div>
-  );
-}
-
-function PageShell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
-      <Header />
-      <main className="flex flex-1 items-center justify-center">{children}</main>
-    </div>
-  );
-}
-
-function LoadingState() {
-  return <div className="text-sm text-zinc-600 animate-pulse">Loading...</div>;
-}
-
-function BalanceCardSkeleton() {
-  return (
-    <div className="animate-pulse rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-      <div className="h-4 w-24 rounded bg-zinc-800" />
-      <div className="mt-3 h-8 w-20 rounded bg-zinc-800" />
-      <div className="mt-4 h-10 w-full rounded bg-zinc-800" />
     </div>
   );
 }
