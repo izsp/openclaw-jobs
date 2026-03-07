@@ -77,6 +77,16 @@ function ChatPageInner() {
     setSidebarKey((k) => k + 1);
   }, [activeConvId]);
 
+  // Sync URL with active conversation so refresh preserves state
+  useEffect(() => {
+    const currentId = new URLSearchParams(window.location.search).get("id");
+    if (activeConvId && activeConvId !== currentId) {
+      window.history.replaceState(null, "", `/chat?id=${activeConvId}`);
+    } else if (!activeConvId && currentId) {
+      window.history.replaceState(null, "", "/chat");
+    }
+  }, [activeConvId]);
+
   // Close result panel when switching conversations
   useEffect(() => {
     setExpandedResult(null);
