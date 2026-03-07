@@ -1,8 +1,11 @@
 /**
  * Dedicated chat page for authenticated users.
  * Full-screen layout with conversation sidebar + chat panel.
- * Results open in a side panel (desktop) or full-screen sheet (mobile).
- * Supports ?worker=<slug>&offering=<id> for pre-assigned worker chats.
+ * Results open in a side panel (desktop) or full-screen reader page (mobile).
+ *
+ * URL patterns:
+ *   /chat?id=<convId>           — chat view
+ *   /chat?id=<convId>&task=<id> — mobile: full-page reader (native scroll)
  */
 "use client";
 
@@ -14,8 +17,8 @@ import Link from "next/link";
 import { ChatPanel } from "@/components/chat/chat-panel";
 import { ChatSidebar } from "@/components/chat/chat-sidebar";
 import { ResultPanel } from "@/components/chat/result-panel";
-import { ResultSheet } from "@/components/chat/result-sheet";
-import { listConversations, deleteConversation } from "@/lib/chat/chat-storage";
+import { ResultReader } from "@/components/chat/result-reader";
+import { listConversations, loadConversations, deleteConversation } from "@/lib/chat/chat-storage";
 import { useBalance } from "@/lib/hooks/use-balance";
 import { useWorkerOffering } from "@/lib/hooks/use-worker-offering";
 import type { ChatMessage } from "@/lib/chat/chat-types";
@@ -28,6 +31,18 @@ export default function ChatPage() {
   );
 }
 
+/** Finds a result message by task_id across all conversations. */
+function findResultMessage(userId: string, taskId: string): ChatMessage | null {
+  const conversations = loadConversations(userId);
+  for (const conv of conversations) {
+    const msg = conv.messages.find(
+      (m) => m.result_meta?.task_id === taskId,
+    );
+    if (msg) return msg;
+  }
+  return null;
+}
+
 function ChatPageInner() {
   const { data: session, status } = useSession();
   const userId = session?.user?.id ?? null;
@@ -36,13 +51,12 @@ function ChatPageInner() {
 
   const searchParams = useSearchParams();
   const urlId = searchParams.get("id");
+  const urlTaskId = searchParams.get("task");
   const workerSlug = searchParams.get("worker");
   const offeringId = searchParams.get("offering");
 
   const { workerId, welcomeMessage, loading: offeringLoading } = useWorkerOffering(workerSlug, offeringId);
 
-  // WHY: On refresh without ?id= param, auto-select the most recent
-  // conversation so the user doesn't lose context.
   const initialConvId = (() => {
     if (urlId) return urlId;
     if (!userId) return null;
@@ -58,7 +72,7 @@ function ChatPageInner() {
   const [sidebarKey, setSidebarKey] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Result panel state — the message currently being viewed
+  // Desktop side panel state
   const [expandedResult, setExpandedResult] = useState<ChatMessage | null>(null);
 
   // Keep URL param in sync
@@ -77,9 +91,13 @@ function ChatPageInner() {
     setSidebarKey((k) => k + 1);
   }, [activeConvId]);
 
-  // Sync URL with active conversation so refresh preserves state
+  // Sync URL with active conversation
   useEffect(() => {
-    const currentId = new URLSearchParams(window.location.search).get("id");
+    const params = new URLSearchParams(window.location.search);
+    const currentId = params.get("id");
+    const currentTask = params.get("task");
+    // Don't override URL when in reader mode
+    if (currentTask) return;
     if (activeConvId && activeConvId !== currentId) {
       window.history.replaceState(null, "", `/chat?id=${activeConvId}`);
     } else if (!activeConvId && currentId) {
@@ -92,15 +110,42 @@ function ChatPageInner() {
     setExpandedResult(null);
   }, [activeConvId]);
 
+  // WHY: On mobile, opening a result navigates to ?task=<id> so it's a
+  // real page (native scroll → iOS address bar collapse). On desktop,
+  // it opens a side panel (no navigation needed).
   const handleOpenResult = useCallback((message: ChatMessage) => {
+    if (!message.result_meta) return;
+    const taskId = message.result_meta.task_id;
+    // Desktop: side panel
     setExpandedResult(message);
-  }, []);
+    // Mobile: push URL so it becomes a real page
+    if (window.innerWidth < 1024) {
+      const convId = activeConvId ?? "";
+      window.history.pushState(null, "", `/chat?id=${convId}&task=${taskId}`);
+    }
+  }, [activeConvId]);
 
   const handleCloseResult = useCallback(() => {
     setExpandedResult(null);
+    // If URL has task param, go back
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("task")) {
+      window.history.back();
+    }
   }, []);
 
-  // Stub credit handler — delegates to the chat hook via the conversation
+  // WHY: Listen for browser back button to close the reader
+  useEffect(() => {
+    function onPopState() {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.get("task")) {
+        setExpandedResult(null);
+      }
+    }
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
   const handleCredit = useCallback(async (taskId: string): Promise<boolean> => {
     try {
       const res = await fetch(`/api/task/${encodeURIComponent(taskId)}/credit`, {
@@ -119,6 +164,27 @@ function ChatPageInner() {
     redirect("/login");
   }
 
+  // --- Mobile reader mode: full page, native scroll ---
+  // Check if we should show the reader (URL has task param)
+  const readerMessage = urlTaskId && userId
+    ? (expandedResult?.result_meta?.task_id === urlTaskId
+        ? expandedResult
+        : findResultMessage(userId, urlTaskId))
+    : null;
+
+  if (readerMessage?.result_meta && urlTaskId) {
+    return (
+      <ResultReader
+        content={readerMessage.content}
+        meta={readerMessage.result_meta}
+        onClose={handleCloseResult}
+        onCredit={handleCredit}
+        credited={false}
+      />
+    );
+  }
+
+  // --- Normal chat mode ---
   const conversations = userId ? listConversations(userId) : [];
 
   function handleNewChat() {
@@ -219,19 +285,6 @@ function ChatPageInner() {
         {hasPanel && expandedResult.result_meta && (
           <div className="hidden w-[55%] lg:block">
             <ResultPanel
-              content={expandedResult.content}
-              meta={expandedResult.result_meta}
-              onClose={handleCloseResult}
-              onCredit={handleCredit}
-              credited={false}
-            />
-          </div>
-        )}
-
-        {/* Mobile: Full-screen sheet (below lg) */}
-        {hasPanel && expandedResult.result_meta && (
-          <div className="lg:hidden">
-            <ResultSheet
               content={expandedResult.content}
               meta={expandedResult.result_meta}
               onClose={handleCloseResult}
