@@ -53,7 +53,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         placeholder="Describe your task..."
         disabled={disabled}
         rows={1}
-        className="w-full resize-none bg-transparent px-3 pt-2.5 pb-1 text-sm leading-relaxed text-content placeholder-content-tertiary outline-none md:px-4 md:pt-3"
+        className="w-full resize-none bg-transparent px-3 pt-2.5 pb-1 text-base leading-relaxed text-content placeholder-content-tertiary outline-none md:px-4 md:pt-3 md:text-sm"
       />
       {/* Bottom toolbar: depth selector + send */}
       <div className="flex items-center justify-between px-2 pb-2 md:px-3">
