@@ -152,6 +152,24 @@ body {
   animation: toast-in 0.2s ease-out;
 }
 
+/* Side panel slide-in from right */
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.2s ease-out;
+}
+
+/* Mobile sheet slide-up */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slide-up 0.25s ease-out;
+}
+
 /* Autofill override — adapts to theme */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,

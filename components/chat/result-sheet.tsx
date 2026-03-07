@@ -72,7 +72,7 @@ export function ResultSheet({
   const displayName = meta.worker_display_name ?? "Lobster";
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-page">
+    <div className="fixed inset-0 z-50 flex animate-slide-up flex-col bg-page">
       {/* Top bar */}
       <div className="flex shrink-0 items-center justify-between border-b border-edge px-3 py-2.5">
         <button

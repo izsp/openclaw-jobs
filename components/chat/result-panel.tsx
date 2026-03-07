@@ -65,7 +65,7 @@ export function ResultPanel({
   const displayName = meta.worker_display_name ?? "Lobster";
 
   return (
-    <div className="flex h-full w-full flex-col border-l border-edge bg-surface">
+    <div className="flex h-full w-full animate-slide-in-right flex-col border-l border-edge bg-surface">
       {/* Header */}
       <div className="flex shrink-0 items-center gap-3 border-b border-edge px-4 py-3">
         <button

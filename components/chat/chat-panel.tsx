@@ -119,7 +119,6 @@ export function ChatPanel({
       <TaskStatusBar
         taskStatus={conversation?.task_status ?? null}
         priceCents={conversation?.price_cents ?? null}
-        balanceCents={balance?.amount_cents ?? null}
         onCancel={cancel}
         onRetry={retry}
       />
